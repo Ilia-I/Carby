@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary>
+	<row>
+		<col1>Energy</col1>
+		<col2>kJ/kcal</col2>
+	</row>
+	<row>
+		<col1>Fat</col1>
+		<col2>\dg</col2>
+	</row>
+	<row>
+		<col1>of which</col1>
+		<col2> </col2>
+	</row>
+	<row>
+		<col1>-saturates</col1>
+		<col2>\dg</col2>
+	</row>
+	<row>
+		<col1>-mono-unsaturates</col1>
+		<col2>\dg</col2>
+	</row>
+	<row>
+		<col1>-polysaturates</col1>
+		<col2>\dg</col2>
+	</row>
+	<row>
+		<col1>Carbohydrate</col1>
+		<col2>\dg</col2>
+	</row>
+	<row>
+		<col1>-sugars</col1>
+		<col2>\dg</col2>
+	</row>
+	<row>
+		<col1>-polyols</col1>
+		<col2>\dg</col2>
+	</row>
+	<row>
+		<col1>-starch</col1>
+		<col2>\dg</col2>
+	</row>
+	<row>
+		<col1>Fibre</col1>
+		<col2>.</col2>
+	</row>
+	<row>
+		<col1>Protein</col1>
+		<col2>.</col2>
+	</row>
+	<row>
+		<col1>Salt</col1>
+		<col2>.</col2>
+	</row>
+	<row>
+		<col1>Vitamins and Minerals</col1>
+		<col2>.</col2>
+	</row>
+	<row>
+		<col1> </col1>
+		<col2> </col2>
+	</row>
+</dictionary>
