@@ -1,5 +1,8 @@
 package com.ocr.prototype.ocr_prototype.nutrition.info;
 
+import com.ocr.prototype.ocr_prototype.activities.R;
+
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -7,7 +10,7 @@ import java.util.Map;
  * Version: 0.1
  */
 
-public class NutritionTable implements INutritionTable{
+public class NutritionTable extends ANutritionTable{
     private @MeasurementUnit String energy;
     private @MeasurementUnit String content;
     private Map<String,IComposite> nutritionalInformation;
@@ -19,50 +22,57 @@ public class NutritionTable implements INutritionTable{
     public NutritionTable(@MeasurementUnit String energy, @MeasurementUnit String content){
         this.energy = energy;
         this.content = content;
+        nutritionalInformation = new HashMap<String,IComposite>();
     }
 
 
     //setter methods
     @Override
-    public boolean setEnergy(int value, String unit) {
-        //TODO Composite
-        IComposite compositeEnergy = null;
+    public boolean setEnergy(double value,@MeasurementUnit String unit) {
+        double convertedValue = super.convertUnits(value,unit,energy);
+        if(convertedValue==-1) return false;
+        IComposite compositeEnergy = new Composite(convertedValue);
         nutritionalInformation.put("Energy", compositeEnergy);
         return true;
     }
 
     @Override
-    public boolean setFats(IComposite fats, String unit) {
+    public boolean setFats(IComposite fats,@MeasurementUnit String unit) {
+        //TODO unit conversion
         nutritionalInformation.put("Fat", fats);
         return true;
     }
 
     @Override
-    public boolean setCarbohydrates(IComposite carbohydrates, String unit) {
+    public boolean setCarbohydrates(IComposite carbohydrates,@MeasurementUnit String unit) {
+        //TODO unit conversion
         nutritionalInformation.put("Carbohydrate", carbohydrates);
         return true;
     }
 
     @Override
-    public boolean setFibre(int value, String unit) {
-        //TODO Composite
-        IComposite compositeFibre = null;
+    public boolean setFibre(double value,@MeasurementUnit String unit) {
+        double convertedValue = super.convertUnits(value,unit,content);
+        if(convertedValue==-1) return false;
+        IComposite compositeFibre = new Composite(convertedValue);
         nutritionalInformation.put("Fibre", compositeFibre);
         return true;
     }
 
     @Override
-    public boolean setProtein(int value, String unit) {
-        //TODO Composite
-        IComposite compositeProtein = null;
+    public boolean setProtein(double value,@MeasurementUnit String unit) {
+        double convertedValue = super.convertUnits(value,unit,content);
+        if(convertedValue==-1) return false;
+        IComposite compositeProtein = new Composite(convertedValue);
         nutritionalInformation.put("Protein", compositeProtein);
         return true;
     }
 
     @Override
-    public boolean setSalt(int value, String unit) {
-        //TODO Composite
-        IComposite compositeSalt = null;
+    public boolean setSalt(double value,@MeasurementUnit String unit) {
+        double convertedValue = super.convertUnits(value,unit,content);
+        if(convertedValue==-1) return false;
+        IComposite compositeSalt = new Composite(convertedValue);
         nutritionalInformation.put("Salt", compositeSalt);
         return true;
     }
@@ -73,18 +83,17 @@ public class NutritionTable implements INutritionTable{
     }
 
     @Override
-    public String getEnergyUnit() {
+    public @MeasurementUnit String getEnergyUnit() {
         return energy;
     }
 
     @Override
-    public int getEnergy() {
-        //TODO
-        return 0;
+    public double getEnergy() {
+        return nutritionalInformation.get("Energy").getTotal();
     }
 
     @Override
-    public String getFatsUnit() {
+    public @MeasurementUnit String getFatsUnit() {
         return getContentUnit();
     }
 
@@ -94,7 +103,7 @@ public class NutritionTable implements INutritionTable{
     }
 
     @Override
-    public String getCarbohydratesUnit() {
+    public @MeasurementUnit String getCarbohydratesUnit() {
         return getContentUnit();
     }
 
@@ -104,35 +113,32 @@ public class NutritionTable implements INutritionTable{
     }
 
     @Override
-    public String getFibreUnit() {
+    public @MeasurementUnit String getFibreUnit() {
         return getContentUnit();
     }
 
     @Override
-    public int getFibre() {
-        //TODO
-        return 0;
+    public double getFibre() {
+        return nutritionalInformation.get("Fibre").getTotal();
     }
 
     @Override
-    public String getProteinUnit() {
+    public @MeasurementUnit String getProteinUnit() {
         return getContentUnit();
     }
 
     @Override
-    public int getProtein() {
-        //TODO
-        return 0;
+    public double getProtein() {
+        return nutritionalInformation.get("Protein").getTotal();
     }
 
     @Override
-    public String getSaltUnit() {
+    public @MeasurementUnit String getSaltUnit() {
         return getContentUnit();
     }
 
     @Override
-    public int getSalt() {
-        //TODO
-        return 0;
+    public double getSalt() {
+        return nutritionalInformation.get("Salt").getTotal();
     }
 }

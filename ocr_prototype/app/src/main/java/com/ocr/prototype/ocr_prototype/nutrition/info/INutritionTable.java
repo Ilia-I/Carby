@@ -27,23 +27,23 @@ public interface INutritionTable {
     public static final String KILOCALORIES_UNIT = "kcal";
 
 
-    public boolean setEnergy(int value, @MeasurementUnit String unit);
+    public boolean setEnergy(double value, @MeasurementUnit String unit);
     public boolean setFats(IComposite fats, @MeasurementUnit String unit);
     public boolean setCarbohydrates(IComposite carbohydrates, @MeasurementUnit String unit);
-    public boolean setFibre(int value, @MeasurementUnit String unit);
-    public boolean setProtein(int value, @MeasurementUnit String unit);
-    public boolean setSalt(int value, @MeasurementUnit String unit);
+    public boolean setFibre(double value, @MeasurementUnit String unit);
+    public boolean setProtein(double value, @MeasurementUnit String unit);
+    public boolean setSalt(double value, @MeasurementUnit String unit);
 
     public @MeasurementUnit String getEnergyUnit();
-    public int getEnergy();
+    public double getEnergy();
     public @MeasurementUnit String getFatsUnit();
     public IComposite getFats();
     public @MeasurementUnit String getCarbohydratesUnit();
     public IComposite getCarbohydrates();
     public @MeasurementUnit String getFibreUnit();
-    public int getFibre();
+    public double getFibre();
     public @MeasurementUnit String getProteinUnit();
-    public int getProtein();
+    public double getProtein();
     public @MeasurementUnit String getSaltUnit();
-    public int getSalt();
+    public double getSalt();
 }

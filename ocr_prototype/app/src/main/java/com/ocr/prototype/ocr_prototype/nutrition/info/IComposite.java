@@ -1,5 +1,7 @@
 package com.ocr.prototype.ocr_prototype.nutrition.info;
 
+import java.util.List;
+
 /**
  * Interface for the composite class to hold
  * 'of which' composition values
@@ -8,4 +10,8 @@ package com.ocr.prototype.ocr_prototype.nutrition.info;
  */
 
 public interface IComposite {
+    public double getTotal();
+    public boolean addSubComponent(String name, double content);
+    public List<String> getSubComponentNames();
+    public double getContentOf(String name);
 }
