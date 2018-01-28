@@ -1,5 +1,7 @@
 package com.ocr.prototype.ocr_prototype.nutrition.info;
 
+import java.util.List;
+
 /**
  * Created by Martin Peev on 28.01.2018 г..
  * Version: 0.1
@@ -26,5 +28,26 @@ public abstract class ANutritionTable implements INutritionTable {
                 } else return -1;
             default: return -1;
         }
+    }
+
+    protected boolean convertUnits(IComposite composite, @MeasurementUnit String units, @MeasurementUnit String goal){
+        double temp = convertUnits(composite.getTotal(), units, goal);
+        if(temp==-1) return false;
+        composite.setTotal(temp);
+
+        for(String componentName: composite.getSubComponentNames()){
+            temp = convertUnits(composite.getContentOf(componentName), units, goal);
+            if(temp==-1) return false;
+            if(!composite.addSubComponent(componentName,temp)) return false;
+        }
+        return true;
+    }
+
+    protected boolean convertUnits(List<IComposite> composite, @MeasurementUnit String units, @MeasurementUnit String goal){
+        boolean result = true;
+        for(IComposite component: composite){
+            result = result && convertUnits(component, units, goal);
+        }
+        return result;
     }
 }

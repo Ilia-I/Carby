@@ -10,6 +10,7 @@ import java.util.List;
  */
 
 public interface IComposite {
+    public boolean setTotal(double content);
     public double getTotal();
     public boolean addSubComponent(String name, double content);
     public List<String> getSubComponentNames();

@@ -1,7 +1,5 @@
 package com.ocr.prototype.ocr_prototype.nutrition.info;
 
-import com.ocr.prototype.ocr_prototype.activities.R;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,54 +25,43 @@ public class NutritionTable extends ANutritionTable{
 
 
     //setter methods
+    private boolean setter(String nutrientName,
+                           IComposite content,
+                           @MeasurementUnit String dataUnit,
+                           @MeasurementUnit String targetUnit){
+        if(!super.convertUnits(content,dataUnit,targetUnit)) return false;
+        nutritionalInformation.put(nutrientName,content);
+        return true;
+    }
+
     @Override
     public boolean setEnergy(double value,@MeasurementUnit String unit) {
-        double convertedValue = super.convertUnits(value,unit,energy);
-        if(convertedValue==-1) return false;
-        IComposite compositeEnergy = new Composite(convertedValue);
-        nutritionalInformation.put("Energy", compositeEnergy);
-        return true;
+        return setter("Energy",new Composite(value),unit,energy);
     }
 
     @Override
     public boolean setFats(IComposite fats,@MeasurementUnit String unit) {
-        //TODO unit conversion
-        nutritionalInformation.put("Fat", fats);
-        return true;
+        return setter("Fat", fats, unit, content);
     }
 
     @Override
     public boolean setCarbohydrates(IComposite carbohydrates,@MeasurementUnit String unit) {
-        //TODO unit conversion
-        nutritionalInformation.put("Carbohydrate", carbohydrates);
-        return true;
+        return setter("Carbohydrate", carbohydrates, unit, content);
     }
 
     @Override
     public boolean setFibre(double value,@MeasurementUnit String unit) {
-        double convertedValue = super.convertUnits(value,unit,content);
-        if(convertedValue==-1) return false;
-        IComposite compositeFibre = new Composite(convertedValue);
-        nutritionalInformation.put("Fibre", compositeFibre);
-        return true;
+        return setter("Fibre", new Composite(value), unit, content);
     }
 
     @Override
     public boolean setProtein(double value,@MeasurementUnit String unit) {
-        double convertedValue = super.convertUnits(value,unit,content);
-        if(convertedValue==-1) return false;
-        IComposite compositeProtein = new Composite(convertedValue);
-        nutritionalInformation.put("Protein", compositeProtein);
-        return true;
+        return setter("Protein", new Composite(value), unit, content);
     }
 
     @Override
     public boolean setSalt(double value,@MeasurementUnit String unit) {
-        double convertedValue = super.convertUnits(value,unit,content);
-        if(convertedValue==-1) return false;
-        IComposite compositeSalt = new Composite(convertedValue);
-        nutritionalInformation.put("Salt", compositeSalt);
-        return true;
+        return setter("Salt", new Composite(value), unit, content);
     }
 
     //getter methods

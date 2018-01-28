@@ -20,6 +20,12 @@ public class Composite implements IComposite {
     }
 
     @Override
+    public boolean setTotal(double content) {
+        this.content = content;
+        return true;
+    }
+
+    @Override
     public double getTotal() {
         return content;
     }
