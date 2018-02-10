@@ -8,21 +8,22 @@
             <item
                 android:id="@+id/nav_barcode"
                 android:icon="@drawable/ic_menu_camera"
-                android:title="Barcode Scanner" />
+                android:title="1. Barcode Scanner" />
 
             <item
                 android:id="@+id/nav_ocr"
                 android:icon="@drawable/ic_menu_camera"
-                android:title="OCR: Label Scanner" />
+                android:title="2. Nutrition Table Scanner (OCR)" />
 
 
             <item
                 android:id="@+id/nav_volume"
                 android:icon="@drawable/ic_menu_camera"
-                android:title="Volume Estimation" />
+                android:title="3. Volume Estimation" />
         </menu>
     </item>
 
+    <!---
     <item android:title="Features">
         <menu>
         <item
@@ -31,4 +32,6 @@
             android:title="Feature 1" />
         </menu>
     </item>
+    -->
+    
 </menu>

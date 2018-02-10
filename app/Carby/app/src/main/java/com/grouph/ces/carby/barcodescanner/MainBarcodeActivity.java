@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.grouph.ces.carby;
+package com.grouph.ces.carby.barcodescanner;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
 import android.util.Log;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
+import com.grouph.ces.carby.R;
 
 /**
  * Main activity demonstrating how to pass extra parameters to an activity that
