@@ -32,6 +32,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".barcodescanner.BarcodeCaptureActivity"
+            android:parentActivityName=".barcodescanner.BarcodeCaptureActivity"
             android:label="Read Barcode"/>
     </application>
 
