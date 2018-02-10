@@ -1,29 +1,15 @@
-# README #
-
-This README would normally document whatever steps are necessary to get your application up and running.
-
 ### What is this repository for? ###
 
-* Quick summary
-* Version
+* This repo is for the code developed as part of 19520, CES MEng 5th Year group project
+
+### What does it contain? ###
+
+* An Android application for a carbohydrate estimation system to aid those with diabetes 
+
+### How do I set up? ###
+
+* Browse the repository in Android studio and open the relevant project
+
+### Editing README ###
+
 * [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
-
-### How do I get set up? ###
-
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
