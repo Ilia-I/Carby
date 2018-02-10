@@ -62,6 +62,11 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+
+            Snackbar snackbar = Snackbar
+                    .make(findViewById(android.R.id.content), "Settings not implemented", Snackbar.LENGTH_LONG);
+            snackbar.show();
+
             return true;
         }
 
@@ -79,9 +84,13 @@ public class MainActivity extends AppCompatActivity
             startActivity(myIntent1);
             // Handle the camera action
         } else if (id == R.id.nav_ocr) {
-
+            Snackbar snackbar = Snackbar
+                    .make(findViewById(android.R.id.content), "Nutrition table scanner not implemented", Snackbar.LENGTH_LONG);
+            snackbar.show();
         } else if (id == R.id.nav_volume) {
-
+            Snackbar snackbar = Snackbar
+                    .make(findViewById(android.R.id.content), "Volume estimation not implemented", Snackbar.LENGTH_LONG);
+            snackbar.show();
         } /*else if (id == R.id.nav_feature) {
 
         }*/
