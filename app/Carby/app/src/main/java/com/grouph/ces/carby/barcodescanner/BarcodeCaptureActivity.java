@@ -441,7 +441,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         data.putExtra(BarcodeObject, barcode);
         setResult(CommonStatusCodes.SUCCESS, data);
         finish();
-        Log.i("Barcode", "Barcode detected");
+        Log.i("Barcode", "Barcode detected: " + barcode.displayValue);
         //do something with barcode data returned
     }
 }
