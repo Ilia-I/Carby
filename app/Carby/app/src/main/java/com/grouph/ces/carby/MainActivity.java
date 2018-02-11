@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.grouph.ces.carby.barcodescanner.MainBarcodeActivity;
+import com.grouph.ces.carby.ocr.OcrCaptureActivity;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -84,9 +85,11 @@ public class MainActivity extends AppCompatActivity
             startActivity(myIntent1);
             // Handle the camera action
         } else if (id == R.id.nav_ocr) {
-            Snackbar snackbar = Snackbar
-                    .make(findViewById(android.R.id.content), "Nutrition table scanner not implemented", Snackbar.LENGTH_LONG);
-            snackbar.show();
+//            Snackbar snackbar = Snackbar
+//                    .make(findViewById(android.R.id.content), "Nutrition table scanner not implemented", Snackbar.LENGTH_LONG);
+//            snackbar.show();
+            Intent ocr = new Intent(this, OcrCaptureActivity.class);
+            startActivity(ocr);
         } else if (id == R.id.nav_volume) {
             Snackbar snackbar = Snackbar
                     .make(findViewById(android.R.id.content), "Volume estimation not implemented", Snackbar.LENGTH_LONG);

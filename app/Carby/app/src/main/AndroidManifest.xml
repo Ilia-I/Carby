@@ -34,6 +34,8 @@
         <activity android:name=".barcodescanner.BarcodeCaptureActivity"
             android:parentActivityName=".barcodescanner.BarcodeCaptureActivity"
             android:label="Read Barcode"/>
+        <activity android:name=".ocr.OcrCaptureActivity"/>
+
     </application>
 
 </manifest>

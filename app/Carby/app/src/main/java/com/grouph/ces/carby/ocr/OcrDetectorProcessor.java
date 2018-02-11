@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ocr.prototype.ocr_prototype.ocr;
+package com.grouph.ces.carby.ocr;
 
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.text.TextBlock;
+import com.grouph.ces.carby.ui.camera.GraphicOverlay;
 
-import com.ocr.prototype.ocr_prototype.ui.camera.GraphicOverlay;
 /**
  * A very simple Processor which gets detected TextBlocks and adds them to the overlay
  * as OcrGraphics.
