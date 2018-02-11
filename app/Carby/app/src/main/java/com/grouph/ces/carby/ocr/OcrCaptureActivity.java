@@ -29,9 +29,11 @@ import android.hardware.Camera;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -81,6 +83,7 @@ public final class OcrCaptureActivity extends AppCompatActivity {
     // A TextToSpeech engine for speaking a String value.
     private TextToSpeech tts;
 
+    private OcrDetectorProcessor processor;
     /**
      * Initializes the UI and creates the detector pipeline.
      */
@@ -126,6 +129,8 @@ public final class OcrCaptureActivity extends AppCompatActivity {
                     }
                 };
         tts = new TextToSpeech(this.getApplicationContext(), listener);
+
+        OcrController oc = new OcrController(this,(FloatingActionButton)findViewById(R.id.btn_scan_table));
     }
 
     /**
@@ -185,7 +190,8 @@ public final class OcrCaptureActivity extends AppCompatActivity {
         TextRecognizer textRecognizer = new TextRecognizer.Builder(context).build();
 
         // Set the TextRecognizer's Processor.
-        textRecognizer.setProcessor(new OcrDetectorProcessor(mGraphicOverlay));
+        processor = new OcrDetectorProcessor(mGraphicOverlay);
+        textRecognizer.setProcessor(processor);
 
         // Check if the TextRecognizer is operational.
         if (!textRecognizer.isOperational()) {
@@ -202,13 +208,16 @@ public final class OcrCaptureActivity extends AppCompatActivity {
             }
         }
 
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
         // Create the mCameraSource using the TextRecognizer.
         mCameraSource = new CameraSource.Builder(getApplicationContext(), textRecognizer)
                         .setFacing(CameraSource.CAMERA_FACING_BACK)
-                        .setRequestedPreviewSize(1280, 1024)
+                        .setRequestedPreviewSize(metrics.widthPixels, metrics.heightPixels)//(1280, 1024)
                         .setRequestedFps(15.0f)
                         .setFlashMode(useFlash ? Camera.Parameters.FLASH_MODE_TORCH : null)
-                        .setFocusMode(autoFocus ? Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE : null)
+                        .setFocusMode(autoFocus ? Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO : null)
                         .build();
     }
 
@@ -273,7 +282,7 @@ public final class OcrCaptureActivity extends AppCompatActivity {
         if (grantResults.length != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "Camera permission granted - initialize the camera source");
             // We have permission, so create the camerasource
-            boolean autoFocus = getIntent().getBooleanExtra(AutoFocus,false);
+            boolean autoFocus = getIntent().getBooleanExtra(AutoFocus,true);
             boolean useFlash = getIntent().getBooleanExtra(UseFlash, false);
             createCameraSource(autoFocus, useFlash);
             return;
@@ -347,6 +356,10 @@ public final class OcrCaptureActivity extends AppCompatActivity {
             Log.d(TAG,"no text detected");
         }
         return text != null;
+    }
+
+    public void scan() {
+        processor.scan();
     }
 
     private class CaptureGestureListener extends GestureDetector.SimpleOnGestureListener {
