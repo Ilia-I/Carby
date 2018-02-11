@@ -16,6 +16,7 @@ import android.view.MenuItem;
 
 import com.grouph.ces.carby.barcodescanner.MainBarcodeActivity;
 import com.grouph.ces.carby.ocr.OcrCaptureActivity;
+import com.grouph.ces.carby.volume_estimation.VolumeCaptureActivity;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -91,6 +92,8 @@ public class MainActivity extends AppCompatActivity
             Intent ocr = new Intent(this, OcrCaptureActivity.class);
             startActivity(ocr);
         } else if (id == R.id.nav_volume) {
+            Intent volume = new Intent(this, VolumeCaptureActivity.class);
+            startActivity(volume);
             Snackbar snackbar = Snackbar
                     .make(findViewById(android.R.id.content), "Volume estimation not implemented", Snackbar.LENGTH_LONG);
             snackbar.show();
