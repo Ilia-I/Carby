@@ -26,6 +26,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -74,7 +75,9 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
         }
 
         mPreview = new CameraPreview(this, mCamera);
-        mImageView = new ImageView(this);
+
+        mImageView = findViewById(R.id.vol_capture_image);
+        mImageView.setVisibility(View.GONE);
 
         previewFrame = findViewById(R.id.camera_preview);
         previewFrame.addView(mPreview);
@@ -83,8 +86,8 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
         captureButton.setOnClickListener((view) -> {
             if(!imageTaken) {
                 mCamera.takePicture(null, null, new PictureCallback(mImageView));
-                previewFrame.removeView(mPreview);
-                previewFrame.addView(mImageView);
+                mImageView.setVisibility(View.VISIBLE);
+                mPreview.setVisibility(View.GONE);
                 imageTaken = !imageTaken;
             }
         });
@@ -92,8 +95,9 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
         FloatingActionButton resetButton = findViewById(R.id.btn_reset);
         resetButton.setOnClickListener((view) -> {
             if(imageTaken) {
-                previewFrame.removeView(mImageView);
-                previewFrame.addView(mPreview);
+                mImageView.setVisibility(View.GONE);
+                mPreview.setVisibility(View.VISIBLE);
+                mImageView.setImageBitmap(null);
                 imageTaken = !imageTaken;
             }
         });
