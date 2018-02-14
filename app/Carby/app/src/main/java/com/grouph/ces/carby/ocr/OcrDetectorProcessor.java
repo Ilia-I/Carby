@@ -131,6 +131,8 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                     line+=" ";
                 }
             }
+            Log.d("OcrDetectorProcessor","string line "+i+":"+line);
+            result.add(line);
         }
         return result;
     }
