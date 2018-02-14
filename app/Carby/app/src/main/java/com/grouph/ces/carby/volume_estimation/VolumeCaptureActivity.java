@@ -31,6 +31,8 @@ import android.widget.ImageView;
 
 import com.grouph.ces.carby.R;
 
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
 
@@ -50,6 +52,8 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
     private CameraPreview mPreview;
     private FrameLayout previewFrame;
     private ImageView mImageView;
+
+    private boolean imageTaken = false;
 
     /**
      * Initializes the UI and creates the detector pipeline.
@@ -77,15 +81,54 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
 
         FloatingActionButton captureButton = findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
-            mCamera.takePicture(null,null, new PictureCallback(mImageView));
-            previewFrame.removeView(mPreview);
-            previewFrame.addView(mImageView);
+            if(!imageTaken) {
+                mCamera.takePicture(null, null, new PictureCallback(mImageView));
+                previewFrame.removeView(mPreview);
+                previewFrame.addView(mImageView);
+                imageTaken = !imageTaken;
+            }
+        });
+
+        FloatingActionButton resetButton = findViewById(R.id.btn_reset);
+        resetButton.setOnClickListener((view) -> {
+            if(imageTaken) {
+                previewFrame.removeView(mImageView);
+                previewFrame.addView(mPreview);
+                imageTaken = !imageTaken;
+            }
         });
 
         if (!OpenCVLoader.initDebug()) {
             // Handle initialization error
         }
+    }
 
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+        @Override
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case LoaderCallbackInterface.SUCCESS: {
+                    Log.i(TAG, "OpenCV loaded successfully");
+                }
+                break;
+                default: {
+                    super.onManagerConnected(status);
+                }
+                break;
+            }
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!OpenCVLoader.initDebug()) {
+            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, mLoaderCallback);
+        } else {
+            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
     }
 
 

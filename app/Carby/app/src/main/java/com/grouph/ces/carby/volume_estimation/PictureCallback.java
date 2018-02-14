@@ -59,6 +59,8 @@ public class PictureCallback implements Camera.PictureCallback {
         this.mImageView.setImageBitmap(picture);
         this.mImageView.setRotation(90);
 
+        Mat mat = new Mat();
+
 //        try {
 //            FileOutputStream fos = new FileOutputStream(pictureFile);
 //            fos.write(data);
