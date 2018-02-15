@@ -54,13 +54,14 @@ public class PictureCallback implements Camera.PictureCallback {
             return;
         }
 
+
         Bitmap b = BitmapFactory.decodeByteArray(data, 0, data.length);
 
         Bitmap picture = BitmapFactory.decodeByteArray(data, 0, data.length);
         Bitmap picture32 = picture.copy(Bitmap.Config.ARGB_8888, true);
-        picture32 = Bitmap.createScaledBitmap(picture32, 500, 500, false);
+        picture32 = Bitmap.createScaledBitmap(picture32, 640, 480, false);
 
-        Mat mat = new Mat(500,500, CvType.CV_8UC3);
+        Mat mat = new Mat(640,480, CvType.CV_8UC3);
         Utils.bitmapToMat(picture32, mat);
 
         Log.i(TAG, mat.size().toString());
@@ -75,13 +76,13 @@ public class PictureCallback implements Camera.PictureCallback {
         Mat source = new Mat(1, 1, CvType.CV_8U, new Scalar(Imgproc.GC_PR_FGD));
         Mat dst = new Mat();
 
-        Point p1 = new Point(100,100);
-        Point p2 = new Point(mat.size().width-100, mat.size().height-100);
+        Point p1 = new Point((mat.size().width-250)/2,(mat.size().height-250)/2);
+        Point p2 = new Point((mat.size().width+250)/2, (mat.size().height+250)/2);
 
         Rect rect = new Rect(p1, p2);
 
         Imgproc.grabCut(mat, firstMask, rect, bgModel, fgModel,
-                10, Imgproc.GC_INIT_WITH_RECT);
+                40, Imgproc.GC_INIT_WITH_RECT);
 
         Core.compare(firstMask, source, firstMask, Core.CMP_EQ);
 
@@ -91,9 +92,10 @@ public class PictureCallback implements Camera.PictureCallback {
 
         Scalar color = new Scalar(255, 0, 0, 255);
         Imgproc.rectangle(mat, p1, p2, color);
-        Mat vals = new Mat(1, 1, CvType.CV_8UC3, new Scalar(0.0));
 
+        Mat vals = new Mat(1, 1, CvType.CV_8UC3, new Scalar(0.0));
         Mat tmp = new Mat();
+
         Imgproc.resize(background, tmp, mat.size());
         background = tmp;
         mask = new Mat(foreground.size(), CvType.CV_8UC1,
@@ -103,9 +105,7 @@ public class PictureCallback implements Camera.PictureCallback {
         Imgproc.threshold(mask, mask, 254, 255, Imgproc.THRESH_BINARY_INV);
 
         background.copyTo(dst);
-
         background.setTo(vals, mask);
-
         Core.add(background, foreground, dst, mask);
 
         firstMask.release();
@@ -120,6 +120,7 @@ public class PictureCallback implements Camera.PictureCallback {
         Bitmap newBitmap = Bitmap.createBitmap(mat.cols(), mat.rows(),
                 Bitmap.Config.ARGB_8888);
 
+        Imgproc.rectangle(dst, p1, p2, color);
         Utils.matToBitmap(dst, newBitmap);
 
         this.mImageView.setImageBitmap(newBitmap);

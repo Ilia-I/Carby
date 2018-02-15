@@ -18,6 +18,7 @@ package com.grouph.ces.carby.volume_estimation;
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -25,10 +26,12 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.grouph.ces.carby.R;
 
@@ -59,6 +62,15 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
     /**
      * Initializes the UI and creates the detector pipeline.
      */
+
+    public static int pxToDp(int px) {
+        return (int) (px / Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    public static int dpToPx(int dp) {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
@@ -82,12 +94,24 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
         previewFrame = findViewById(R.id.camera_preview);
         previewFrame.addView(mPreview);
 
+        ImageView squareOverlay = new ImageView(this.getApplicationContext());
+        squareOverlay.setImageResource(R.drawable.ic_square_overlay);
+
+        int sizeInPx = dpToPx(200);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(sizeInPx,sizeInPx);
+        params.gravity = Gravity.CENTER;
+
+        squareOverlay.setLayoutParams(params);
+
+        previewFrame.addView(squareOverlay);
+
         FloatingActionButton captureButton = findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
             if(!imageTaken) {
                 mCamera.takePicture(null, null, new PictureCallback(mImageView));
                 mImageView.setVisibility(View.VISIBLE);
                 mPreview.setVisibility(View.GONE);
+                squareOverlay.setVisibility(View.INVISIBLE);
                 imageTaken = !imageTaken;
             }
         });
@@ -95,6 +119,7 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
         FloatingActionButton resetButton = findViewById(R.id.btn_reset);
         resetButton.setOnClickListener((view) -> {
             if(imageTaken) {
+                squareOverlay.setVisibility(View.VISIBLE);
                 mImageView.setVisibility(View.GONE);
                 mPreview.setVisibility(View.VISIBLE);
                 mImageView.setImageBitmap(null);
