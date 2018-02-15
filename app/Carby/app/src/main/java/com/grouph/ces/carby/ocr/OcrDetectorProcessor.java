@@ -22,6 +22,8 @@ import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.text.Element;
 import com.google.android.gms.vision.text.Line;
 import com.google.android.gms.vision.text.TextBlock;
+import com.grouph.ces.carby.nutrition_data.INutritionTable;
+import com.grouph.ces.carby.nutrition_data.NutritionTable;
 import com.grouph.ces.carby.ui.camera.GraphicOverlay;
 
 import java.util.ArrayList;
@@ -32,9 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A very simple Processor which gets detected TextBlocks and adds them to the overlay
- * as OcrGraphics.
- * Make this implement Detector.Processor<TextBlock> and add text to the GraphicOverlay
+ * Processor which gets detects and processes the nutrition table
  */
 public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
@@ -70,10 +70,17 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         mGraphicOverlay.clear();
     }
 
+    /**
+     * Uses by the controller to enable scanning
+     */
     public void scan() {
         scan = true;
     }
 
+    /**
+     * Table matcher algorithm
+     * @param items
+     */
     private void tableMatcher(SparseArray<TextBlock> items){
         Map<Integer,List<Element>> scannedData = new HashMap<>();
         for(int i=0;i<items.size();i++) {
@@ -108,8 +115,72 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
         //split in columns
         //TODO split each line into columns [some text][[number][unit]]++
+        INutritionTable nt = toTable(dataLines);
     }
 
+    private INutritionTable toTable(List<String> dataLines) {
+        int numCols = 0;
+        INutritionTable nt = new NutritionTable();
+        List<String> contents = nt.listOfContents();
+
+        boolean ri = false;
+        boolean g100 = false;
+        for(String typicalValues: dataLines){
+            if(typicalValues.contains("per")){
+                //TODO support non 100g
+                if(typicalValues.contains("100g")) g100 = true;
+                int tempIdx = typicalValues.lastIndexOf(" ");
+                //check if table has %RI (reference intake of average adult)
+                if(typicalValues.substring(tempIdx).contains("%R")){
+                    typicalValues = typicalValues.substring(0,tempIdx);
+                    ri = true;
+                }
+                do {
+                    tempIdx = typicalValues.lastIndexOf("per");
+                    numCols++;
+                    if(g100 && typicalValues.substring(tempIdx).contains("100g")){
+                        break;
+                    }
+                    typicalValues = typicalValues.substring(0,tempIdx);
+
+                }while(typicalValues.contains("per"));
+                break;
+            }
+        }
+
+        Map<String,String> valuePairs = new HashMap<>();
+        for(String row: dataLines){
+            for(int i=0; i<contents.size();i++) {
+                if (row.contains(contents.get(i))){
+                    Log.d("OcrDetectorProcessor","Cols:"+numCols+" Content:"+contents.get(i)+" Row:"+row);
+                    if(ri && row.endsWith("%")){
+                        row = row.substring(0,row.lastIndexOf(" "));
+                        Log.d("OcrDetectorProcessor","remove %RI");
+                    }
+                    for(int k=1;k<numCols;k++){
+                        row = row.substring(0,row.lastIndexOf(" "));
+                        Log.d("OcrDetectorProcessor","remove col");
+                    }
+                    int tempIdx = row.lastIndexOf(" ");
+//                    Log.d("OcrDetectorProcessor","idx:"+tempIdx);
+                    valuePairs.put(contents.get(i),row.substring(tempIdx));
+                    Log.d("OcrDetectorProcessor","Map<"+contents.get(i)+","+row.substring(tempIdx)+">");
+                    contents.remove(i);
+                    break;
+                }
+            }
+        }
+
+
+        //TODO fix return
+        return nt;
+    }
+
+    /**
+     * Group input by rows and order them in strings
+     * @param scannedData
+     * @return
+     */
     private List<String> orderElements(Map<Integer, List<Element>> scannedData) {
         List<String> result = new ArrayList<>();
 
@@ -132,11 +203,16 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                 }
             }
             Log.d("OcrDetectorProcessor","string line "+i+":"+line);
-            result.add(line);
+            result.add(line.trim());
         }
         return result;
     }
 
+    /**
+     * utility method for processing rows
+     * @param value
+     * @return
+     */
     private boolean addSpace(String value) {
 //        "\\d++\\s{1}+\\p{Punct}\\s{1}+\\d++"
         String pattern= "\\d|\\p{Punct}";

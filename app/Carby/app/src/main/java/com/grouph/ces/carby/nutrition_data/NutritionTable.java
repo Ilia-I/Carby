@@ -1,17 +1,20 @@
 package com.grouph.ces.carby.nutrition_data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Created by Martin Peev on 28.01.2018 г..
- * Version: 0.1
+ * Version: 0.2
  */
 
 public class NutritionTable extends ANutritionTable{
     private @MeasurementUnit String energy;
     private @MeasurementUnit String content;
     private Map<String,IComposite> nutritionalInformation;
+    private List<String> listOfContents;
 
     public NutritionTable(){
         this(KILOCALORIES_UNIT, GRAMS_UNIT);
@@ -21,6 +24,7 @@ public class NutritionTable extends ANutritionTable{
         this.energy = energy;
         this.content = content;
         nutritionalInformation = new HashMap<String,IComposite>();
+        initListOfContents();
     }
 
 
@@ -32,6 +36,27 @@ public class NutritionTable extends ANutritionTable{
         if(!super.convertUnits(content,dataUnit,targetUnit)) return false;
         nutritionalInformation.put(nutrientName,content);
         return true;
+    }
+
+    @Override
+    public List<String> listOfContents() {
+        return listOfContents;
+    }
+
+    private void initListOfContents(){
+        listOfContents = new ArrayList<>();
+        listOfContents.add("Energy");
+        listOfContents.add("Fat");
+        listOfContents.add("saturates");
+        listOfContents.add("mono-unsaturates");
+        listOfContents.add("polysaturates");
+        listOfContents.add("Carbohydrate");
+        listOfContents.add("sugars");
+        listOfContents.add("polyols");
+        listOfContents.add("starch");
+        listOfContents.add("Fibre");
+        listOfContents.add("Protein");
+        listOfContents.add("Salt");
     }
 
     @Override
