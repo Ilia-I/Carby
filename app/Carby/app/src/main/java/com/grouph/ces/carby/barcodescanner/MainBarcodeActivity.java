@@ -92,10 +92,14 @@ public class MainBarcodeActivity extends Activity implements View.OnClickListene
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+
+        BarcodeLookup barcodeLookup = new BarcodeLookup();
+        barcodeLookup.getDatabaseItem(barcode);
+        
         if (requestCode == RC_BARCODE_CAPTURE) {
             if (resultCode == CommonStatusCodes.SUCCESS) {
                 if (data != null) {
-                    Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
                     statusMessage.setText(R.string.barcode_success);
                     barcodeValue.setText(barcode.displayValue);
                     Log.d(TAG, "Barcode read: " + barcode.displayValue);

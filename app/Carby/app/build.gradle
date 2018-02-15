@@ -27,6 +27,7 @@ dependencies {
     // Important - the CameraSource implementation in this project requires version 8.1 or higher.
     implementation 'com.google.android.gms:play-services-vision:9.4.0+'
     implementation 'com.android.support:design:26+'
+    implementation 'com.google.code.gson:gson:2.8.2'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
