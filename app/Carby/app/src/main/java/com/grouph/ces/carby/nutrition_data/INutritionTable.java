@@ -28,6 +28,7 @@ public interface INutritionTable {
     public static final String KILOCALORIES_UNIT = "kcal";
 
     public List<String> listOfContents();
+    public boolean setComponent(String name, double value);
 
     public boolean setEnergy(double value, @MeasurementUnit String unit);
     public boolean setFats(IComposite fats, @MeasurementUnit String unit);

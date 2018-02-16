@@ -148,22 +148,24 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
             }
         }
 
-        Map<String,String> valuePairs = new HashMap<>();
+//        Map<String,String> valuePairs = new HashMap<>();
         for(String row: dataLines){
             for(int i=0; i<contents.size();i++) {
-                if (row.contains(contents.get(i))){
+                if (row.contains(contents.get(i))&&(row.indexOf(contents.get(i))==0||row.charAt(row.indexOf(contents.get(i))-1)==' ')){
                     Log.d("OcrDetectorProcessor","Cols:"+numCols+" Content:"+contents.get(i)+" Row:"+row);
                     if(ri && row.endsWith("%")){
                         row = row.substring(0,row.lastIndexOf(" "));
                         Log.d("OcrDetectorProcessor","remove %RI");
                     }
                     for(int k=1;k<numCols;k++){
-                        row = row.substring(0,row.lastIndexOf(" "));
-                        Log.d("OcrDetectorProcessor","remove col");
+                        int idx =row.lastIndexOf(" ");
+                        Log.d("OcrDetectorProcessor","remove col:"+row.substring(idx));
+                        row = row.substring(0,idx);
                     }
                     int tempIdx = row.lastIndexOf(" ");
-//                    Log.d("OcrDetectorProcessor","idx:"+tempIdx);
-                    valuePairs.put(contents.get(i),row.substring(tempIdx));
+                    Log.d("OcrDetectorProcessor","idx:"+tempIdx);
+//                    valuePairs.put(contents.get(i),row.substring(tempIdx));
+                    setComponent(row.substring(tempIdx),contents.get(i),nt);
                     Log.d("OcrDetectorProcessor","Map<"+contents.get(i)+","+row.substring(tempIdx)+">");
                     contents.remove(i);
                     break;
@@ -174,6 +176,22 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
         //TODO fix return
         return nt;
+    }
+
+    private boolean setComponent(String name, String value, INutritionTable nt) {
+        if(name.equals("Energy")){
+            //make adjustments for energy 5.5kJ/5.5kcal format
+            String[] strAr = value.split("/");
+            for(String val: strAr){
+                if(val.contains("kcal")){
+                    return nt.setComponent(name, Double.valueOf(val.replaceAll("[^\\.0123456789]","")));
+                }
+            }
+        } else {
+            //everything else uses the same 5.5g or 5.5ml format
+            return nt.setComponent(name, Double.valueOf(value.replaceAll("[^\\.0123456789]","")));
+        }
+        return false;
     }
 
     /**
