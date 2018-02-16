@@ -60,7 +60,8 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                 OcrGraphic graphic = new OcrGraphic(mGraphicOverlay, item);
                 mGraphicOverlay.add(graphic);
             }
-            tableMatcher(items);
+            //TODO table object not stored anywhere
+            INutritionTable nt = tableMatcher(items);
             scan = false;
         }
     }
@@ -81,7 +82,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
      * Table matcher algorithm
      * @param items
      */
-    private void tableMatcher(SparseArray<TextBlock> items){
+    private INutritionTable tableMatcher(SparseArray<TextBlock> items){
         Map<Integer,List<Element>> scannedData = new HashMap<>();
         for(int i=0;i<items.size();i++) {
             //every text block
@@ -114,8 +115,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         List<String> dataLines = orderElements(scannedData);
 
         //split in columns
-        //TODO split each line into columns [some text][[number][unit]]++
-        INutritionTable nt = toTable(dataLines);
+        return toTable(dataLines);
     }
 
     private INutritionTable toTable(List<String> dataLines) {
@@ -173,8 +173,6 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
             }
         }
 
-
-        //TODO fix return
         return nt;
     }
 
