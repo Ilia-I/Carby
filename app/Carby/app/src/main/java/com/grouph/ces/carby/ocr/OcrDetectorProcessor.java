@@ -22,6 +22,8 @@ import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.text.Element;
 import com.google.android.gms.vision.text.Line;
 import com.google.android.gms.vision.text.TextBlock;
+import com.grouph.ces.carby.nutrition_data.INutritionTable;
+import com.grouph.ces.carby.nutrition_data.NutritionTable;
 import com.grouph.ces.carby.ui.camera.GraphicOverlay;
 
 import java.util.ArrayList;
@@ -32,9 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A very simple Processor which gets detected TextBlocks and adds them to the overlay
- * as OcrGraphics.
- * Make this implement Detector.Processor<TextBlock> and add text to the GraphicOverlay
+ * Processor which gets detects and processes the nutrition table
  */
 public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
@@ -60,7 +60,8 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                 OcrGraphic graphic = new OcrGraphic(mGraphicOverlay, item);
                 mGraphicOverlay.add(graphic);
             }
-            tableMatcher(items);
+            //TODO table object not stored anywhere
+            INutritionTable nt = tableMatcher(items);
             scan = false;
         }
     }
@@ -70,11 +71,18 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         mGraphicOverlay.clear();
     }
 
+    /**
+     * Uses by the controller to enable scanning
+     */
     public void scan() {
         scan = true;
     }
 
-    private void tableMatcher(SparseArray<TextBlock> items){
+    /**
+     * Table matcher algorithm
+     * @param items
+     */
+    private INutritionTable tableMatcher(SparseArray<TextBlock> items){
         Map<Integer,List<Element>> scannedData = new HashMap<>();
         for(int i=0;i<items.size();i++) {
             //every text block
@@ -107,9 +115,88 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         List<String> dataLines = orderElements(scannedData);
 
         //split in columns
-        //TODO split each line into columns [some text][[number][unit]]++
+        return toTable(dataLines);
     }
 
+    private INutritionTable toTable(List<String> dataLines) {
+        int numCols = 0;
+        INutritionTable nt = new NutritionTable();
+        List<String> contents = nt.listOfContents();
+
+        boolean ri = false;
+        boolean g100 = false;
+        for(String typicalValues: dataLines){
+            if(typicalValues.contains("per")){
+                //TODO support non 100g
+                if(typicalValues.contains("100g")) g100 = true;
+                int tempIdx = typicalValues.lastIndexOf(" ");
+                //check if table has %RI (reference intake of average adult)
+                if(typicalValues.substring(tempIdx).contains("%R")){
+                    typicalValues = typicalValues.substring(0,tempIdx);
+                    ri = true;
+                }
+                do {
+                    tempIdx = typicalValues.lastIndexOf("per");
+                    numCols++;
+                    if(g100 && typicalValues.substring(tempIdx).contains("100g")){
+                        break;
+                    }
+                    typicalValues = typicalValues.substring(0,tempIdx);
+
+                }while(typicalValues.contains("per"));
+                break;
+            }
+        }
+
+//        Map<String,String> valuePairs = new HashMap<>();
+        for(String row: dataLines){
+            for(int i=0; i<contents.size();i++) {
+                if (row.contains(contents.get(i))&&(row.indexOf(contents.get(i))==0||row.charAt(row.indexOf(contents.get(i))-1)==' ')){
+                    Log.d("OcrDetectorProcessor","Cols:"+numCols+" Content:"+contents.get(i)+" Row:"+row);
+                    if(ri && row.endsWith("%")){
+                        row = row.substring(0,row.lastIndexOf(" "));
+                        Log.d("OcrDetectorProcessor","remove %RI");
+                    }
+                    for(int k=1;k<numCols;k++){
+                        int idx =row.lastIndexOf(" ");
+                        Log.d("OcrDetectorProcessor","remove col:"+row.substring(idx));
+                        row = row.substring(0,idx);
+                    }
+                    int tempIdx = row.lastIndexOf(" ");
+                    Log.d("OcrDetectorProcessor","idx:"+tempIdx);
+//                    valuePairs.put(contents.get(i),row.substring(tempIdx));
+                    setComponent(row.substring(tempIdx),contents.get(i),nt);
+                    Log.d("OcrDetectorProcessor","Map<"+contents.get(i)+","+row.substring(tempIdx)+">");
+                    contents.remove(i);
+                    break;
+                }
+            }
+        }
+
+        return nt;
+    }
+
+    private boolean setComponent(String name, String value, INutritionTable nt) {
+        if(name.equals("Energy")){
+            //make adjustments for energy 5.5kJ/5.5kcal format
+            String[] strAr = value.split("/");
+            for(String val: strAr){
+                if(val.contains("kcal")){
+                    return nt.setComponent(name, Double.valueOf(val.replaceAll("[^\\.0123456789]","")));
+                }
+            }
+        } else {
+            //everything else uses the same 5.5g or 5.5ml format
+            return nt.setComponent(name, Double.valueOf(value.replaceAll("[^\\.0123456789]","")));
+        }
+        return false;
+    }
+
+    /**
+     * Group input by rows and order them in strings
+     * @param scannedData
+     * @return
+     */
     private List<String> orderElements(Map<Integer, List<Element>> scannedData) {
         List<String> result = new ArrayList<>();
 
@@ -131,10 +218,17 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                     line+=" ";
                 }
             }
+            Log.d("OcrDetectorProcessor","string line "+i+":"+line);
+            result.add(line.trim());
         }
         return result;
     }
 
+    /**
+     * utility method for processing rows
+     * @param value
+     * @return
+     */
     private boolean addSpace(String value) {
 //        "\\d++\\s{1}+\\p{Punct}\\s{1}+\\d++"
         String pattern= "\\d|\\p{Punct}";

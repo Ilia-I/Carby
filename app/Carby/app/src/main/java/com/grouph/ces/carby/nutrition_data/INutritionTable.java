@@ -4,6 +4,7 @@ import android.support.annotation.StringDef;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 /**
  * Interface for storage of the nutrition information
@@ -26,6 +27,8 @@ public interface INutritionTable {
     public static final String KILOJOULES_UNIT = "kJ";
     public static final String KILOCALORIES_UNIT = "kcal";
 
+    public List<String> listOfContents();
+    public boolean setComponent(String name, double value);
 
     public boolean setEnergy(double value, @MeasurementUnit String unit);
     public boolean setFats(IComposite fats, @MeasurementUnit String unit);
