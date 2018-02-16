@@ -17,6 +17,7 @@ package com.grouph.ces.carby.volume_estimation;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -48,6 +49,7 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
 
     // Intent to capture image
     private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int PICK_IMAGE = 100;
 
     private Camera mCamera;
     private CameraPreview mPreview;
@@ -89,6 +91,14 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
                 mImageView.setVisibility(View.VISIBLE);
                 mPreview.setVisibility(View.GONE);
                 imageTaken = !imageTaken;
+            }
+        });
+
+        FloatingActionButton searchGallery = findViewById(R.id.search_gallery);
+        searchGallery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openGallery();
             }
         });
 
@@ -137,6 +147,14 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
 
 
     /** A safe way to get an instance of the Camera object. */
+
+    private void openGallery() {
+        Intent gallery =
+                new Intent(Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+        startActivityForResult(gallery, PICK_IMAGE);
+    }
+
     public static Camera getCameraInstance(){
         Camera c = null;
         try {
