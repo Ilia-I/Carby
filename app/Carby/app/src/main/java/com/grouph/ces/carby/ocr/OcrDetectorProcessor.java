@@ -62,6 +62,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
             }
             //TODO table object not stored anywhere
             INutritionTable nt = tableMatcher(items);
+            Log.v("OcrDetectorProcessor","NutritionTable:\n"+nt);
             scan = false;
         }
     }
@@ -131,7 +132,8 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                 if(typicalValues.contains("100g")) g100 = true;
                 int tempIdx = typicalValues.lastIndexOf(" ");
                 //check if table has %RI (reference intake of average adult)
-                if(typicalValues.substring(tempIdx).contains("%R")){
+                if(typicalValues.substring(tempIdx).matches("(?s).*\\p{Space}.{0,1}RI.*|(?s).*\\p{Space}\\p{Punct}\\wI.*|(?s).*\\p{Punct}R\\w.*")){//.contains("%R")){
+                    Log.d(this.getClass().getName(),"%RI detected");
                     typicalValues = typicalValues.substring(0,tempIdx);
                     ri = true;
                 }
@@ -148,7 +150,6 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
             }
         }
 
-//        Map<String,String> valuePairs = new HashMap<>();
         for(String row: dataLines){
             for(int i=0; i<contents.size();i++) {
                 if (row.contains(contents.get(i))&&(row.indexOf(contents.get(i))==0||row.charAt(row.indexOf(contents.get(i))-1)==' ')){
@@ -163,9 +164,8 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                         row = row.substring(0,idx);
                     }
                     int tempIdx = row.lastIndexOf(" ");
-                    Log.d("OcrDetectorProcessor","idx:"+tempIdx);
-//                    valuePairs.put(contents.get(i),row.substring(tempIdx));
-                    setComponent(row.substring(tempIdx),contents.get(i),nt);
+//                    Log.d("OcrDetectorProcessor","idx:"+tempIdx);
+                    setComponent(contents.get(i),row.substring(tempIdx),nt);
                     Log.d("OcrDetectorProcessor","Map<"+contents.get(i)+","+row.substring(tempIdx)+">");
                     contents.remove(i);
                     break;
@@ -177,6 +177,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
     }
 
     private boolean setComponent(String name, String value, INutritionTable nt) {
+        Log.d(this.getClass().getName(),"setComponent:"+name+" - "+value);
         if(name.equals("Energy")){
             //make adjustments for energy 5.5kJ/5.5kcal format
             String[] strAr = value.split("/");
