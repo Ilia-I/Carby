@@ -35,6 +35,7 @@ public class NutritionTable extends ANutritionTable{
                            IComposite content,
                            @MeasurementUnit String dataUnit,
                            @MeasurementUnit String targetUnit){
+        Log.d(this.getClass().getName(),"Setting component:"+nutrientName+" "+content);
         if(!super.convertUnits(content,dataUnit,targetUnit)) return false;
         nutritionalInformation.put(nutrientName,content);
         return true;
@@ -62,7 +63,7 @@ public class NutritionTable extends ANutritionTable{
                                 return getFats().setTotal(value);
                             }
             case "mono-unsaturates":
-            case "polysaturates":
+            case "polyunsaturates":
             case "saturates":if(getFats()==null){
                                 IComposite fats = new Composite(value);
                                 fats.addSubComponent(name,value);
@@ -201,5 +202,14 @@ public class NutritionTable extends ANutritionTable{
     @Override
     public double getSalt() {
         return nutritionalInformation.get("Salt").getTotal();
+    }
+
+    @Override
+    public String toString(){
+        String output = "Units: "+energy+" & "+content+"\n";
+        for(String key: nutritionalInformation.keySet()){
+            output += key+" "+nutritionalInformation.get(key).toString();
+        }
+        return output;
     }
 }
