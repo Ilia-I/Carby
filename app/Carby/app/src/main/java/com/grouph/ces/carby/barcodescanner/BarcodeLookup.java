@@ -67,7 +67,7 @@ public class BarcodeLookup extends AsyncTask<Barcode, Void, JsonElement> {
             }
 
         } catch (Exception e){
-            Log.e("Tag", "This is not good: " + e.toString());
+            Log.e("Tag", "Likely could not connect to internet/server: " + e.toString());
         }
 
         return null;
@@ -76,35 +76,44 @@ public class BarcodeLookup extends AsyncTask<Barcode, Void, JsonElement> {
     @Override
     protected void onPostExecute(JsonElement root){
         if( root!= null) {
-            String rootStr = root.toString();
-            JsonElement product = root.getAsJsonObject().get("product");
-            JsonElement nutrients = product.getAsJsonObject().get("nutriments");
+            try {
+                String rootStr = root.toString();
+                JsonElement product = root.getAsJsonObject().get("product");
+                JsonElement nutrients = product.getAsJsonObject().get("nutriments");
 
-            String productName = product.getAsJsonObject().get("product_name").toString().replace("\"", "");
-            String servingSize = product.getAsJsonObject().get("serving_size").toString().replace("\"", "");
-            String carbsPerServing = nutrients.getAsJsonObject().get("carbohydrates_serving").toString();
-
-
-            Log.i("Tag", "Connection established...");
-            Log.i("Tag", rootStr);
-
-            Log.i("Tag", productName);
-            Log.i("Tag", servingSize);
-            Log.i("Tag", carbsPerServing);
-
-            String result = carbsPerServing + "g carbohydrates per " + servingSize + " serving";
+                String productName = product.getAsJsonObject().get("product_name").toString().replace("\"", "");
+                String servingSize = product.getAsJsonObject().get("serving_size").toString().replace("\"", "");
+                String carbsPerServing = nutrients.getAsJsonObject().get("carbohydrates_serving").toString();
 
 
-            barcodeHeader.setText(productName);
-            barcodeHeader.setTypeface(barcodeHeader.getTypeface(), Typeface.BOLD);
-            productResult.setText(result);
+                Log.i("Tag", "Connection established...");
+                Log.i("Tag", rootStr);
 
-            progressBar.setVisibility(View.GONE);
-            barcodeHeader.setVisibility(View.VISIBLE);
-            productResult.setVisibility(View.VISIBLE);
+                Log.i("Tag", productName);
+                Log.i("Tag", servingSize);
+                Log.i("Tag", carbsPerServing);
+
+                String result = carbsPerServing + "g carbohydrates per " + servingSize + " serving";
+
+
+                barcodeHeader.setText(productName);
+                barcodeHeader.setTypeface(barcodeHeader.getTypeface(), Typeface.BOLD);
+                productResult.setText(result);
+
+                progressBar.setVisibility(View.GONE);
+                barcodeHeader.setVisibility(View.VISIBLE);
+                productResult.setVisibility(View.VISIBLE);
+            }catch(Exception e){
+                Log.e("Tag", "This is not good, product may be missing information: " + e.toString());
+                productNotFound();
+            }
         }else{
-            barcodeHeader.setText("Could not find product information");
-            progressBar.setVisibility(View.GONE);
+            productNotFound();
         }
+    }
+
+    private void productNotFound(){
+        barcodeHeader.setText("Could not find product information");
+        progressBar.setVisibility(View.GONE);
     }
 }
