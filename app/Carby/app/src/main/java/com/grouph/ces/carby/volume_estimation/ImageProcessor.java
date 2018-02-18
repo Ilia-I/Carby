@@ -15,9 +15,13 @@ import org.opencv.core.Algorithm;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.features2d.FeatureDetector;
+import org.opencv.features2d.Features2d;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
@@ -103,26 +107,34 @@ public class ImageProcessor {
         fgModel.release();
         vals.release();
 
-        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2RGBA);
+        dst=featureDetect(dst);
 
-        // unsure of syntax for your platform here... but something like ...
-        Bitmap newBitmap = Bitmap.createBitmap(mat.cols(), mat.rows(),
-                Bitmap.Config.ARGB_8888);
+        //convert back to bitmap
+        Utils.matToBitmap(dst, scaledPicture);
 
-        Imgproc.rectangle(dst, p1, p2, color);
-        Utils.matToBitmap(dst, newBitmap);
+        return scaledPicture;
+    }
 
-//        try {
-//            FileOutputStream fos = new FileOutputStream(pictureFile);
-//            fos.write(data);
-//            fos.close();
-//        } catch (FileNotFoundException e) {
-//            Log.d(TAG, "File not found: " + e.getMessage());
-//        } catch (IOException e) {
-//            Log.d(TAG, "Error accessing file: " + e.getMessage());
-//        }
+    private Mat featureDetect(Mat img){
+        Mat blurredImage = new Mat();
 
-        return newBitmap;
+        Imgproc.blur(img, blurredImage, new Size(7, 7));
+
+        //convert to gray
+        Mat gray = new Mat(img.width(), img.height(), CvType.CV_8U, new Scalar(4));
+        Imgproc.cvtColor(img, gray, Imgproc.COLOR_BGR2GRAY);
+
+
+        FeatureDetector fd = FeatureDetector.create(FeatureDetector.FAST);
+        MatOfKeyPoint regions = new MatOfKeyPoint();
+        fd.detect(gray, regions);
+
+        Mat output=new Mat();
+        //int r=regions.rows();
+        //System.out.println("REGIONS ARE: " + regions);
+        Features2d.drawKeypoints(img, regions,output );
+
+        return output;
     }
 
     /** Create a File for saving an image or video */
