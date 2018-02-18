@@ -59,7 +59,7 @@ public class BarcodeLookup extends AsyncTask<Barcode, Void, JsonElement> {
             root = root.getAsJsonObject(); //May be an array, may be an object.
 
             int status = root.getAsJsonObject().get("status").getAsInt();
-            
+
             if(status==0){
                 return null;
             }else{

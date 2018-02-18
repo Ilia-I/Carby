@@ -98,28 +98,31 @@ public class MainBarcodeActivity extends Activity implements View.OnClickListene
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+        if( resultCode == RESULT_OK) {
+            Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
 
-        BarcodeLookup barcodeLookup = new BarcodeLookup(barcodeHeader, productResult, progressBar);
-        barcodeLookup.execute(barcode);
-        
-        if (requestCode == RC_BARCODE_CAPTURE) {
-            if (resultCode == CommonStatusCodes.SUCCESS) {
-                if (data != null) {
-                    //barcodeHeader.setText(R.string.barcode_success);
-                    barcodeValue.setText("Barcode: " + barcode.displayValue);
-                    Log.d(TAG, "Barcode read: " + barcode.displayValue);
+            BarcodeLookup barcodeLookup = new BarcodeLookup(barcodeHeader, productResult, progressBar);
+            barcodeLookup.execute(barcode);
+
+            if (requestCode == RC_BARCODE_CAPTURE) {
+                if (resultCode == CommonStatusCodes.SUCCESS) {
+                    if (data != null) {
+                        //barcodeHeader.setText(R.string.barcode_success);
+                        barcodeValue.setText("Barcode: " + barcode.displayValue);
+                        Log.d(TAG, "Barcode read: " + barcode.displayValue);
+                    } else {
+                        barcodeHeader.setText(R.string.barcode_failure);
+                        Log.d(TAG, "No barcode captured, intent data is null");
+                    }
                 } else {
-                    barcodeHeader.setText(R.string.barcode_failure);
-                    Log.d(TAG, "No barcode captured, intent data is null");
+                    barcodeHeader.setText(String.format(getString(R.string.barcode_error),
+                            CommonStatusCodes.getStatusCodeString(resultCode)));
                 }
             } else {
-                barcodeHeader.setText(String.format(getString(R.string.barcode_error),
-                        CommonStatusCodes.getStatusCodeString(resultCode)));
+                super.onActivityResult(requestCode, resultCode, data);
             }
-        }
-        else {
-            super.onActivityResult(requestCode, resultCode, data);
+        }else{
+            
         }
     }
 }
