@@ -1,18 +1,3 @@
-/*
- * Copyright (C) The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.grouph.ces.carby.volume_estimation;
 
 import android.Manifest;
@@ -20,7 +5,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -33,12 +21,16 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.grouph.ces.carby.R;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 
 public final class VolumeCaptureActivity extends AppCompatActivity {
@@ -56,14 +48,12 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
 
     private Camera mCamera;
     private CameraPreview mPreview;
-    private FrameLayout previewFrame;
     private ImageView mImageView;
+    private ImageView squareOverlay;
+
+    private ImageProcessor imageProcessor = new ImageProcessor();
 
     private boolean imageTaken = false;
-
-    /**
-     * Initializes the UI and creates the detector pipeline.
-     */
 
     public static int pxToDp(int px) {
         return (int) (px / Resources.getSystem().getDisplayMetrics().density);
@@ -93,10 +83,10 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
         mImageView = findViewById(R.id.vol_capture_image);
         mImageView.setVisibility(View.GONE);
 
-        previewFrame = findViewById(R.id.camera_preview);
+        FrameLayout previewFrame = findViewById(R.id.camera_preview);
         previewFrame.addView(mPreview);
 
-        ImageView squareOverlay = new ImageView(this.getApplicationContext());
+        squareOverlay = new ImageView(this.getApplicationContext());
         squareOverlay.setImageResource(R.drawable.ic_square_overlay);
 
         int sizeInPx = dpToPx(200);
@@ -110,10 +100,10 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
         FloatingActionButton captureButton = findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
             if(!imageTaken) {
-                mCamera.takePicture(null, null, new PictureCallback(mImageView));
+                squareOverlay.setVisibility(View.INVISIBLE);
+                mCamera.takePicture(null, null, new PictureCallback(mImageView, imageProcessor));
                 mImageView.setVisibility(View.VISIBLE);
                 mPreview.setVisibility(View.GONE);
-                squareOverlay.setVisibility(View.INVISIBLE);
                 imageTaken = !imageTaken;
             }
         });
@@ -136,10 +126,6 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
                 imageTaken = !imageTaken;
             }
         });
-
-        if (!OpenCVLoader.initDebug()) {
-            // Handle initialization error
-        }
     }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -170,15 +156,37 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
         }
     }
 
-
-    /** A safe way to get an instance of the Camera object. */
-
     private void openGallery() {
         Intent gallery =
                 new Intent(Intent.ACTION_PICK,
                         android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
         startActivityForResult(gallery, PICK_IMAGE);
     }
+
+    @Override
+    protected void onActivityResult(int reqCode, int resultCode, Intent data) {
+        super.onActivityResult(reqCode, resultCode, data);
+
+        if (resultCode == RESULT_OK) {
+            try {
+                final Uri imageUri = data.getData();
+                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+                final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+
+                squareOverlay.setVisibility(View.INVISIBLE);
+                mImageView.setImageBitmap(imageProcessor.performGrabCut(selectedImage));
+                mImageView.setRotation(90);
+                mImageView.setVisibility(View.VISIBLE);
+                mPreview.setVisibility(View.GONE);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
+            }
+        } else
+            Toast.makeText(this, "You haven't picked Image",Toast.LENGTH_LONG).show();
+    }
+
+    /** A safe way to get an instance of the Camera object. */
 
     public static Camera getCameraInstance(){
         Camera c = null;
