@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.CardView;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -18,13 +19,16 @@ import com.grouph.ces.carby.barcodescanner.MainBarcodeActivity;
 import com.grouph.ces.carby.ocr.OcrCaptureActivity;
 import com.grouph.ces.carby.volume_estimation.VolumeCaptureActivity;
 
+import android.view.View.OnClickListener;
+
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnClickListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -36,6 +40,14 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        CardView barcodeCard = findViewById(R.id.barcode_card);
+        CardView ocrCard = findViewById(R.id.ocr_card);
+        CardView volumeCard = findViewById(R.id.volume_card);
+
+        barcodeCard.setOnClickListener(this);
+        ocrCard.setOnClickListener(this);
+        volumeCard.setOnClickListener(this);
     }
 
     @Override
@@ -86,17 +98,11 @@ public class MainActivity extends AppCompatActivity
             startActivity(myIntent1);
             // Handle the camera action
         } else if (id == R.id.nav_ocr) {
-//            Snackbar snackbar = Snackbar
-//                    .make(findViewById(android.R.id.content), "Nutrition table scanner not implemented", Snackbar.LENGTH_LONG);
-//            snackbar.show();
             Intent ocr = new Intent(this, OcrCaptureActivity.class);
             startActivity(ocr);
         } else if (id == R.id.nav_volume) {
             Intent volume = new Intent(this, VolumeCaptureActivity.class);
             startActivity(volume);
-            Snackbar snackbar = Snackbar
-                    .make(findViewById(android.R.id.content), "Volume estimation not implemented", Snackbar.LENGTH_LONG);
-            snackbar.show();
         } /*else if (id == R.id.nav_feature) {
 
         }*/
@@ -104,5 +110,22 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+
+        if (id == R.id.barcode_card) {
+            Intent myIntent1 = new Intent(this, MainBarcodeActivity.class);
+            startActivity(myIntent1);
+            // Handle the camera action
+        } else if (id == R.id.ocr_card) {
+            Intent ocr = new Intent(this, OcrCaptureActivity.class);
+            startActivity(ocr);
+        } else if (id == R.id.volume_card) {
+            Intent volume = new Intent(this, VolumeCaptureActivity.class);
+            startActivity(volume);
+        }
     }
 }
