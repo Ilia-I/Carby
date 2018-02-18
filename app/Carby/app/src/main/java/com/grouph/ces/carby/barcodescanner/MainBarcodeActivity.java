@@ -25,6 +25,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
+import com.google.gson.JsonElement;
 import com.grouph.ces.carby.R;
 
 /**
@@ -94,8 +95,7 @@ public class MainBarcodeActivity extends Activity implements View.OnClickListene
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
 
-        BarcodeLookup barcodeLookup = new BarcodeLookup();
-        barcodeLookup.getDatabaseItem(barcode);
+        new BarcodeLookup().execute(barcode);
         
         if (requestCode == RC_BARCODE_CAPTURE) {
             if (resultCode == CommonStatusCodes.SUCCESS) {

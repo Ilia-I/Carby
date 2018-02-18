@@ -1,5 +1,6 @@
 package com.grouph.ces.carby.barcodescanner;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.android.gms.vision.barcode.Barcode;
@@ -18,44 +19,39 @@ import java.net.URL;
 
 /**
  * Created by George on 15/02/2018.
+ *
+ * Class for the OpenFoodFacts look-up of scanned barcode
  */
 
-public class BarcodeLookup {
+public class BarcodeLookup extends AsyncTask<Barcode, Void, JsonElement> {
+    protected JsonElement doInBackground(Barcode... barcode){
+        String DataURL = "https://world.openfoodfacts.org/api/v0/product/";
+        //DataURL += barcode.displayValue + ".json";
+        DataURL += "50457236.json";
+        //TODO change back to actual barcode value and not test value
 
-    public BarcodeLookup(){
+        try {
+            URL url = new URL(DataURL);
+            HttpURLConnection request = (HttpURLConnection) url.openConnection();
+            request.connect();
 
+            // Convert to a JSON object to print data
+            JsonParser jp = new JsonParser(); //from gson
+            JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent())); //Convert the input stream to a json element
+            root = root.getAsJsonObject(); //May be an array, may be an object.
+
+            return root;
+
+        } catch (Exception e){
+            Log.e("Tag", "This is not good: " + e.toString());
+        }
+
+        return null;
     }
 
-    public void getDatabaseItem(final Barcode barcode){
-
-        new Thread(new Runnable(){
-            @Override
-            public void run() {
-                String Url = "https://world.openfoodfacts.org/api/v0/product/";
-                Url += barcode.displayValue + ".json";
-
-                try {
-                    URL url = new URL(Url);
-                    HttpURLConnection request = (HttpURLConnection) url.openConnection();
-                    request.connect();
-
-                    // Convert to a JSON object to print data
-                    JsonParser jp = new JsonParser(); //from gson
-                    JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent())); //Convert the input stream to a json element
-                    JsonObject rootobj = root.getAsJsonObject(); //May be an array, may be an object.
-
-                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                    String json = gson.toJson(rootobj);
-
-                    Log.i("Tag", "rootobj grabbed");
-
-                    Log.i("Tag", json);
-
-
-                } catch (Exception e){
-                    Log.e("Tag", "This is not good: " + e.toString());
-                }
-            }
-        }).start();
+    protected void onPostExecute(JsonElement root){
+        String test = root.toString();
+        Log.i("Tag", "Connection established...");
+        Log.i("Tag", test);
     }
 }
