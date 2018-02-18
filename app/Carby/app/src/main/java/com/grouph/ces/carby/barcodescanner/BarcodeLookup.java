@@ -1,6 +1,6 @@
 package com.grouph.ces.carby.barcodescanner;
 
-import android.app.ProgressDialog;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
@@ -8,13 +8,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.vision.barcode.Barcode;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -29,20 +24,21 @@ import java.net.URL;
 
 public class BarcodeLookup extends AsyncTask<Barcode, Void, JsonElement> {
 
+    private TextView barcodeHeader;
+    private TextView productResult;
     private ProgressBar progressBar;
-    private TextView productText;
 
-    public BarcodeLookup(ProgressBar progressBar, TextView productText){
+    public BarcodeLookup(TextView barcodeHeader, TextView productResult, ProgressBar progressBar){
+        this.barcodeHeader = barcodeHeader;
+        this.productResult = productResult;
         this.progressBar = progressBar;
-        this.productText = productText;
     }
 
     @Override
     protected  void onPreExecute(){
         progressBar.setVisibility(View.VISIBLE);
-
-        productText.setText("Searching Open Food Facts database");
-        //productText.setVisibility(View.GONE);
+        barcodeHeader.setText("Searching Open Food Facts database");
+        productResult.setVisibility(View.GONE);
     }
 
     @Override
@@ -79,7 +75,7 @@ public class BarcodeLookup extends AsyncTask<Barcode, Void, JsonElement> {
 
         String productName = product.getAsJsonObject().get("product_name").toString().replace("\"", "");
         String servingSize = product.getAsJsonObject().get("serving_size").toString().replace("\"", "");
-        String carbPer100 = nutrients.getAsJsonObject().get("carbohydrates_serving").toString();
+        String carbsPerServing = nutrients.getAsJsonObject().get("carbohydrates_serving").toString();
 
 
         Log.i("Tag", "Connection established...");
@@ -87,12 +83,17 @@ public class BarcodeLookup extends AsyncTask<Barcode, Void, JsonElement> {
 
         Log.i("Tag", productName);
         Log.i("Tag", servingSize);
-        Log.i("Tag", carbPer100);
+        Log.i("Tag", carbsPerServing);
 
-        String result = productName;
+        String result = carbsPerServing + "g carbohydrates per " + servingSize + " serving";
 
-        productText.setText(productName);
+
+        barcodeHeader.setText(productName);
+        barcodeHeader.setTypeface(barcodeHeader.getTypeface(), Typeface.BOLD);
+        productResult.setText(result);
+
         progressBar.setVisibility(View.GONE);
-        productText.setVisibility(View.VISIBLE);
+        barcodeHeader.setVisibility(View.VISIBLE);
+        productResult.setVisibility(View.VISIBLE);
     }
 }

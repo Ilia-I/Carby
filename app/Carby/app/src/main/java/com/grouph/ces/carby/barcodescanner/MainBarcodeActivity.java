@@ -38,7 +38,7 @@ public class MainBarcodeActivity extends Activity implements View.OnClickListene
     private TextView barcodeHeader;
     private TextView barcodeValue;
     private ProgressBar progressBar;
-    private TextView productText;
+    private TextView productResult;
 
     private static final int RC_BARCODE_CAPTURE = 9001;
     private static final String TAG = "BarcodeMain";
@@ -52,7 +52,7 @@ public class MainBarcodeActivity extends Activity implements View.OnClickListene
         barcodeValue = (TextView)findViewById(R.id.barcode_value);
 
         progressBar = findViewById(R.id.load_json_bar);
-        productText = findViewById(R.id.product_data);
+        productResult = findViewById(R.id.product_result);
 
         findViewById(R.id.read_barcode).setOnClickListener(this);
     }
@@ -100,7 +100,7 @@ public class MainBarcodeActivity extends Activity implements View.OnClickListene
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
 
-        BarcodeLookup barcodeLookup = new BarcodeLookup(progressBar, barcodeHeader);
+        BarcodeLookup barcodeLookup = new BarcodeLookup(barcodeHeader, productResult, progressBar);
         barcodeLookup.execute(barcode);
         
         if (requestCode == RC_BARCODE_CAPTURE) {
