@@ -44,8 +44,8 @@ public class BarcodeLookup extends AsyncTask<Barcode, Void, JsonElement> {
     @Override
     protected JsonElement doInBackground(Barcode... barcode){
         String DataURL = "https://world.openfoodfacts.org/api/v0/product/";
-        //DataURL += barcode.displayValue + ".json";
-        DataURL += "50457236.json";
+        DataURL += barcode[0].displayValue + ".json";
+        //DataURL += "50457236.json";
         //TODO change back to actual barcode value and not test value
 
         try {
@@ -58,7 +58,13 @@ public class BarcodeLookup extends AsyncTask<Barcode, Void, JsonElement> {
             JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent())); //Convert the input stream to a json element
             root = root.getAsJsonObject(); //May be an array, may be an object.
 
-            return root;
+            int status = root.getAsJsonObject().get("status").getAsInt();
+            
+            if(status==0){
+                return null;
+            }else{
+                return root;
+            }
 
         } catch (Exception e){
             Log.e("Tag", "This is not good: " + e.toString());
@@ -69,31 +75,36 @@ public class BarcodeLookup extends AsyncTask<Barcode, Void, JsonElement> {
 
     @Override
     protected void onPostExecute(JsonElement root){
-        String rootStr = root.toString();
-        JsonElement product = root.getAsJsonObject().get("product");
-        JsonElement nutrients = product.getAsJsonObject().get("nutriments");
+        if( root!= null) {
+            String rootStr = root.toString();
+            JsonElement product = root.getAsJsonObject().get("product");
+            JsonElement nutrients = product.getAsJsonObject().get("nutriments");
 
-        String productName = product.getAsJsonObject().get("product_name").toString().replace("\"", "");
-        String servingSize = product.getAsJsonObject().get("serving_size").toString().replace("\"", "");
-        String carbsPerServing = nutrients.getAsJsonObject().get("carbohydrates_serving").toString();
-
-
-        Log.i("Tag", "Connection established...");
-        Log.i("Tag", rootStr);
-
-        Log.i("Tag", productName);
-        Log.i("Tag", servingSize);
-        Log.i("Tag", carbsPerServing);
-
-        String result = carbsPerServing + "g carbohydrates per " + servingSize + " serving";
+            String productName = product.getAsJsonObject().get("product_name").toString().replace("\"", "");
+            String servingSize = product.getAsJsonObject().get("serving_size").toString().replace("\"", "");
+            String carbsPerServing = nutrients.getAsJsonObject().get("carbohydrates_serving").toString();
 
 
-        barcodeHeader.setText(productName);
-        barcodeHeader.setTypeface(barcodeHeader.getTypeface(), Typeface.BOLD);
-        productResult.setText(result);
+            Log.i("Tag", "Connection established...");
+            Log.i("Tag", rootStr);
 
-        progressBar.setVisibility(View.GONE);
-        barcodeHeader.setVisibility(View.VISIBLE);
-        productResult.setVisibility(View.VISIBLE);
+            Log.i("Tag", productName);
+            Log.i("Tag", servingSize);
+            Log.i("Tag", carbsPerServing);
+
+            String result = carbsPerServing + "g carbohydrates per " + servingSize + " serving";
+
+
+            barcodeHeader.setText(productName);
+            barcodeHeader.setTypeface(barcodeHeader.getTypeface(), Typeface.BOLD);
+            productResult.setText(result);
+
+            progressBar.setVisibility(View.GONE);
+            barcodeHeader.setVisibility(View.VISIBLE);
+            productResult.setVisibility(View.VISIBLE);
+        }else{
+            barcodeHeader.setText("Could not find product information");
+            progressBar.setVisibility(View.GONE);
+        }
     }
 }
