@@ -105,7 +105,7 @@ public class MainBarcodeActivity extends Activity implements View.OnClickListene
             barcodeLookup.execute(barcode);
 
             if (requestCode == RC_BARCODE_CAPTURE) {
-                if (resultCode == CommonStatusCodes.SUCCESS) {
+                if (resultCode == RESULT_OK) {
                     if (data != null) {
                         //barcodeHeader.setText(R.string.barcode_success);
                         barcodeValue.setText("Barcode: " + barcode.displayValue);
