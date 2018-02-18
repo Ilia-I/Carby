@@ -21,11 +21,11 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
-import com.google.gson.JsonElement;
 import com.grouph.ces.carby.R;
 
 /**
@@ -35,8 +35,10 @@ import com.grouph.ces.carby.R;
 public class MainBarcodeActivity extends Activity implements View.OnClickListener {
 
     // use a compound button so either checkbox or switch widgets work.
-    private TextView statusMessage;
+    private TextView barcodeHeader;
     private TextView barcodeValue;
+    private ProgressBar progressBar;
+    private TextView productText;
 
     private static final int RC_BARCODE_CAPTURE = 9001;
     private static final String TAG = "BarcodeMain";
@@ -46,8 +48,11 @@ public class MainBarcodeActivity extends Activity implements View.OnClickListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_barcode_main);
 
-        statusMessage = (TextView)findViewById(R.id.status_message);
+        barcodeHeader = (TextView)findViewById(R.id.barcode_header);
         barcodeValue = (TextView)findViewById(R.id.barcode_value);
+
+        progressBar = findViewById(R.id.load_json_bar);
+        productText = findViewById(R.id.product_data);
 
         findViewById(R.id.read_barcode).setOnClickListener(this);
     }
@@ -95,20 +100,21 @@ public class MainBarcodeActivity extends Activity implements View.OnClickListene
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
 
-        new BarcodeLookup().execute(barcode);
+        BarcodeLookup barcodeLookup = new BarcodeLookup(progressBar, barcodeHeader);
+        barcodeLookup.execute(barcode);
         
         if (requestCode == RC_BARCODE_CAPTURE) {
             if (resultCode == CommonStatusCodes.SUCCESS) {
                 if (data != null) {
-                    statusMessage.setText(R.string.barcode_success);
-                    barcodeValue.setText(barcode.displayValue);
+                    //barcodeHeader.setText(R.string.barcode_success);
+                    barcodeValue.setText("Barcode: " + barcode.displayValue);
                     Log.d(TAG, "Barcode read: " + barcode.displayValue);
                 } else {
-                    statusMessage.setText(R.string.barcode_failure);
+                    barcodeHeader.setText(R.string.barcode_failure);
                     Log.d(TAG, "No barcode captured, intent data is null");
                 }
             } else {
-                statusMessage.setText(String.format(getString(R.string.barcode_error),
+                barcodeHeader.setText(String.format(getString(R.string.barcode_error),
                         CommonStatusCodes.getStatusCodeString(resultCode)));
             }
         }

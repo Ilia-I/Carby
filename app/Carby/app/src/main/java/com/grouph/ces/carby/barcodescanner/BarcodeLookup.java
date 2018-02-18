@@ -1,7 +1,11 @@
 package com.grouph.ces.carby.barcodescanner;
 
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.gson.Gson;
@@ -24,6 +28,24 @@ import java.net.URL;
  */
 
 public class BarcodeLookup extends AsyncTask<Barcode, Void, JsonElement> {
+
+    private ProgressBar progressBar;
+    private TextView productText;
+
+    public BarcodeLookup(ProgressBar progressBar, TextView productText){
+        this.progressBar = progressBar;
+        this.productText = productText;
+    }
+
+    @Override
+    protected  void onPreExecute(){
+        progressBar.setVisibility(View.VISIBLE);
+
+        productText.setText("Searching Open Food Facts database");
+        //productText.setVisibility(View.GONE);
+    }
+
+    @Override
     protected JsonElement doInBackground(Barcode... barcode){
         String DataURL = "https://world.openfoodfacts.org/api/v0/product/";
         //DataURL += barcode.displayValue + ".json";
@@ -49,9 +71,28 @@ public class BarcodeLookup extends AsyncTask<Barcode, Void, JsonElement> {
         return null;
     }
 
+    @Override
     protected void onPostExecute(JsonElement root){
-        String test = root.toString();
+        String rootStr = root.toString();
+        JsonElement product = root.getAsJsonObject().get("product");
+        JsonElement nutrients = product.getAsJsonObject().get("nutriments");
+
+        String productName = product.getAsJsonObject().get("product_name").toString().replace("\"", "");
+        String servingSize = product.getAsJsonObject().get("serving_size").toString().replace("\"", "");
+        String carbPer100 = nutrients.getAsJsonObject().get("carbohydrates_serving").toString();
+
+
         Log.i("Tag", "Connection established...");
-        Log.i("Tag", test);
+        Log.i("Tag", rootStr);
+
+        Log.i("Tag", productName);
+        Log.i("Tag", servingSize);
+        Log.i("Tag", carbPer100);
+
+        String result = productName;
+
+        productText.setText(productName);
+        progressBar.setVisibility(View.GONE);
+        productText.setVisibility(View.VISIBLE);
     }
 }
