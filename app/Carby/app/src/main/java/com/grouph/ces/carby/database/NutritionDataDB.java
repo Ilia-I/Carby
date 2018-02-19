@@ -3,6 +3,7 @@ package com.grouph.ces.carby.database;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.arch.persistence.room.TypeConverters;
 
 import com.grouph.ces.carby.nutrition_data.INutritionTable;
 
@@ -11,6 +12,7 @@ import com.grouph.ces.carby.nutrition_data.INutritionTable;
  * Version: 0.2
  */
 @Entity(tableName = "NutritionData")
+@TypeConverters({NutritionTableConverter.class})
 public class NutritionDataDB {
     @PrimaryKey(autoGenerate = false)
     private int barcode;

@@ -17,13 +17,13 @@ import java.util.List;
 @Dao
 @TypeConverters({NutritionTableConverter.class})
 public interface NutritionDataDao {
-    @Query("SELECT * FROM GoalDB")
+    @Query("SELECT * FROM NutritionData")
     List<NutritionDataDB> getAll();
 
-    @Query("SELECT * FROM goaldb WHERE barcode LIKE :barcode LIMIT 1")
+    @Query("SELECT * FROM NutritionData WHERE barcode LIKE :barcode LIMIT 1")
     NutritionDataDB findByBarcode(int barcode);
 
-    @Query("UPDATE goaldb SET nutritionTable = :nt WHERE barcode = :barcode")
+    @Query("UPDATE NutritionData SET nutritionTable = :nt WHERE barcode = :barcode")
     void update(int barcode, INutritionTable nt);
 
     @Insert
