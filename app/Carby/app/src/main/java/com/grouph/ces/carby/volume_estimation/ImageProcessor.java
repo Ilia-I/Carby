@@ -16,6 +16,7 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfKeyPoint;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -29,7 +30,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
@@ -68,6 +71,7 @@ public class ImageProcessor {
         Mat mask;
         Mat source = new Mat(1, 1, CvType.CV_8U, new Scalar(Imgproc.GC_PR_FGD));
         Mat dst = new Mat();
+
 
         // Create bounding box
         Point p1 = new Point((mat.size().width-250)/2,(mat.size().height-250)/2);
@@ -109,21 +113,32 @@ public class ImageProcessor {
 
         dst=featureDetect(dst);
 
-        //convert back to bitmap
-        Utils.matToBitmap(dst, scaledPicture);
+        Mat gray = new Mat();
+        Mat cannyEdges = new Mat();
+        Imgproc.cvtColor(mat, gray, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.Canny(gray,cannyEdges,75,100);
+        List<MatOfPoint> contours = new ArrayList<>();
+        Imgproc.findContours(cannyEdges,contours,new Mat(),Imgproc.RETR_TREE,Imgproc.CHAIN_APPROX_SIMPLE);
+        Mat contourImg = new Mat();
+        contourImg.create(cannyEdges.rows(), cannyEdges.cols(), CvType.CV_8UC3);
+        contourImg.setTo(new Scalar(0,0,0));
 
+        //for (int i = 0; i < contours.size(); i++) {
+        Imgproc.drawContours(contourImg, contours, -1, new Scalar(233,29,29), -1);
+
+
+        //convert back to bitmap
+        Utils.matToBitmap(contourImg, scaledPicture);
         return scaledPicture;
     }
 
     private Mat featureDetect(Mat img){
         Mat blurredImage = new Mat();
-
         Imgproc.blur(img, blurredImage, new Size(7, 7));
 
         //convert to gray
         Mat gray = new Mat(img.width(), img.height(), CvType.CV_8U, new Scalar(4));
         Imgproc.cvtColor(img, gray, Imgproc.COLOR_BGR2GRAY);
-
 
         FeatureDetector fd = FeatureDetector.create(FeatureDetector.FAST);
         MatOfKeyPoint regions = new MatOfKeyPoint();
