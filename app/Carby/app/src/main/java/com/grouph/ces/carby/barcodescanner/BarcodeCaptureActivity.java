@@ -443,7 +443,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
     public void onBarcodeDetected(Barcode barcode) {
         Intent data = new Intent();
         data.putExtra(BarcodeObject, barcode);
-        setResult(CommonStatusCodes.SUCCESS, data);
+        setResult(RESULT_OK, data);
         finish();
         Log.i("Barcode", "Barcode detected: " + barcode.displayValue);
         //do something with barcode data returned

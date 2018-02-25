@@ -4,7 +4,7 @@
 
 ### What does it contain? ###
 
-* An Android application for a carbohydrate estimation system to aid those with diabetes 
+* An Android application for a carbohydrate estimation system to aid those with diabetes
 
 ### How do I set up? ###
 
@@ -12,4 +12,4 @@
 
 ### Editing README ###
 
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo) 
