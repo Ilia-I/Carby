@@ -20,7 +20,7 @@ public interface NutritionDataDao {
     @Query("SELECT * FROM NutritionData")
     List<NutritionDataDB> getAll();
 
-    @Query("SELECT * FROM NutritionData WHERE barcode LIKE :barcode LIMIT 1")
+    @Query("SELECT * FROM NutritionData WHERE barcode = :barcode LIMIT 1")
     NutritionDataDB findByBarcode(int barcode);
 
     @Query("UPDATE NutritionData SET nutritionTable = :nt WHERE barcode = :barcode")

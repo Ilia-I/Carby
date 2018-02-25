@@ -15,6 +15,9 @@
  */
 package com.grouph.ces.carby.ocr;
 
+import android.arch.persistence.room.Database;
+import android.arch.persistence.room.Room;
+import android.content.Context;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -22,6 +25,9 @@ import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.text.Element;
 import com.google.android.gms.vision.text.Line;
 import com.google.android.gms.vision.text.TextBlock;
+import com.grouph.ces.carby.database.AppDatabase;
+import com.grouph.ces.carby.database.AppDatabase_Impl;
+import com.grouph.ces.carby.database.NutritionDataDB;
 import com.grouph.ces.carby.nutrition_data.INutritionTable;
 import com.grouph.ces.carby.nutrition_data.NutritionTable;
 import com.grouph.ces.carby.ui.camera.GraphicOverlay;
@@ -38,11 +44,13 @@ import java.util.Map;
  */
 public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
+    private Context context;
     private GraphicOverlay<OcrGraphic> mGraphicOverlay;
     private boolean scan = false;
 
-    public OcrDetectorProcessor(GraphicOverlay<OcrGraphic> ocrGraphicOverlay) {
-        mGraphicOverlay = ocrGraphicOverlay;
+    public OcrDetectorProcessor(Context applicationContext, GraphicOverlay<OcrGraphic> ocrGraphicOverlay) {
+        this.context = applicationContext;
+        this.mGraphicOverlay = ocrGraphicOverlay;
     }
 
     // Once this implements Detector.Processor<TextBlock>, implement the abstract methods.
@@ -60,11 +68,25 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                 OcrGraphic graphic = new OcrGraphic(mGraphicOverlay, item);
                 mGraphicOverlay.add(graphic);
             }
-            //TODO table object not stored anywhere
+            //TODO provide a correct barcode
             INutritionTable nt = tableMatcher(items);
             Log.v("OcrDetectorProcessor","NutritionTable:\n"+nt);
+            record(100,nt);
             scan = false;
         }
+    }
+
+    private void record(int barcode, INutritionTable nt) {
+        AppDatabase db = Room.databaseBuilder(context ,AppDatabase.class,"myDB").allowMainThreadQueries().build();
+
+        //TODO remove the auto delete for loop
+        // for test reasons delete all previous content
+        for(NutritionDataDB nd: db.nutritionDataDao().getAll()){
+            db.nutritionDataDao().delete(nd);
+        }
+
+        db.nutritionDataDao().insertAll(new NutritionDataDB(barcode,nt));
+        Log.d("OcrDetectorProcessor","loaded table:\n"+db.nutritionDataDao().findByBarcode(barcode).getNt());
     }
 
     @Override
@@ -114,6 +136,8 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
         //compile lines
         List<String> dataLines = orderElements(scannedData);
+
+        //TODO error correction
 
         //split in columns
         return toTable(dataLines);
