@@ -109,7 +109,7 @@ public class ImageProcessor {
         dst=featureDetect(dst);
 
         //convert back to bitmap
-        Utils.matToBitmap(refObjMat, scaledPicture);
+        Utils.matToBitmap(dst, scaledPicture);
         return scaledPicture;
     }
 
@@ -154,43 +154,30 @@ public class ImageProcessor {
             int ch[] = { c, 0 };
             Core.mixChannels(blurredChannel, gray0Channel, new MatOfInt(ch));
 
-            int thresholdLevel = 1;
-            for (int t = 0; t < thresholdLevel; t++) {
-                if (t == 0) {
-                    Imgproc.Canny(gray0, gray, 100, 300, 3, true);
-                    Imgproc.dilate(gray, gray, new Mat(), new Point(-1, -1), 1);
-                } else {
-                    Imgproc.adaptiveThreshold(gray0, gray, thresholdLevel,
-                            Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
-                            Imgproc.THRESH_BINARY,
-                            (src.width() + src.height()) / 200, t);
-                }
+            Imgproc.Canny(gray0, gray, 50, 150, 3, true);
+            Imgproc.findContours(gray, contours, new Mat(),
+                    Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
-                Imgproc.findContours(gray, contours, new Mat(),
-                        Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+            for (MatOfPoint contour : contours) {
+                MatOfPoint2f temp = new MatOfPoint2f(contour.toArray());
 
-                for (MatOfPoint contour : contours) {
-                    MatOfPoint2f temp = new MatOfPoint2f(contour.toArray());
-
-                    double area = Imgproc.contourArea(contour);
-                    approxCurve = new MatOfPoint2f();
-                    Imgproc.approxPolyDP(temp, approxCurve,
+                double area = Imgproc.contourArea(contour);
+                approxCurve = new MatOfPoint2f();
+                Imgproc.approxPolyDP(temp, approxCurve,
                             Imgproc.arcLength(temp, true) * 0.02, true);
 
-                    if (approxCurve.total() == 4 && area >= maxArea) {
-                        maxArea = area;
-                        maxId = contours.indexOf(contour);
-                    }
+                if (approxCurve.total() == 4 && area >= maxArea) {
+                    maxArea = area;
+                    maxId = contours.indexOf(contour);
                 }
             }
+
         }
         Mat mask = new Mat(src.size(), CvType.CV_8UC3,
                 new Scalar(0, 0, 0));
         Mat crop=new Mat(src.size(), CvType.CV_8UC3, white);
         if (maxId >= 0) {
             Imgproc.drawContours(mask, contours, maxId, white, -1);
-
-
         }
         return mask;
     }
