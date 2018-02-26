@@ -109,7 +109,7 @@ public class ImageProcessor {
         dst=featureDetect(dst);
 
         //convert back to bitmap
-        Utils.matToBitmap(dst, scaledPicture);
+        Utils.matToBitmap(refObjMat, scaledPicture);
         return scaledPicture;
     }
 
@@ -147,7 +147,7 @@ public class ImageProcessor {
         gray0Channel.add(gray0);
 
         MatOfPoint2f approxCurve;
-        double maxArea = 0;
+        double maxArea = 2500;
         int maxId = -1;
 
         for (int c = 0; c < 3; c++) {
@@ -157,7 +157,7 @@ public class ImageProcessor {
             int thresholdLevel = 1;
             for (int t = 0; t < thresholdLevel; t++) {
                 if (t == 0) {
-                    Imgproc.Canny(gray0, gray, 10, 20, 3, true);
+                    Imgproc.Canny(gray0, gray, 100, 300, 3, true);
                     Imgproc.dilate(gray, gray, new Mat(), new Point(-1, -1), 1);
                 } else {
                     Imgproc.adaptiveThreshold(gray0, gray, thresholdLevel,
@@ -178,20 +178,8 @@ public class ImageProcessor {
                             Imgproc.arcLength(temp, true) * 0.02, true);
 
                     if (approxCurve.total() == 4 && area >= maxArea) {
-                        double maxCosine = 0;
-
-                        List<Point> curves = approxCurve.toList();
-                        for (int j = 2; j < 5; j++) {
-
-                            double cosine = Math.abs(angle(curves.get(j % 4),
-                                    curves.get(j - 2), curves.get(j - 1)));
-                            maxCosine = Math.max(maxCosine, cosine);
-                        }
-
-                        if (maxCosine < 0.3) {
-                            maxArea = area;
-                            maxId = contours.indexOf(contour);
-                        }
+                        maxArea = area;
+                        maxId = contours.indexOf(contour);
                     }
                 }
             }
