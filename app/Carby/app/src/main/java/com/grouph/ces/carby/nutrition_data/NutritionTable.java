@@ -2,8 +2,12 @@ package com.grouph.ces.carby.nutrition_data;
 
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -211,5 +215,30 @@ public class NutritionTable extends ANutritionTable{
             output += key+" "+nutritionalInformation.get(key).toString();
         }
         return output;
+    }
+
+    @Override
+    public boolean setAll(JSONObject jo) throws JSONException{
+        Iterator<String> keys = jo.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            nutritionalInformation.put(key, new Composite(jo.getJSONObject(key)));
+        }
+        return true;
+    }
+
+    @Override
+    public JSONObject toJasonObject(){
+        Map<String,JSONObject> temp = new HashMap<>();
+        for(String key: nutritionalInformation.keySet()) {
+            temp.put(key,nutritionalInformation.get(key).toJasonObject());
+        }
+        JSONObject jo = new JSONObject(temp);
+        try {
+            Log.d(this.getClass().getName(), "toJSONObject():" + jo.toString(4));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return new JSONObject(temp);
     }
 }

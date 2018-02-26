@@ -2,6 +2,9 @@ package com.grouph.ces.carby.nutrition_data;
 
 import android.support.annotation.StringDef;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
@@ -49,4 +52,7 @@ public interface INutritionTable {
     public double getProtein();
     public @MeasurementUnit String getSaltUnit();
     public double getSalt();
+
+    public boolean setAll(JSONObject jo) throws JSONException;
+    public JSONObject toJasonObject();
 }

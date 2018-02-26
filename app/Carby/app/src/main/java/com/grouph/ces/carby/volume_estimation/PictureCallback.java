@@ -1,34 +1,9 @@
 package com.grouph.ces.carby.volume_estimation;
 
-import android.Manifest;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
-import android.media.Image;
-import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
-import android.util.Log;
 import android.widget.ImageView;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
-import org.opencv.core.Algorithm;
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
-
-import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
 /**
  * Created by matthewball on 14/02/2018.

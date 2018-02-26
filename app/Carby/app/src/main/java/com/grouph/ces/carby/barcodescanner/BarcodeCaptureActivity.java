@@ -32,26 +32,24 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.Toast;
-import android.util.DisplayMetrics;
-import android.widget.Toolbar;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.CommonStatusCodes;
-import com.grouph.ces.carby.R;
-import com.grouph.ces.carby.ui.camera.CameraSource;
-import com.grouph.ces.carby.ui.camera.CameraSourcePreview;
-
-import com.grouph.ces.carby.ui.camera.GraphicOverlay;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
+import com.grouph.ces.carby.R;
+import com.grouph.ces.carby.ui.camera.CameraSource;
+import com.grouph.ces.carby.ui.camera.CameraSourcePreview;
+import com.grouph.ces.carby.ui.camera.GraphicOverlay;
 
 import java.io.IOException;
 
