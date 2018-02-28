@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 /**
@@ -137,10 +138,110 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         //compile lines
         List<String> dataLines = orderElements(scannedData);
 
-        //TODO error correction
+        //error correction
+        dataLines = errorCorrection(dataLines);
 
         //split in columns
         return toTable(dataLines);
+    }
+
+    /**
+     * Perform error correction on provided collection
+     * @param dataLines - Note, this will be changed using the algorithm
+     * @return corrected lines
+     */
+    private List<String> errorCorrection(List<String> dataLines) {
+        //TODO test algoirthm
+        List<String> result = new ArrayList<>();
+        List<String> contents = errCorrectionContents();
+
+        //find all correct lines and move them to the result list
+        for(String str: dataLines){
+            if(str.contains("per")){
+                Log.d(this.getClass().getName(),"errorCorrection() -> per line:"+str);
+                result.add(str);
+            } else {
+                for (int i = 0; i < contents.size(); i++) {
+                    if (str.contains(contents.get(i))) {
+                        Log.d(this.getClass().getName(),"errorCorrection() -> correct:"+contents.get(i)+" in "+str);
+                        result.add(str);
+                        contents.remove(i);
+                        break;
+                    }
+                }
+            }
+        }
+        dataLines.removeAll(result);
+
+        //process the rest
+        for(String in:dataLines){
+            String[] tokens = in.split(" ");
+            String comp = "";
+            for (String token : tokens) {
+                if(!isVal(token)) {
+                    comp+=token+" ";
+                } else break;
+            }
+            comp = comp.trim();
+
+            List<Double> dist = new ArrayList<>();
+            for(String s: contents) {
+                dist.add(similarity(s,comp));
+            }
+            Log.d(this.getClass().getName(),comp+" closest:"+contents.get(dist.indexOf(Collections.max(dist)))+" s:"+Collections.max(dist));
+            if(Collections.max(dist)>=0.5) {
+                in = contents.get(dist.indexOf(Collections.max(dist))) +" "+ in;
+            }
+            result.add(in);
+            Log.d(this.getClass().getName(),in);
+        }
+
+        return result;
+    }
+
+    /**
+     * utility method for getting list of strings for error correction
+     * @return
+     */
+    private List<String> errCorrectionContents(){
+        List<String> listOfContents = new NutritionTable().listOfContents();
+        listOfContents.add("of which mono-unsaturates");
+        listOfContents.add("of which polyunsaturates");
+        listOfContents.add("of which saturates");
+        listOfContents.add("of which sugars");
+        listOfContents.add("of which polyols");
+        listOfContents.add("of which starch");
+        return listOfContents;
+    }
+
+    /**
+     * Utility method for calculating distance between two object using Levenshtein Distance metric
+     * @param expected
+     * @param compared
+     * @return 0-1 where 1 is identical
+     */
+    private double similarity(String expected, String compared) {
+        String longer = expected, shorter = compared;
+        if (expected.length() < compared.length()) { // longer should always have greater length
+            longer = compared; shorter = expected;
+        }
+        int longerLength = longer.length();
+        if (longerLength == 0) { return 1.0; /* both strings are zero length */ }
+        LevenshteinDistance ld = new LevenshteinDistance(expected.length());//(int)(expected.length()/2)+1);
+        System.out.println("lev:"+ld.apply(longer, shorter)+" "+ld.apply(shorter,longer));
+        int distance = ld.apply(longer, shorter);
+        if(distance<0) return 0;
+        return (longerLength - distance) / (double) longerLength;
+    }
+
+    /**
+     * utility method for checking if the provided string is a number with possible unit appended
+     * @param s - string to be processed
+     * @return boolean result
+     */
+    private boolean isVal(String s) {
+        String pattern= "\\d+(\\.\\d)?(\\p{ASCII})*";
+        return s.matches(pattern);
     }
 
     private INutritionTable toTable(List<String> dataLines) {
