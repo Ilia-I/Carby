@@ -15,7 +15,6 @@
  */
 package com.grouph.ces.carby.ocr;
 
-import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.util.Log;
@@ -26,7 +25,6 @@ import com.google.android.gms.vision.text.Element;
 import com.google.android.gms.vision.text.Line;
 import com.google.android.gms.vision.text.TextBlock;
 import com.grouph.ces.carby.database.AppDatabase;
-import com.grouph.ces.carby.database.AppDatabase_Impl;
 import com.grouph.ces.carby.database.NutritionDataDB;
 import com.grouph.ces.carby.nutrition_data.INutritionTable;
 import com.grouph.ces.carby.nutrition_data.NutritionTable;
@@ -37,7 +35,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 
 /**
@@ -177,12 +174,18 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         for(String in:dataLines){
             String[] tokens = in.split(" ");
             String comp = "";
+            String rest = "";
+            boolean col1 = true;
             for (String token : tokens) {
-                if(!isVal(token)) {
+                if(col1&&!isVal(token)) {
                     comp+=token+" ";
-                } else break;
+                } else {
+                    rest+=token+" ";
+                    col1=false;
+                }
             }
             comp = comp.trim();
+            rest = rest.trim();
 
             List<Double> dist = new ArrayList<>();
             for(String s: contents) {
@@ -190,10 +193,11 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
             }
             Log.d(this.getClass().getName(),comp+" closest:"+contents.get(dist.indexOf(Collections.max(dist)))+" s:"+Collections.max(dist));
             if(Collections.max(dist)>=0.5) {
-                in = contents.get(dist.indexOf(Collections.max(dist))) +" "+ in;
+                Log.d(this.getClass().getName(),"errorCorrection("+in+")");
+                in = contents.get(dist.indexOf(Collections.max(dist))) +" "+ rest;
+                Log.d(this.getClass().getName(),"to:"+in);
             }
             result.add(in);
-            Log.d(this.getClass().getName(),in);
         }
 
         return result;
@@ -289,7 +293,6 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                         row = row.substring(0,idx);
                     }
                     int tempIdx = row.lastIndexOf(" ");
-//                    Log.d("OcrDetectorProcessor","idx:"+tempIdx);
                     setComponent(contents.get(i),row.substring(tempIdx),nt);
                     Log.d("OcrDetectorProcessor","Map<"+contents.get(i)+","+row.substring(tempIdx)+">");
                     contents.remove(i);
