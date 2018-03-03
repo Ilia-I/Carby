@@ -154,7 +154,7 @@ public class ImageProcessor {
             int ch[] = { c, 0 };
             Core.mixChannels(blurredChannel, gray0Channel, new MatOfInt(ch));
 
-            Imgproc.Canny(gray0, gray, 50, 150, 3, true);
+            Imgproc.Canny(gray0, gray, 10, 30, 3, true);
             Imgproc.findContours(gray, contours, new Mat(),
                     Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
