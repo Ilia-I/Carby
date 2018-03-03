@@ -23,9 +23,12 @@ import org.opencv.core.Mat;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,7 +41,7 @@ import android.widget.Toast;
 
 import com.grouph.ces.carby.R;
 
-public class CameraCalibrationActivity extends Activity implements CvCameraViewListener2, OnTouchListener {
+public class CameraCalibrationActivity extends AppCompatActivity implements CvCameraViewListener2, OnTouchListener {
     private static final String TAG = "OCVSample::Activity";
 
     private CameraBridgeViewBase mOpenCvCameraView;
@@ -73,11 +76,14 @@ public class CameraCalibrationActivity extends Activity implements CvCameraViewL
     public void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "called onCreate");
         super.onCreate(savedInstanceState);
+        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setContentView(R.layout.camera_calibration_surface_view);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.camera_calibration_java_surface_view);
+        mOpenCvCameraView = findViewById(R.id.camera_calibration_java_surface_view);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
     }

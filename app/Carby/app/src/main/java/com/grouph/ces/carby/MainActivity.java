@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 
 import com.grouph.ces.carby.barcodescanner.MainBarcodeActivity;
+import com.grouph.ces.carby.camera_calibration.CameraCalibrationActivity;
 import com.grouph.ces.carby.ocr.OcrCaptureActivity;
 import com.grouph.ces.carby.volume_estimation.VolumeCaptureActivity;
 
@@ -42,10 +43,12 @@ public class MainActivity extends AppCompatActivity
         CardView barcodeCard = findViewById(R.id.barcode_card);
         CardView ocrCard = findViewById(R.id.ocr_card);
         CardView volumeCard = findViewById(R.id.volume_card);
+        CardView calibrationCard = findViewById(R.id.calibration_card);
 
         barcodeCard.setOnClickListener(this);
         ocrCard.setOnClickListener(this);
         volumeCard.setOnClickListener(this);
+        calibrationCard.setOnClickListener(this);
     }
 
     @Override
@@ -74,7 +77,6 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-
             Snackbar snackbar = Snackbar
                     .make(findViewById(android.R.id.content), "Settings not implemented", Snackbar.LENGTH_LONG);
             snackbar.show();
@@ -101,6 +103,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_volume) {
             Intent volume = new Intent(this, VolumeCaptureActivity.class);
             startActivity(volume);
+        } else if (id == R.id.nav_calibration) {
+            Intent camCal = new Intent(this, CameraCalibrationActivity.class);
+            startActivity(camCal);
         } /*else if (id == R.id.nav_feature) {
 
         }*/
@@ -124,6 +129,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.volume_card) {
             Intent volume = new Intent(this, VolumeCaptureActivity.class);
             startActivity(volume);
+        } else if (id == R.id.calibration_card) {
+            Intent camCal = new Intent(this, CameraCalibrationActivity.class);
+            startActivity(camCal);
         }
     }
 }

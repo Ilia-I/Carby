@@ -8,7 +8,7 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 public abstract class CalibrationResult {
-    private static final String TAG = "OCVSample::CalibrationResult";
+    private static final String TAG = "OCVSample::CalibResult";
 
     private static final int CAMERA_MATRIX_ROWS = 3;
     private static final int CAMERA_MATRIX_COLS = 3;

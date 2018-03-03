@@ -20,6 +20,11 @@
                 android:id="@+id/nav_volume"
                 android:icon="@drawable/ic_menu_camera"
                 android:title="3. Volume Estimation" />
+
+            <item
+                android:id="@+id/nav_calibration"
+                android:icon="@drawable/ic_menu_camera"
+                android:title="4. Camera Calibration" />
         </menu>
     </item>
 
