@@ -15,7 +15,6 @@
  */
 package com.grouph.ces.carby.ocr;
 
-import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.util.Log;
@@ -26,7 +25,6 @@ import com.google.android.gms.vision.text.Element;
 import com.google.android.gms.vision.text.Line;
 import com.google.android.gms.vision.text.TextBlock;
 import com.grouph.ces.carby.database.AppDatabase;
-import com.grouph.ces.carby.database.AppDatabase_Impl;
 import com.grouph.ces.carby.database.NutritionDataDB;
 import com.grouph.ces.carby.nutrition_data.INutritionTable;
 import com.grouph.ces.carby.nutrition_data.NutritionTable;
@@ -137,10 +135,115 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         //compile lines
         List<String> dataLines = orderElements(scannedData);
 
-        //TODO error correction
+        //error correction
+        dataLines = errorCorrection(dataLines);
 
         //split in columns
         return toTable(dataLines);
+    }
+
+    /**
+     * Perform error correction on provided collection
+     * @param dataLines - Note, this will be changed using the algorithm
+     * @return corrected lines
+     */
+    private List<String> errorCorrection(List<String> dataLines) {
+        List<String> result = new ArrayList<>();
+        List<String> contents = errCorrectionContents();
+
+        //find all correct lines and move them to the result list
+        for(String str: dataLines){
+            if(str.contains("per")){
+                Log.d(this.getClass().getName(),"errorCorrection() -> per line:"+str);
+                result.add(str);
+            } else {
+                for (int i = 0; i < contents.size(); i++) {
+                    if (str.contains(contents.get(i))) {
+                        Log.d(this.getClass().getName(),"errorCorrection() -> correct:"+contents.get(i)+" in "+str);
+                        result.add(str);
+                        contents.remove(i);
+                        break;
+                    }
+                }
+            }
+        }
+        dataLines.removeAll(result);
+
+        //process the rest
+        for(String in:dataLines){
+            String[] tokens = in.split(" ");
+            String comp = "";
+            String rest = "";
+            boolean col1 = true;
+            for (String token : tokens) {
+                if(col1&&!isVal(token)) {
+                    comp+=token+" ";
+                } else {
+                    rest+=token+" ";
+                    col1=false;
+                }
+            }
+            comp = comp.trim();
+            rest = rest.trim();
+
+            List<Double> dist = new ArrayList<>();
+            for(String s: contents) {
+                dist.add(similarity(s,comp));
+            }
+            Log.d(this.getClass().getName(),comp+" closest:"+contents.get(dist.indexOf(Collections.max(dist)))+" s:"+Collections.max(dist));
+            if(Collections.max(dist)>=0.5) {
+                Log.d(this.getClass().getName(),"errorCorrection("+in+")");
+                in = contents.get(dist.indexOf(Collections.max(dist))) +" "+ rest;
+                Log.d(this.getClass().getName(),"to:"+in);
+            }
+            result.add(in);
+        }
+
+        return result;
+    }
+
+    /**
+     * utility method for getting list of strings for error correction
+     * @return
+     */
+    private List<String> errCorrectionContents(){
+        List<String> listOfContents = new NutritionTable().listOfContents();
+        listOfContents.add("of which mono-unsaturates");
+        listOfContents.add("of which polyunsaturates");
+        listOfContents.add("of which saturates");
+        listOfContents.add("of which sugars");
+        listOfContents.add("of which polyols");
+        listOfContents.add("of which starch");
+        return listOfContents;
+    }
+
+    /**
+     * Utility method for calculating distance between two object using Levenshtein Distance metric
+     * @param expected
+     * @param compared
+     * @return 0-1 where 1 is identical
+     */
+    private double similarity(String expected, String compared) {
+        String longer = expected, shorter = compared;
+        if (expected.length() < compared.length()) { // longer should always have greater length
+            longer = compared; shorter = expected;
+        }
+        int longerLength = longer.length();
+        if (longerLength == 0) { return 1.0; /* both strings are zero length */ }
+        LevenshteinDistance ld = new LevenshteinDistance(expected.length());
+        int distance = ld.apply(longer, shorter);
+        if(distance<0) return 0;
+        return (longerLength - distance) / (double) longerLength;
+    }
+
+    /**
+     * utility method for checking if the provided string is a number with possible unit appended
+     * @param s - string to be processed
+     * @return boolean result
+     */
+    private boolean isVal(String s) {
+        String pattern= "\\d+(\\.\\d)?(\\p{ASCII})*";
+        return s.matches(pattern);
     }
 
     private INutritionTable toTable(List<String> dataLines) {
@@ -188,7 +291,6 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                         row = row.substring(0,idx);
                     }
                     int tempIdx = row.lastIndexOf(" ");
-//                    Log.d("OcrDetectorProcessor","idx:"+tempIdx);
                     setComponent(contents.get(i),row.substring(tempIdx),nt);
                     Log.d("OcrDetectorProcessor","Map<"+contents.get(i)+","+row.substring(tempIdx)+">");
                     contents.remove(i);

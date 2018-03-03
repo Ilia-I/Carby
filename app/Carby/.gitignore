@@ -35,6 +35,7 @@ proguard/
 
 # Android Studio
 /*/build/
+/*/schemas/
 /*/local.properties
 /*/out
 /*/*/build
