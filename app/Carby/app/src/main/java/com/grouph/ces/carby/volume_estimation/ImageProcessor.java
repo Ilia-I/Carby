@@ -152,9 +152,10 @@ public class ImageProcessor {
 
         for (int c = 0; c < 3; c++) {
             int ch[] = { c, 0 };
-            Core.mixChannels(blurredChannel, gray0Channel, new MatOfInt(ch));
 
+            Core.mixChannels(blurredChannel, gray0Channel, new MatOfInt(ch));
             Imgproc.Canny(gray0, gray, 10, 30, 3, true);
+
             Imgproc.findContours(gray, contours, new Mat(),
                     Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
@@ -164,20 +165,19 @@ public class ImageProcessor {
                 double area = Imgproc.contourArea(contour);
                 approxCurve = new MatOfPoint2f();
                 Imgproc.approxPolyDP(temp, approxCurve,
-                            Imgproc.arcLength(temp, true) * 0.02, true);
-
-                if (approxCurve.total() == 4 && area >= maxArea) {
-                    maxArea = area;
-                    maxId = contours.indexOf(contour);
-                }
+                        Imgproc.arcLength(temp, true) * 0.02, true);
+                 if (approxCurve.total() == 4 && area >= maxArea) {
+                     maxArea = area;
+                     maxId = contours.indexOf(contour);
+                 }
             }
-
         }
+
         Mat mask = new Mat(src.size(), CvType.CV_8UC3,
                 new Scalar(0, 0, 0));
-        Mat crop=new Mat(src.size(), CvType.CV_8UC3, white);
         if (maxId >= 0) {
             Imgproc.drawContours(mask, contours, maxId, white, -1);
+            //Imgproc.drawContours(mask, contours, -1, white, 1);
         }
         return mask;
     }
