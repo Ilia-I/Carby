@@ -231,8 +231,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         }
         int longerLength = longer.length();
         if (longerLength == 0) { return 1.0; /* both strings are zero length */ }
-        LevenshteinDistance ld = new LevenshteinDistance(expected.length());//(int)(expected.length()/2)+1);
-        System.out.println("lev:"+ld.apply(longer, shorter)+" "+ld.apply(shorter,longer));
+        LevenshteinDistance ld = new LevenshteinDistance(expected.length());
         int distance = ld.apply(longer, shorter);
         if(distance<0) return 0;
         return (longerLength - distance) / (double) longerLength;
