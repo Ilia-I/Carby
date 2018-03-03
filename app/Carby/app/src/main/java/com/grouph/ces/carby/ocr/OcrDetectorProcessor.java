@@ -148,7 +148,6 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
      * @return corrected lines
      */
     private List<String> errorCorrection(List<String> dataLines) {
-        //TODO test algoirthm
         List<String> result = new ArrayList<>();
         List<String> contents = errCorrectionContents();
 
