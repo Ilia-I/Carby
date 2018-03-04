@@ -19,16 +19,17 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".barcodescanner.MainBarcodeActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name=".MainBarcodeActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -36,11 +37,15 @@
         </activity>
         <activity android:name=".barcodescanner.BarcodeCaptureActivity"
             android:parentActivityName=".barcodescanner.BarcodeCaptureActivity"
-            android:label="Read Barcode"/>
-        <activity android:name=".ocr.OcrCaptureActivity"/>
+            android:label="Read Barcode"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ocr.OcrCaptureActivity"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".volume_estimation.VolumeCaptureActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name=".VolumeCaptureActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -49,7 +54,8 @@
         <activity
             android:name=".camera_calibration.CameraCalibrationActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name=".CameraCalibrationActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
