@@ -29,6 +29,8 @@ public class PictureCallback implements Camera.PictureCallback {
         Bitmap pictureTaken = BitmapFactory.decodeByteArray(data, 0, data.length);
         Bitmap grabCutPicture = processor.performGrabCut(pictureTaken);
 
+        processor.saveGrabCutPicture(grabCutPicture);
+
         this.mImageView.setImageBitmap(grabCutPicture);
         this.mImageView.setRotation(90);
     }

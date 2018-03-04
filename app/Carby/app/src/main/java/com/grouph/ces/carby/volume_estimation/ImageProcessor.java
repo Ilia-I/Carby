@@ -35,6 +35,7 @@ public class ImageProcessor {
 
     private static String TAG = "ImageProcessor";
     private Scalar white = new Scalar(255,255,255);
+    private ArrayList<Bitmap> grabCutPictures = new ArrayList<>();
 
     public Bitmap performGrabCut(Bitmap input) {
         File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
@@ -193,6 +194,10 @@ public class ImageProcessor {
                 + 1e-10);
     }
 
+    // Used to save the image during PictureCallback
+    public void saveGrabCutPicture(Bitmap image) {
+        grabCutPictures.add(image);
+    }
 
     /** Create a File for saving an image or video */
     private static File getOutputMediaFile(int type){
