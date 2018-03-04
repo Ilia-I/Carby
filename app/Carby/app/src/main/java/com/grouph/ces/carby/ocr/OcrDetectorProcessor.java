@@ -36,6 +36,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Processor which gets detects and processes the nutrition table
@@ -327,7 +328,16 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
     private List<String> orderElements(Map<Integer, List<Element>> scannedData) {
         List<String> result = new ArrayList<>();
 
-        for(Integer i: scannedData.keySet()){
+        //sort rows form top to bottom (needed for multi frame work)
+        List<Integer> keys = new ArrayList<>(scannedData.keySet());
+        Collections.sort(keys, new Comparator<Integer>() {
+            @Override
+            public int compare(Integer x1, Integer x2) {
+                return x1 < x2 ? -1 : (x2 < x1) ? 1 : 0;
+            }
+        });
+
+        for(Integer i: keys){
             String line = "";
             List<Element> list = scannedData.get(i);
             Collections.sort(list, new Comparator<Element>() { //sort by place in line (x coordinate)
