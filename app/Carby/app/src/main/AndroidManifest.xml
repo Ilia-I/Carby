@@ -55,7 +55,7 @@
             android:name=".camera_calibration.CameraCalibrationActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait">
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name=".CameraCalibrationActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
