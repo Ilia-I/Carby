@@ -4,9 +4,12 @@ package com.grouph.ces.carby.volume_estimation;
  * Created by matthewball on 18/02/2018.
  */
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Environment;
 import android.util.Log;
+
+import com.grouph.ces.carby.camera_calibration.CalibrationResult;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
@@ -35,6 +38,15 @@ public class ImageProcessor {
 
     private static String TAG = "ImageProcessor";
     private Scalar white = new Scalar(255,255,255);
+    private Mat mCameraMatrix = new Mat();
+    private Mat mDistortionCoefficients = new Mat();
+
+    public ImageProcessor(Activity activity) {
+        if (CalibrationResult.tryLoad(activity, mCameraMatrix, mDistortionCoefficients)) {
+            Log.e(TAG, "Camera calibrated: " + mCameraMatrix.toString());
+        } else
+            Log.e(TAG, "Camera not calibrated");
+    }
 
     public Bitmap performGrabCut(Bitmap input) {
         File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
