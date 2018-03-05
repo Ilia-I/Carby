@@ -50,7 +50,7 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
     private ImageView mImageView;
     private ImageView squareOverlay;
 
-    private ImageProcessor imageProcessor = new ImageProcessor();
+    private ImageProcessor imageProcessor;
 
     private boolean imageTaken = false;
 
@@ -78,6 +78,7 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
         }
 
         mPreview = new CameraPreview(this, mCamera);
+        imageProcessor = new ImageProcessor(this);
 
         mImageView = findViewById(R.id.vol_capture_image);
         mImageView.setVisibility(View.GONE);
