@@ -18,7 +18,7 @@ import android.view.View.OnClickListener;
 import com.grouph.ces.carby.barcodescanner.MainBarcodeActivity;
 import com.grouph.ces.carby.camera_calibration.CameraCalibrationActivity;
 import com.grouph.ces.carby.ocr.OcrCaptureActivity;
-import com.grouph.ces.carby.volume_estimation.VolumeCaptureActivity;
+import com.grouph.ces.carby.volume_estimation.CaptureActivity;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnClickListener {
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity
             Intent ocr = new Intent(this, OcrCaptureActivity.class);
             startActivity(ocr);
         } else if (id == R.id.nav_volume) {
-            Intent volume = new Intent(this, VolumeCaptureActivity.class);
+            Intent volume = new Intent(this, CaptureActivity.class);
             startActivity(volume);
         } else if (id == R.id.nav_calibration) {
             Intent camCal = new Intent(this, CameraCalibrationActivity.class);
@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity
             Intent ocr = new Intent(this, OcrCaptureActivity.class);
             startActivity(ocr);
         } else if (id == R.id.volume_card) {
-            Intent volume = new Intent(this, VolumeCaptureActivity.class);
+            Intent volume = new Intent(this, CaptureActivity.class);
             startActivity(volume);
         } else if (id == R.id.calibration_card) {
             Intent camCal = new Intent(this, CameraCalibrationActivity.class);

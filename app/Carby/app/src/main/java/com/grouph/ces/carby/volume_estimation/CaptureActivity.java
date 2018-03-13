@@ -4,22 +4,19 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.grouph.ces.carby.R;
@@ -31,14 +28,19 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
 
-public final class VolumeCaptureActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
+public final class CaptureActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, Camera.PictureCallback{
 
     private static String TAG = "VolumeCpature";
 
@@ -47,29 +49,18 @@ public final class VolumeCaptureActivity extends AppCompatActivity implements Ca
     private static final int RC_HANDLE_WRITE_PERM = 3;
     private static final int RC_HANDLE_READ_PERM = 4;
 
-    // Intent to capture image
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int PICK_IMAGE = 100;
 
-    private CameraBridgeViewBase mOpenCvCameraView;
-    private ImageView mImageView;
-    private ImageView squareOverlay;
-
+    private CameraView mOpenCvCameraView;
     private ImageProcessor imageProcessor;
 
     private Mat mRgba;
     private Mat mRgbaF;
     private Mat mRgbaT;
 
-    private boolean imageTaken = false;
-
-    public static int pxToDp(int px) {
-        return (int) (px / Resources.getSystem().getDisplayMetrics().density);
-    }
-
-    public static int dpToPx(int dp) {
-        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
-    }
+    private int imagesTaken = 0;
+    private Bitmap b1;
+    private Bitmap b2;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -80,55 +71,28 @@ public final class VolumeCaptureActivity extends AppCompatActivity implements Ca
         // permission is not granted yet, request permission.
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
 
-        mOpenCvCameraView = findViewById(R.id.camera_calibration_java_surface_view);
+        mOpenCvCameraView = findViewById(R.id.camera_preview);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
 
-        if (rc == PackageManager.PERMISSION_GRANTED) {
+        if (rc == PackageManager.PERMISSION_GRANTED)
             mOpenCvCameraView.enableView();
-        } else {
+        else
             requestPermissions();
-        }
-
-        mImageView = findViewById(R.id.vol_capture_image);
-        mImageView.setVisibility(View.GONE);
-
-        FrameLayout previewFrame = findViewById(R.id.camera_preview);
-
-        squareOverlay = new ImageView(this.getApplicationContext());
-        squareOverlay.setImageResource(R.drawable.ic_square_overlay);
-
-        int sizeInPx = dpToPx(200);
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(sizeInPx,sizeInPx);
-        params.gravity = Gravity.CENTER;
-
-        squareOverlay.setLayoutParams(params);
-
-        previewFrame.addView(squareOverlay);
 
         FloatingActionButton captureButton = findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
-            if(!imageTaken) {
-                squareOverlay.setVisibility(View.INVISIBLE);
-//                mCamera.takePicture(null, null, new PictureCallback(mImageView, imageProcessor));
-                mImageView.setVisibility(View.VISIBLE);
-                mOpenCvCameraView.setVisibility(View.GONE);
-                imageTaken = !imageTaken;
-            }
+            mOpenCvCameraView.takePicture("Hello", this);
         });
 
         FloatingActionButton searchGallery = findViewById(R.id.search_gallery);
-        searchGallery.setOnClickListener((view)-> openGallery());
+        searchGallery.setOnClickListener((view)-> {
+            openGallery();
+        });
 
         FloatingActionButton resetButton = findViewById(R.id.btn_reset);
         resetButton.setOnClickListener((view) -> {
-            if(imageTaken) {
-                squareOverlay.setVisibility(View.VISIBLE);
-                mImageView.setVisibility(View.GONE);
-                mOpenCvCameraView.setVisibility(View.VISIBLE);
-                mImageView.setImageBitmap(null);
-                imageTaken = !imageTaken;
-            }
+            imagesTaken = 0;
         });
     }
 
@@ -173,8 +137,9 @@ public final class VolumeCaptureActivity extends AppCompatActivity implements Ca
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
-
         imageProcessor = new ImageProcessor(this);
+        mOpenCvCameraView.enableView();
+        imagesTaken = 0;
     }
 
     private void openGallery() {
@@ -194,11 +159,17 @@ public final class VolumeCaptureActivity extends AppCompatActivity implements Ca
                 final InputStream imageStream = getContentResolver().openInputStream(imageUri);
                 final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
 
-                squareOverlay.setVisibility(View.INVISIBLE);
-                mImageView.setImageBitmap(imageProcessor.performGrabCut(selectedImage));
-                mImageView.setRotation(90);
-                mImageView.setVisibility(View.VISIBLE);
-                mOpenCvCameraView.setVisibility(View.GONE);
+//                try {
+//                    File newFile = ProcessingAlgorithms.getOutputMediaFile(MEDIA_TYPE_IMAGE);
+//                    FileOutputStream fos = new FileOutputStream(newFile);
+//                    selectedImage.compress(Bitmap.CompressFormat.PNG, 90, fos);
+//                    fos.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+
+                imageProcessor.addImage(selectedImage);
+                imagesTaken++;
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
                 Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
@@ -207,24 +178,6 @@ public final class VolumeCaptureActivity extends AppCompatActivity implements Ca
             Toast.makeText(this, "You haven't picked Image",Toast.LENGTH_LONG).show();
     }
 
-    /** A safe way to get an instance of the Camera object. */
-
-    public static Camera getCameraInstance(){
-        Camera c = null;
-        try {
-            c = Camera.open(); // attempt to get a Camera instance
-        }
-        catch (Exception e){
-            // Camera is not available (in use or does not exist)
-        }
-        return c; // returns null if camera is unavailable
-    }
-
-    /**
-     * Handles the requesting of the camera permission.  This includes
-     * showing a "Snackbar" message of why the permission is needed then
-     * sending the request.
-     */
     private void requestPermissions() {
         Log.w(TAG, "Camera permission is not granted. Requesting permission");
 
@@ -274,12 +227,61 @@ public final class VolumeCaptureActivity extends AppCompatActivity implements Ca
         mRgba.release();
     }
 
+
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
         Core.transpose(mRgba, mRgbaT);
         Imgproc.resize(mRgbaT,mRgbaF,mRgbaF.size(),0,0,0);
         Core.flip(mRgbaF, mRgba,1);
+
+        org.opencv.core.Point p1 = new org.opencv.core.Point((mRgba.size().width-300)/2,(mRgba.size().height-300)/2);
+        org.opencv.core.Point p2 = new org.opencv.core.Point((mRgba.size().width+300)/2, (mRgba.size().height+300)/2);
+        Imgproc.rectangle(mRgba, p1, p2, new Scalar(255,255,0));
         return mRgba;
+    }
+
+    @Override
+    public void onPictureTaken(byte[] data, Camera camera) {
+        Bitmap pictureTaken = BitmapFactory.decodeByteArray(data, 0, data.length);
+
+        imageProcessor.addImage(pictureTaken);
+
+        if(++imagesTaken == 2) {
+            mOpenCvCameraView.disableView();
+            imageProcessor.processImages();
+        }
+
+        if(imagesTaken == 1)
+            Toast.makeText(this, "Captured 1st image", Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(this, "Captured 2nd image", Toast.LENGTH_SHORT).show();
+    }
+
+    /** Create a File for saving an image or video */
+    public static File getOutputMediaFile(int type){
+        // To be safe, you should check that the SDCard is mounted
+        // using Environment.getExternalStorageState() before doing this.
+
+        File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "Carby Images");
+
+        // Create the storage directory if it does not exist
+        if (! mediaStorageDir.exists()){
+            if (! mediaStorageDir.mkdirs()){
+                Log.d("Carby Images", "failed to create directory");
+                return null;
+            }
+        }
+
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File mediaFile;
+        if (type == MEDIA_TYPE_IMAGE) {
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                    "IMG_"+ timeStamp + ".jpg");
+        } else {
+            return null;
+        }
+        return mediaFile;
     }
 }

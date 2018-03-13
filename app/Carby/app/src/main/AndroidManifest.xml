@@ -43,7 +43,16 @@
             android:name=".ocr.OcrCaptureActivity"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".volume_estimation.VolumeCaptureActivity"
+            android:name=".volume_estimation.CaptureActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name=".VolumeCaptureActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".volume_estimation.ResultsActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait">
             <intent-filter>

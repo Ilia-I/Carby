@@ -39,8 +39,8 @@ public abstract class CalibrationResult {
         Log.i(TAG, "Saved distortion coefficients: " + distortionCoefficients.dump());
     }
 
-    public static boolean tryLoad(Activity activity, Mat cameraMatrix, Mat distortionCoefficients) {
-        SharedPreferences sharedPref = activity.getSharedPreferences("prefs", Context.MODE_PRIVATE);
+    public static boolean tryLoad(Context context, Mat cameraMatrix, Mat distortionCoefficients) {
+        SharedPreferences sharedPref = context.getSharedPreferences("prefs", Context.MODE_PRIVATE);
         if (sharedPref.getFloat("0", -1) == -1) {
             Log.i(TAG, "No previous calibration results found");
             return false;
