@@ -78,7 +78,6 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
         }
 
         mPreview = new CameraPreview(this, mCamera);
-        imageProcessor = new ImageProcessor(this);
 
         mImageView = findViewById(R.id.vol_capture_image);
         mImageView.setVisibility(View.GONE);
@@ -150,6 +149,8 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, mLoaderCallback);
+
+            imageProcessor = new ImageProcessor(this);
         } else {
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
