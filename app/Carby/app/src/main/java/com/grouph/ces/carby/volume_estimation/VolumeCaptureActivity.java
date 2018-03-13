@@ -16,6 +16,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.SurfaceView;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -24,15 +25,20 @@ import android.widget.Toast;
 import com.grouph.ces.carby.R;
 
 import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
 
-public final class VolumeCaptureActivity extends AppCompatActivity {
+public final class VolumeCaptureActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     private static String TAG = "VolumeCpature";
 
@@ -45,12 +51,15 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int PICK_IMAGE = 100;
 
-    private Camera mCamera;
-    private CameraPreview mPreview;
+    private CameraBridgeViewBase mOpenCvCameraView;
     private ImageView mImageView;
     private ImageView squareOverlay;
 
     private ImageProcessor imageProcessor;
+
+    private Mat mRgba;
+    private Mat mRgbaF;
+    private Mat mRgbaT;
 
     private boolean imageTaken = false;
 
@@ -71,20 +80,20 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
         // permission is not granted yet, request permission.
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
 
+        mOpenCvCameraView = findViewById(R.id.camera_calibration_java_surface_view);
+        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
+        mOpenCvCameraView.setCvCameraViewListener(this);
+
         if (rc == PackageManager.PERMISSION_GRANTED) {
-            mCamera = getCameraInstance();
+            mOpenCvCameraView.enableView();
         } else {
             requestPermissions();
         }
-
-        mPreview = new CameraPreview(this, mCamera);
-        imageProcessor = new ImageProcessor(this);
 
         mImageView = findViewById(R.id.vol_capture_image);
         mImageView.setVisibility(View.GONE);
 
         FrameLayout previewFrame = findViewById(R.id.camera_preview);
-        previewFrame.addView(mPreview);
 
         squareOverlay = new ImageView(this.getApplicationContext());
         squareOverlay.setImageResource(R.drawable.ic_square_overlay);
@@ -101,27 +110,22 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
         captureButton.setOnClickListener((view) -> {
             if(!imageTaken) {
                 squareOverlay.setVisibility(View.INVISIBLE);
-                mCamera.takePicture(null, null, new PictureCallback(mImageView, imageProcessor));
+//                mCamera.takePicture(null, null, new PictureCallback(mImageView, imageProcessor));
                 mImageView.setVisibility(View.VISIBLE);
-                mPreview.setVisibility(View.GONE);
+                mOpenCvCameraView.setVisibility(View.GONE);
                 imageTaken = !imageTaken;
             }
         });
 
         FloatingActionButton searchGallery = findViewById(R.id.search_gallery);
-        searchGallery.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openGallery();
-            }
-        });
+        searchGallery.setOnClickListener((view)-> openGallery());
 
         FloatingActionButton resetButton = findViewById(R.id.btn_reset);
         resetButton.setOnClickListener((view) -> {
             if(imageTaken) {
                 squareOverlay.setVisibility(View.VISIBLE);
                 mImageView.setVisibility(View.GONE);
-                mPreview.setVisibility(View.VISIBLE);
+                mOpenCvCameraView.setVisibility(View.VISIBLE);
                 mImageView.setImageBitmap(null);
                 imageTaken = !imageTaken;
             }
@@ -145,6 +149,21 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
     };
 
     @Override
+    public void onPause()
+    {
+        super.onPause();
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
+    }
+
+
+    public void onDestroy() {
+        super.onDestroy();
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         if (!OpenCVLoader.initDebug()) {
@@ -154,6 +173,8 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
+
+        imageProcessor = new ImageProcessor(this);
     }
 
     private void openGallery() {
@@ -177,7 +198,7 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
                 mImageView.setImageBitmap(imageProcessor.performGrabCut(selectedImage));
                 mImageView.setRotation(90);
                 mImageView.setVisibility(View.VISIBLE);
-                mPreview.setVisibility(View.GONE);
+                mOpenCvCameraView.setVisibility(View.GONE);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
                 Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
@@ -238,12 +259,27 @@ public final class VolumeCaptureActivity extends AppCompatActivity {
                         RC_HANDLE_CAMERA_PERM);
             }
         };
-
-        Snackbar.make(mPreview, R.string.permission_camera_rationale,
-                Snackbar.LENGTH_INDEFINITE)
-                .setAction(R.string.ok, listener)
-                .show();
     }
 
 
+    @Override
+    public void onCameraViewStarted(int width, int height) {
+        mRgba = new Mat(height,width, CvType.CV_8UC4);
+        mRgbaF = new Mat(height,width, CvType.CV_8UC4);
+        mRgbaT = new Mat(height,width, CvType.CV_8UC4);
+    }
+
+    @Override
+    public void onCameraViewStopped() {
+        mRgba.release();
+    }
+
+    @Override
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        mRgba = inputFrame.rgba();
+        Core.transpose(mRgba, mRgbaT);
+        Imgproc.resize(mRgbaT,mRgbaF,mRgbaF.size(),0,0,0);
+        Core.flip(mRgbaF, mRgba,1);
+        return mRgba;
+    }
 }
