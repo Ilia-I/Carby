@@ -18,7 +18,7 @@ import android.view.View.OnClickListener;
 import com.grouph.ces.carby.barcodescanner.MainBarcodeActivity;
 import com.grouph.ces.carby.camera_calibration.CameraCalibrationActivity;
 import com.grouph.ces.carby.ocr.OcrCaptureActivity;
-import com.grouph.ces.carby.volume_estimation.VolumeCaptureActivity;
+import com.grouph.ces.carby.volume_estimation.CaptureActivity;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnClickListener {
@@ -40,15 +40,13 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        CardView barcodeCard = findViewById(R.id.barcode_card);
-        CardView ocrCard = findViewById(R.id.ocr_card);
-        CardView volumeCard = findViewById(R.id.volume_card);
-        CardView calibrationCard = findViewById(R.id.calibration_card);
+        View mBarcodeTile = findViewById(R.id.colored_bar1);
+        View mOcrTile = findViewById(R.id.colored_bar2);
+        View mVolumeTile = findViewById(R.id.colored_bar3);
 
-        barcodeCard.setOnClickListener(this);
-        ocrCard.setOnClickListener(this);
-        volumeCard.setOnClickListener(this);
-        calibrationCard.setOnClickListener(this);
+        mBarcodeTile.setOnClickListener(this);
+        mOcrTile.setOnClickListener(this);
+        mVolumeTile.setOnClickListener(this);
     }
 
     @Override
@@ -93,17 +91,7 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_barcode) {
-            Intent myIntent1 = new Intent(this, MainBarcodeActivity.class);
-            startActivity(myIntent1);
-            // Handle the camera action
-        } else if (id == R.id.nav_ocr) {
-            Intent ocr = new Intent(this, OcrCaptureActivity.class);
-            startActivity(ocr);
-        } else if (id == R.id.nav_volume) {
-            Intent volume = new Intent(this, VolumeCaptureActivity.class);
-            startActivity(volume);
-        } else if (id == R.id.nav_calibration) {
+        if (id == R.id.nav_calibration) {
             Intent camCal = new Intent(this, CameraCalibrationActivity.class);
             startActivity(camCal);
         } /*else if (id == R.id.nav_feature) {
@@ -119,19 +107,16 @@ public class MainActivity extends AppCompatActivity
     public void onClick(View view) {
         int id = view.getId();
 
-        if (id == R.id.barcode_card) {
+        if (id == R.id.colored_bar1) {
             Intent myIntent1 = new Intent(this, MainBarcodeActivity.class);
             startActivity(myIntent1);
             // Handle the camera action
-        } else if (id == R.id.ocr_card) {
+        } else if (id == R.id.colored_bar2) {
             Intent ocr = new Intent(this, OcrCaptureActivity.class);
             startActivity(ocr);
-        } else if (id == R.id.volume_card) {
-            Intent volume = new Intent(this, VolumeCaptureActivity.class);
+        } else if (id == R.id.colored_bar3) {
+            Intent volume = new Intent(this, CaptureActivity.class);
             startActivity(volume);
-        } else if (id == R.id.calibration_card) {
-            Intent camCal = new Intent(this, CameraCalibrationActivity.class);
-            startActivity(camCal);
         }
     }
 }

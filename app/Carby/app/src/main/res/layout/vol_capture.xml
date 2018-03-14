@@ -6,7 +6,7 @@
     android:layout_height="fill_parent">
 
     <FrameLayout
-        android:id="@+id/camera_preview"
+        android:id="@+id/camera_preview_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -16,6 +16,12 @@
             android:layout_height="match_parent"
             android:scaleType="fitCenter"
             android:adjustViewBounds="true" />
+
+        <com.grouph.ces.carby.volume_estimation.CameraView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/camera_preview"/>
+
     </FrameLayout>
 
         <android.support.design.widget.FloatingActionButton
