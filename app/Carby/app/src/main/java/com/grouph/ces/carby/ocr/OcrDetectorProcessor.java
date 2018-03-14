@@ -30,6 +30,7 @@ import com.grouph.ces.carby.nutrition_data.INutritionTable;
 import com.grouph.ces.carby.nutrition_data.NutritionTable;
 import com.grouph.ces.carby.ui.camera.GraphicOverlay;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -43,19 +44,31 @@ import java.util.Set;
  */
 public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
+    private static final int NUM_SCANS = 5;
     private Context context;
     private GraphicOverlay<OcrGraphic> mGraphicOverlay;
-    private boolean scan = false;
+    private int scan;
+    private Integer barcode;
+    private boolean scanComplete = false;
+    private List<List<String>> lineCollector;
 
     public OcrDetectorProcessor(Context applicationContext, GraphicOverlay<OcrGraphic> ocrGraphicOverlay) {
         this.context = applicationContext;
         this.mGraphicOverlay = ocrGraphicOverlay;
+        this.scan = 0;
+        this.barcode = null;
+        lineCollector = new ArrayList<>();
+    }
+
+    public OcrDetectorProcessor(Context applicationContext, GraphicOverlay<OcrGraphic> ocrGraphicOverlay, int barcode) {
+        this(applicationContext,ocrGraphicOverlay);
+        this.barcode = barcode;
     }
 
     // Once this implements Detector.Processor<TextBlock>, implement the abstract methods.
     @Override
     public void receiveDetections(Detector.Detections<TextBlock> detections) {
-        if(scan) {
+        if(scan>0) {
             mGraphicOverlay.clear();
             SparseArray<TextBlock> items = detections.getDetectedItems();
             Log.d("Processor", "num items:" + items.size());
@@ -67,14 +80,104 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                 OcrGraphic graphic = new OcrGraphic(mGraphicOverlay, item);
                 mGraphicOverlay.add(graphic);
             }
-            //TODO provide a correct barcode
-            INutritionTable nt = tableMatcher(items);
+            lineBuilder(items);
+            scan--;
+            if(scan<=0){
+                scanComplete = true;
+            }
+        } else if(scanComplete){
+            INutritionTable nt = tableMatcher(errorCorrectNums());
             Log.v("OcrDetectorProcessor","NutritionTable:\n"+nt);
-            record(100,nt);
-            scan = false;
+            if(barcode!=null)   record(barcode.intValue(),nt);
+            scanComplete = false;
         }
     }
 
+    /**
+     * reduce error after 1st column
+     * @return
+     */
+    private List<String> errorCorrectNums() {
+        //TODO testing
+        List<String> result = new ArrayList<>();
+        List<String> contents = errCorrectionContents();
+        contents.add("per");
+        for(String content:contents){
+            Log.d(this.getClass().getName(),"errorCorrectNums():"+content);
+            List<String> lines = new ArrayList<>();
+            for(List<String> scanedData: lineCollector){
+                for(String s: scanedData){
+                    if(s.startsWith(content) || (content.equals("per") && s.contains("per"))){
+                        lines.add(s);
+                        break;
+                    }
+                }
+            }
+            result.add(correct(lines));
+        }
+        return result;
+    }
+
+    /**
+     * find the best read line
+     * @param lines
+     * @return
+     */
+    private String correct(List<String> lines) {
+        String result = "";
+        int maxLen = 0;
+
+        //get length of largest
+        for(String line: lines){
+            Log.d(this.getClass().getName(),"line:"+line);
+            if(line.length()>maxLen){
+                maxLen = line.length();
+            }
+        }
+
+        //remove all shorter as they are incomplete
+        for(int i=lines.size()-1; i>=0; i--){
+            if(lines.get(i).length()<maxLen){
+                lines.remove(i);
+            }
+        }
+
+        //if only one left or "per" line, return
+        if(lines.size()==1 || lines.get(0).contains("per")){
+            return lines.get(0);
+        }
+
+        for(int i=0; i<maxLen; i++){
+            Map<Character,Integer> counter = new HashMap<>();
+            for(String line: lines){
+                if(counter.get(line.charAt(i))==null){
+                    counter.put(line.charAt(i),1);
+                } else {
+                    counter.put(line.charAt(i),counter.get(i).intValue()+1);
+                }
+            }
+
+            Character largestKey = null;
+            for(Character key: counter.keySet()){
+                if(largestKey == null){
+                    largestKey = key;
+                } else if(counter.get(largestKey)<counter.get(key)){
+                    largestKey = key;
+                }
+            }
+
+            result += counter.get(largestKey);
+        }
+
+        Log.d(this.getClass().getName(),"result:"+result);
+        return result;
+    }
+
+    /**
+     * Associate nutrition table with barcode in database
+     * @param barcode - barcode identifier for the nutrition table
+     * @param nt - nutrition table to store
+     */
     private void record(int barcode, INutritionTable nt) {
         AppDatabase db = Room.databaseBuilder(context ,AppDatabase.class,"myDB").allowMainThreadQueries().build();
 
@@ -97,37 +200,38 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
      * Uses by the controller to enable scanning
      */
     public void scan() {
-        scan = true;
+        lineCollector = new ArrayList<>();
+        scan = NUM_SCANS;
     }
 
     /**
-     * Table matcher algorithm
+     * Line builder algorithm
      * @param items
      */
-    private INutritionTable tableMatcher(SparseArray<TextBlock> items){
-        Map<Integer,List<Element>> scannedData = new HashMap<>();
-        for(int i=0;i<items.size();i++) {
+    private List<String> lineBuilder(SparseArray<TextBlock> items){
+        Map<Integer, List<Element>> scannedData = new HashMap<>();
+        for (int i = 0; i < items.size(); i++) {
             //every text block
-            for(Line line: (List<Line>) items.valueAt(i).getComponents()){
+            for (Line line : (List<Line>) items.valueAt(i).getComponents()) {
                 //every line in the text block
-                for(Element e: (List<Element>)line.getComponents()){
+                for (Element e : (List<Element>) line.getComponents()) {
                     //every element in the text block
                     boolean added = false;
                     int yE = e.getBoundingBox().centerY();
                     int heightE = e.getBoundingBox().height();
 
-                    for(Integer y: scannedData.keySet()){
+                    for (Integer y : scannedData.keySet()) {
                         //if element withing the accepted line limits, then add it
-                        if(Math.abs(y-yE)<(heightE/2)){
+                        if (Math.abs(y - yE) < (heightE / 2)) {
                             scannedData.get(y).add(e);
                             added = true;
                             break;
                         }
                     }
-                    if(!added){
+                    if (!added) {
                         List<Element> list = new ArrayList<>();
                         list.add(e);
-                        scannedData.put(yE,list);
+                        scannedData.put(yE, list);
                     }
                 }
             }
@@ -135,7 +239,10 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
         //compile lines
         List<String> dataLines = orderElements(scannedData);
+        return dataLines;
+    }
 
+    private INutritionTable tableMatcher(List<String> dataLines) {
         //error correction
         dataLines = errorCorrection(dataLines);
 
@@ -172,20 +279,9 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
         //process the rest
         for(String in:dataLines){
-            String[] tokens = in.split(" ");
-            String comp = "";
-            String rest = "";
-            boolean col1 = true;
-            for (String token : tokens) {
-                if(col1&&!isVal(token)) {
-                    comp+=token+" ";
-                } else {
-                    rest+=token+" ";
-                    col1=false;
-                }
-            }
-            comp = comp.trim();
-            rest = rest.trim();
+            List<String> splitLines = lineSplitter(in);
+            String comp = splitLines.get(0);
+            String rest = splitLines.get(1);
 
             List<Double> dist = new ArrayList<>();
             for(String s: contents) {
@@ -201,6 +297,33 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         }
 
         return result;
+    }
+
+    /**
+     * Split data line
+     * @param in
+     * @return
+     */
+    private List<String> lineSplitter(String in) {
+        String[] tokens = in.split(" ");
+        String comp = "";
+        String rest = "";
+        boolean col1 = true;
+        for (String token : tokens) {
+            if(col1&&!isVal(token)) {
+                comp+=token+" ";
+            } else {
+                rest+=token+" ";
+                col1=false;
+            }
+        }
+        comp = comp.trim();
+        rest = rest.trim();
+
+        List<String> res = new ArrayList<>();
+        res.add(comp);
+        res.add(rest);
+        return res;
     }
 
     /**
