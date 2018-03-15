@@ -80,12 +80,13 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                 OcrGraphic graphic = new OcrGraphic(mGraphicOverlay, item);
                 mGraphicOverlay.add(graphic);
             }
-            lineBuilder(items);
+            lineCollector.add(lineBuilder(items));
             scan--;
             if(scan<=0){
                 scanComplete = true;
             }
         } else if(scanComplete){
+            Log.d(this.getClass().getName(),"LineCorrector:"+lineCollector.size());
             INutritionTable nt = tableMatcher(errorCorrectNums());
             Log.v("OcrDetectorProcessor","NutritionTable:\n"+nt);
             if(barcode!=null)   record(barcode.intValue(),nt);
@@ -103,7 +104,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         List<String> contents = errCorrectionContents();
         contents.add("per");
         for(String content:contents){
-            Log.d(this.getClass().getName(),"errorCorrectNums():"+content);
+            Log.d(this.getClass().getName(),"---------------\nerrorCorrectNums():"+content);
             List<String> lines = new ArrayList<>();
             for(List<String> scanedData: lineCollector){
                 for(String s: scanedData){
@@ -113,7 +114,11 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                     }
                 }
             }
-            result.add(correct(lines));
+            if(lines.size()>0){
+                result.add(correct(lines));
+            } else {
+                Log.d(this.getClass().getName(),"None found");
+            }
         }
         return result;
     }
@@ -143,7 +148,8 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         }
 
         //if only one left or "per" line, return
-        if(lines.size()==1 || lines.get(0).contains("per")){
+        if(lines.size()==1){// || lines.get(0).contains("per")){
+            Log.d(this.getClass().getName(),"result - 0:"+lines.get(0)+"\n");
             return lines.get(0);
         }
 
@@ -153,7 +159,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                 if(counter.get(line.charAt(i))==null){
                     counter.put(line.charAt(i),1);
                 } else {
-                    counter.put(line.charAt(i),counter.get(i).intValue()+1);
+                    counter.put(line.charAt(i),counter.get(line.charAt(i)).intValue()+1);
                 }
             }
 
@@ -166,10 +172,10 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                 }
             }
 
-            result += counter.get(largestKey);
+            result += largestKey;
         }
 
-        Log.d(this.getClass().getName(),"result:"+result);
+        Log.d(this.getClass().getName(),"result:"+result+"\n");
         return result;
     }
 
@@ -239,13 +245,14 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
         //compile lines
         List<String> dataLines = orderElements(scannedData);
+
+        //error correction
+        dataLines = errorCorrection(dataLines);
+
         return dataLines;
     }
 
     private INutritionTable tableMatcher(List<String> dataLines) {
-        //error correction
-        dataLines = errorCorrection(dataLines);
-
         //split in columns
         return toTable(dataLines);
     }
@@ -379,8 +386,8 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         boolean g100 = false;
         for(String typicalValues: dataLines){
             if(typicalValues.contains("per")){
-                //TODO support non 100g
-                if(typicalValues.contains("100g")) g100 = true;
+                //TODO support non 100g/100ml
+                if(typicalValues.contains("100g")||typicalValues.contains("100ml")) g100 = true;
                 int tempIdx = typicalValues.lastIndexOf(" ");
                 //check if table has %RI (reference intake of average adult)
                 if(typicalValues.substring(tempIdx).matches("(?s).*\\p{Space}.{0,1}RI.*|(?s).*\\p{Space}\\p{Punct}\\wI.*|(?s).*\\p{Punct}R\\w.*")){//.contains("%R")){
@@ -405,18 +412,28 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
             for(int i=0; i<contents.size();i++) {
                 if (row.contains(contents.get(i))&&(row.indexOf(contents.get(i))==0||row.charAt(row.indexOf(contents.get(i))-1)==' ')){
                     Log.d("OcrDetectorProcessor","Cols:"+numCols+" Content:"+contents.get(i)+" Row:"+row);
-                    if(ri && row.endsWith("%")){
+                    if(row.endsWith("%")){//&& ri
                         row = row.substring(0,row.lastIndexOf(" "));
                         Log.d("OcrDetectorProcessor","remove %RI");
                     }
                     for(int k=1;k<numCols;k++){
                         int idx =row.lastIndexOf(" ");
-                        Log.d("OcrDetectorProcessor","remove col:"+row.substring(idx));
-                        row = row.substring(0,idx);
+                        if(idx>0) {
+                            Log.d("OcrDetectorProcessor", "remove col:" + row.substring(idx));
+                            row = row.substring(0, idx);
+                        }
                     }
                     int tempIdx = row.lastIndexOf(" ");
-                    setComponent(contents.get(i),row.substring(tempIdx),nt);
-                    Log.d("OcrDetectorProcessor","Map<"+contents.get(i)+","+row.substring(tempIdx)+">");
+                    if(tempIdx>0) {
+                        try {
+                            setComponent(contents.get(i), row.substring(tempIdx), nt);
+                            Log.d("OcrDetectorProcessor", "Map<" + contents.get(i) + "," + row.substring(tempIdx) + ">");
+                        } catch (NumberFormatException e){
+                            Log.d(this.getClass().getName(),"Column miss-match!");
+                        }
+                    } else {
+                        Log.d(this.getClass().getName(),"Invalid input!");
+                    }
                     contents.remove(i);
                     break;
                 }
@@ -426,7 +443,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         return nt;
     }
 
-    private boolean setComponent(String name, String value, INutritionTable nt) {
+    private boolean setComponent(String name, String value, INutritionTable nt) throws NumberFormatException{
         Log.d(this.getClass().getName(),"setComponent:"+name+" - "+value);
         if(name.equals("Energy")){
             //make adjustments for energy 5.5kJ/5.5kcal format
