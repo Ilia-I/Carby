@@ -58,7 +58,7 @@
         <activity
             android:name=".volume_estimation.CaptureActivity"
             android:label="@string/app_name"
-            android:screenOrientation="portrait">
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name=".VolumeCaptureActivity" />
                 <category android:name="android.intent.category.DEFAULT" />

@@ -43,13 +43,15 @@ public class ResultsActivity extends AppCompatActivity {
         if(out1path != null) {
             File imgFile1 = new File(out1path);
             Bitmap myBitmap1 = BitmapFactory.decodeFile(imgFile1.getAbsolutePath());
-            iv1.setImageBitmap(myBitmap1);
+            Bitmap scaledPicture = Bitmap.createScaledBitmap(myBitmap1, myBitmap1.getWidth()*2, myBitmap1.getHeight()*2, false);
+            iv1.setImageBitmap(scaledPicture);
         }
 
-        if(out1path != null) {
+        if(out2path != null) {
             File imgFile2 = new File(out2path);
             Bitmap myBitmap2 = BitmapFactory.decodeFile(imgFile2.getAbsolutePath());
-            iv2.setImageBitmap(myBitmap2);
+            Bitmap scaledPicture = Bitmap.createScaledBitmap(myBitmap2, myBitmap2.getWidth()*2, myBitmap2.getHeight()*2, false);
+            iv2.setImageBitmap(scaledPicture);
         }
     }
 
