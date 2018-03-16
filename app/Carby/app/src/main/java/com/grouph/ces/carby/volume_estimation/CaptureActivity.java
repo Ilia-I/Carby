@@ -11,12 +11,14 @@ import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.grouph.ces.carby.R;
@@ -29,6 +31,7 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
@@ -74,6 +77,7 @@ public final class CaptureActivity extends AppCompatActivity implements CameraBr
         mOpenCvCameraView = findViewById(R.id.camera_preview);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
+        mOpenCvCameraView.setMaxFrameSize(1280,720);
 
         if (rc == PackageManager.PERMISSION_GRANTED)
             mOpenCvCameraView.enableView();
@@ -220,6 +224,10 @@ public final class CaptureActivity extends AppCompatActivity implements CameraBr
         mRgba = new Mat(height,width, CvType.CV_8UC4);
         mRgbaF = new Mat(height,width, CvType.CV_8UC4);
         mRgbaT = new Mat(height,width, CvType.CV_8UC4);
+
+        mOpenCvCameraView.setResolution(1280,720);
+        mOpenCvCameraView.getPreviewSize();
+        mOpenCvCameraView.getPictureSize();
     }
 
     @Override
@@ -231,12 +239,15 @@ public final class CaptureActivity extends AppCompatActivity implements CameraBr
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
-        Core.transpose(mRgba, mRgbaT);
-        Imgproc.resize(mRgbaT,mRgbaF,mRgbaF.size(),0,0,0);
-        Core.flip(mRgbaF, mRgba,1);
 
-        org.opencv.core.Point p1 = new org.opencv.core.Point((mRgba.size().width-300)/2,(mRgba.size().height-300)/2);
-        org.opencv.core.Point p2 = new org.opencv.core.Point((mRgba.size().width+300)/2, (mRgba.size().height+300)/2);
+//        Core.transpose(mRgba, mRgbaT);
+//        Imgproc.resize(mRgbaT,mRgbaF,mRgbaF.size(),0,0,0);
+//        Core.flip(mRgbaF, mRgba,1);
+
+        int box = 300;
+
+        org.opencv.core.Point p1 = new org.opencv.core.Point((mRgba.size().width-box)/2,(mRgba.size().height-box)/2);
+        org.opencv.core.Point p2 = new org.opencv.core.Point((mRgba.size().width+box)/2, (mRgba.size().height+box)/2);
         Imgproc.rectangle(mRgba, p1, p2, new Scalar(255,255,0));
         return mRgba;
     }

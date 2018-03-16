@@ -54,20 +54,17 @@ public class ProcessingAlgorithms {
     }
 
     public Bitmap performGrabCut(Bitmap input) {
-//        File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
-//        if (pictureFile == null) {
-//            Log.d(TAG, "Error creating media file, check storage permissions: ");
-//            return null;
-//        }
-
         // Convert to correct image format
         Bitmap picture32 = input.copy(Bitmap.Config.ARGB_8888, true);
 
-        // Scale to 640x480
-        Bitmap scaledPicture = Bitmap.createScaledBitmap(picture32, 640, 480, false);
+        final int scalingFactor = 2;
+        int scaledWidth = input.getWidth() / scalingFactor;
+        int scaledHeight = input.getHeight() / scalingFactor;
+
+        Bitmap scaledPicture = Bitmap.createScaledBitmap(picture32, scaledWidth, scaledHeight, false);
 
         // Convert to OpenCV origImage
-        Mat origImage = new Mat(640,480, CvType.CV_8UC3);
+        Mat origImage = new Mat(scaledWidth, scaledHeight, CvType.CV_8UC3);
 
         // Place bitmap in origImage
         Utils.bitmapToMat(scaledPicture, origImage);
@@ -85,22 +82,17 @@ public class ProcessingAlgorithms {
         Mat dst = new Mat();
 
         // Create bounding box
-        Point p1 = new Point((origImage.size().width-300)/2,(origImage.size().height-300)/2);
-        Point p2 = new Point((origImage.size().width+300)/2, (origImage.size().height+300)/2);
+        int boxSize = 300/scalingFactor;
+        Point p1 = new Point((origImage.size().width-boxSize)/2,(origImage.size().height-boxSize)/2);
+        Point p2 = new Point((origImage.size().width+boxSize)/2, (origImage.size().height+boxSize)/2);
         Rect rect = new Rect(p1, p2);
 
         Imgproc.grabCut(origImage, firstMask, rect, bgModel, fgModel,
-                5, Imgproc.GC_INIT_WITH_RECT);
+                10, Imgproc.GC_INIT_WITH_RECT);
 
         Core.compare(firstMask, source, firstMask, Core.CMP_EQ);
-
         Mat foreground = new Mat(origImage.size(), CvType.CV_8UC3, white);
         origImage.copyTo(foreground, firstMask);
-
-        //uncomment to draw the bounding box
-        /*Scalar color = new Scalar(255, 0, 0, 255);
-        Imgproc.rectangle(origImage, p1, p2, color);
-        */
 
         Mat vals = new Mat(1, 1, CvType.CV_8UC3, new Scalar(0.0));
         Mat tmp = new Mat();
@@ -124,6 +116,10 @@ public class ProcessingAlgorithms {
         Mat refObjMat =findRectangle(origImage);
         origImage.copyTo(dst,refObjMat);
         dst=featureDetect(dst);
+
+        //uncomment to draw the bounding box
+//        Scalar color = new Scalar(255, 0, 0, 255);
+//        Imgproc.rectangle(dst, p1, p2, color);
 
         //convert back to bitmap
         Utils.matToBitmap(dst, scaledPicture);
