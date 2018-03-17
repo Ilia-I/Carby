@@ -19,6 +19,7 @@ package com.grouph.ces.carby.barcodescanner;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -32,7 +33,7 @@ import com.grouph.ces.carby.R;
  * Main activity demonstrating how to pass extra parameters to an activity that
  * reads barcodes.
  */
-public class MainBarcodeActivity extends Activity implements View.OnClickListener {
+public class MainBarcodeActivity extends AppCompatActivity implements View.OnClickListener {
 
     // use a compound button so either checkbox or switch widgets work.
     private TextView barcodeHeader;
