@@ -51,6 +51,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
     private Integer barcode;
     private boolean scanComplete = false;
     private List<List<String>> lineCollector;
+    private long startTime;
 
     public OcrDetectorProcessor(Context applicationContext, GraphicOverlay<OcrGraphic> ocrGraphicOverlay) {
         this.context = applicationContext;
@@ -65,7 +66,10 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         this.barcode = barcode;
     }
 
-    // Once this implements Detector.Processor<TextBlock>, implement the abstract methods.
+    /**
+     * Once this implements Detector.Processor<TextBlock>, implement the abstract methods.
+     * @param detections
+     */
     @Override
     public void receiveDetections(Detector.Detections<TextBlock> detections) {
         if(scan>0) {
@@ -91,6 +95,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
             Log.v("OcrDetectorProcessor","NutritionTable:\n"+nt);
             if(barcode!=null)   record(barcode.intValue(),nt);
             scanComplete = false;
+            Log.d(this.getClass().getName(),"exec time:"+(System.currentTimeMillis() - startTime)+"ms");
         }
     }
 
@@ -99,7 +104,6 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
      * @return
      */
     private List<String> errorCorrectNums() {
-        //TODO testing
         List<String> result = new ArrayList<>();
         List<String> contents = errCorrectionContents();
         contents.add("per");
@@ -130,8 +134,67 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
      */
     private String correct(List<String> lines) {
         String result = "";
-        int maxLen = 0;
+        removeShorter(lines);
 
+        //if only one left or "per" line, return
+        if(lines.size()==1){// || lines.get(0).contains("per")){
+            Log.d(this.getClass().getName(),"result - 0:"+lines.get(0)+"\n");
+            return lines.get(0);
+        }
+
+        //check word per word
+        List<List<String>> words = new ArrayList<>();
+        for(String line: lines){
+            String[] tokens = line.split(" ");
+            for(int i=0; i<tokens.length; i++){
+                if(i>=words.size()) {
+                    words.add(new ArrayList<>());
+                }
+                words.get(i).add(tokens[i]);
+            }
+        }
+
+        for(List<String> list: words){
+            int maxLen = removeShorter(list);
+            if(list.size()==1){
+                result+=list.get(0);
+            } else {
+                for (int i = 0; i < maxLen; i++) {
+                    Map<Character,Integer> counter = new HashMap<>();
+                    for (String line : list) {
+                        if (counter.get(line.charAt(i)) == null) {
+                            counter.put(line.charAt(i), 1);
+                        } else {
+                            counter.put(line.charAt(i), counter.get(line.charAt(i)).intValue() + 1);
+                        }
+                    }
+
+                    Character largestKey = null;
+                    for (Character key : counter.keySet()) {
+                        if (largestKey == null) {
+                            largestKey = key;
+                        } else if (counter.get(largestKey) < counter.get(key)) {
+                            largestKey = key;
+                        }
+                    }
+                    result += largestKey;
+                }
+            }
+            result += " ";
+        }
+        result = result.trim();
+
+        Log.d(this.getClass().getName(),"result:"+result+"\n");
+        return result;
+    }
+
+    /**
+     * find longest String and remove all shorter ones
+     * @param lines
+     * @return
+     */
+    private int removeShorter(List<String> lines) {
+        int maxLen = 0;
         //get length of largest
         for(String line: lines){
             Log.d(this.getClass().getName(),"line:"+line);
@@ -147,36 +210,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
             }
         }
 
-        //if only one left or "per" line, return
-        if(lines.size()==1){// || lines.get(0).contains("per")){
-            Log.d(this.getClass().getName(),"result - 0:"+lines.get(0)+"\n");
-            return lines.get(0);
-        }
-
-        for(int i=0; i<maxLen; i++){
-            Map<Character,Integer> counter = new HashMap<>();
-            for(String line: lines){
-                if(counter.get(line.charAt(i))==null){
-                    counter.put(line.charAt(i),1);
-                } else {
-                    counter.put(line.charAt(i),counter.get(line.charAt(i)).intValue()+1);
-                }
-            }
-
-            Character largestKey = null;
-            for(Character key: counter.keySet()){
-                if(largestKey == null){
-                    largestKey = key;
-                } else if(counter.get(largestKey)<counter.get(key)){
-                    largestKey = key;
-                }
-            }
-
-            result += largestKey;
-        }
-
-        Log.d(this.getClass().getName(),"result:"+result+"\n");
-        return result;
+        return maxLen;
     }
 
     /**
@@ -208,6 +242,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
     public void scan() {
         lineCollector = new ArrayList<>();
         scan = NUM_SCANS;
+        startTime = System.currentTimeMillis();
     }
 
     /**
@@ -398,7 +433,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                 do {
                     tempIdx = typicalValues.lastIndexOf("per");
                     numCols++;
-                    if(g100 && typicalValues.substring(tempIdx).contains("100g")){
+                    if(g100 && (typicalValues.substring(tempIdx).contains("100g")||typicalValues.substring(tempIdx).contains("100ml"))){
                         break;
                     }
                     typicalValues = typicalValues.substring(0,tempIdx);
@@ -470,12 +505,12 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
         //sort rows form top to bottom (needed for multi frame work)
         List<Integer> keys = new ArrayList<>(scannedData.keySet());
-        Collections.sort(keys, new Comparator<Integer>() {
-            @Override
-            public int compare(Integer x1, Integer x2) {
-                return x1 < x2 ? -1 : (x2 < x1) ? 1 : 0;
-            }
-        });
+//        Collections.sort(keys, new Comparator<Integer>() {
+//            @Override
+//            public int compare(Integer x1, Integer x2) {
+//                return x1 < x2 ? -1 : (x2 < x1) ? 1 : 0;
+//            }
+//        });
 
         for(Integer i: keys){
             String line = "";
