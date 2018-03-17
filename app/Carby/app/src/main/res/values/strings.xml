@@ -22,7 +22,6 @@
     <string name="barcode_error">"Error reading barcode: %1$s"</string>
 
 
-
     <!--OpenCV Camera Calibration Strings-->
     <string name="action_calibrate">Calibrate</string>
     <string name="calibration">Calibration</string>
