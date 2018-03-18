@@ -40,10 +40,10 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_calibration) {
+        /* if (id == R.id.nav_calibration) {
             Intent camCal = new Intent(this, CameraCalibrationActivity.class);
             startActivity(camCal);
-        } /*else if (id == R.id.nav_feature) {
+        } else if (id == R.id.nav_feature) {
 
         }*/
 

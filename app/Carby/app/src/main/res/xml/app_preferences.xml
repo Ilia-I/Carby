@@ -10,4 +10,17 @@
 
     </android.support.v7.preference.PreferenceCategory>
 
+    <android.support.v7.preference.PreferenceCategory android:title="Camera">
+
+        <Preference
+            android:key="mykey"
+            android:title="Calibrate Camera"
+            android:summary="Launches chess board camera calibration tool" >
+            <intent android:action="android.intent.action.VIEW"
+                android:targetPackage="com.grouph.ces.carby"
+                android:targetClass="com.grouph.ces.carby.camera_calibration.CameraCalibrationActivity"/>
+        </Preference>
+
+    </android.support.v7.preference.PreferenceCategory>
+
 </android.support.v7.preference.PreferenceScreen>

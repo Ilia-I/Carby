@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
+    <!---
     <item android:title="Scan">
         <menu>
             <item
@@ -12,7 +13,7 @@
         </menu>
     </item>
 
-    <!---
+
     <item android:title="Features">
         <menu>
         <item
