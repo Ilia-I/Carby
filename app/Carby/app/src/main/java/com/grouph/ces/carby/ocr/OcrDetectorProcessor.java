@@ -95,6 +95,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
             Log.v("OcrDetectorProcessor","NutritionTable:\n"+nt);
             if(barcode!=null)   record(barcode.intValue(),nt);
             scanComplete = false;
+            //TODO display table
             Log.d(this.getClass().getName(),"exec time:"+(System.currentTimeMillis() - startTime)+"ms");
         }
     }
@@ -220,15 +221,8 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
      */
     private void record(int barcode, INutritionTable nt) {
         AppDatabase db = Room.databaseBuilder(context ,AppDatabase.class,"myDB").allowMainThreadQueries().build();
-
-        //TODO remove the auto delete for loop
-        // for test reasons delete all previous content
-        for(NutritionDataDB nd: db.nutritionDataDao().getAll()){
-            db.nutritionDataDao().delete(nd);
-        }
-
         db.nutritionDataDao().insertAll(new NutritionDataDB(barcode,nt));
-        Log.d("OcrDetectorProcessor","loaded table:\n"+db.nutritionDataDao().findByBarcode(barcode).getNt());
+        Log.d(this.getClass().getName(),"Barcode: "+barcode+"\nLoaded Table:\n"+db.nutritionDataDao().findByBarcode(barcode).getNt());
     }
 
     @Override

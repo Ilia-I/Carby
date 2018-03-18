@@ -20,6 +20,8 @@
     <string name="barcode_success">Barcode read successfully</string>
     <string name="barcode_failure">No barcode captured</string>
     <string name="barcode_error">"Error reading barcode: %1$s"</string>
+    <string name="barcode_found_localDB">Nutrition information for barcode found in local database.</string>
+    <string name="barcode_found_offDB">Nutrition information for barcode found in Open Food Facts database.</string>
 
 
     <!--OpenCV Camera Calibration Strings-->
@@ -35,6 +37,11 @@
     <string name="please_wait">Please, wait</string>
     <string name="original">Original</string>
     <string name="undistorted">Undistorted</string>
+
+    <!--Start OCR-->
     <string name="ocr_intent_barcode">barcode</string>
+    <string name="cancel">Cancel</string>
+    <string name="dialog_title_check_barcode">Scan Nutrition Table?</string>
+    <string name="dialog_message_check_barcode">Nutrition information not found for scanned barcode. Do you wish to scan the package nutrition table and associate it with this barcode for future use?</string>
 
 </resources>
