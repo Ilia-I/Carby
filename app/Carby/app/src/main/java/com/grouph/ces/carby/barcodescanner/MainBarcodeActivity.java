@@ -67,6 +67,11 @@ public class MainBarcodeActivity extends AppCompatActivity implements View.OnCli
 
         //TODO async if slow
         db = Room.databaseBuilder(getApplicationContext() ,AppDatabase.class,"myDB").allowMainThreadQueries().build();
+
+        Intent intent = new Intent(this, BarcodeCaptureActivity.class);
+        intent.putExtra(BarcodeCaptureActivity.AutoFocus, true);
+
+        startActivityForResult(intent, RC_BARCODE_CAPTURE);
     }
 
     /**
