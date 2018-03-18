@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
+import android.os.Build;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
@@ -191,6 +192,15 @@ public final class OcrCaptureActivity extends AppCompatActivity {
 
         // Set the TextRecognizer's Processor.
         processor = new OcrDetectorProcessor(getApplicationContext(),mGraphicOverlay);
+
+        //if passed a barcode
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            Integer barcode = extras.getInt(getString(R.string.ocr_intent_barcode));
+            if(barcode.intValue()!=0){
+                processor = new OcrDetectorProcessor(getApplicationContext(),mGraphicOverlay,barcode);
+            }
+        }
         textRecognizer.setProcessor(processor);
 
         // Check if the TextRecognizer is operational.
@@ -346,7 +356,9 @@ public final class OcrCaptureActivity extends AppCompatActivity {
             if (text != null && text.getValue() != null) {
                 Log.d(TAG, "text data is being spoken! " + text.getValue());
                 // Speak the string.
-                tts.speak(text.getValue(), TextToSpeech.QUEUE_ADD, null, "DEFAULT");
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    tts.speak(text.getValue(), TextToSpeech.QUEUE_ADD, null, "DEFAULT");
+                }
             }
             else {
                 Log.d(TAG, "text data is null");

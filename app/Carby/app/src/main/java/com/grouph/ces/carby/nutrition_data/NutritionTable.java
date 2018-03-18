@@ -87,7 +87,7 @@ public class NutritionTable extends ANutritionTable{
                                 carbohydrates.addSubComponent(name,value);
                                 return setCarbohydrates(carbohydrates,getCarbohydratesUnit());
                             } else {
-                                getCarbohydrates().addSubComponent(name, value);
+                                return getCarbohydrates().addSubComponent(name, value);
                             }
             case "Fibre":   return setFibre(value,getFibreUnit());
             case "Protein": return setProtein(value,getProteinUnit());
