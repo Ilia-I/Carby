@@ -9,11 +9,18 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.grouph.ces.carby.camera_calibration.CameraCalibrationActivity;
+import com.grouph.ces.carby.nutrition_data.Composite;
+import com.grouph.ces.carby.nutrition_data.INutritionTable;
 import com.grouph.ces.carby.nutrition_data.NutritionResultActivity;
+import com.grouph.ces.carby.nutrition_data.NutritionTable;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class BaseActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -42,7 +49,20 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.nav_nutrition) {
+            INutritionTable nutritionTable = new NutritionTable();
+            nutritionTable.setComponent("Carbohydrate", 12.5);
+            nutritionTable.setComponent("sugars", 5);
+            JSONObject jsonNutritionTable = nutritionTable.toJasonObject();
+
+//            try {
+//                INutritionTable nutritionTable2 = new NutritionTable();
+//                nutritionTable2.setAll(jsonNutritionTable);
+//            } catch (JSONException e){
+//                Log.e("Error", "JSONException error");
+//            }
+
             Intent intent = new Intent(this, NutritionResultActivity.class);
+            intent.putExtra("jsonNutritionTable", jsonNutritionTable.toString());
             startActivity(intent);
         }
         /* else if (id == R.id.nav_feature) {
