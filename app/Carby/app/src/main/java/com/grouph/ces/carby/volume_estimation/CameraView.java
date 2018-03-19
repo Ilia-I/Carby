@@ -76,7 +76,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
-        Imgproc.rectangle(mRgba, p1, p2, boxColor);
+        Imgproc.rectangle(mRgba, p1, p2, boxColor, 3, Imgproc.LINE_AA,0);
         return mRgba;
     }
 
