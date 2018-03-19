@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.os.AsyncTask;
 
 import java.io.File;
@@ -26,6 +25,9 @@ public class ImageProcessor {
     private org.opencv.core.Rect boundingBox2;
     private Bitmap output1;
     private Bitmap output2;
+    private Bitmap refObj1;
+    private Bitmap refObj2;
+
 
     private ProcessingAlgorithms algorithms;
 
@@ -87,12 +89,16 @@ public class ImageProcessor {
             // Do grab cut
             // Feature matching
             // ...
-            if(input1 != null)
+            if(input1 != null) {
                 output1 = algorithms.performGrabCut(input1, boundingBox1);
-
-            if(input2 != null)
+                refObj1 = algorithms.performRefObjDetection(input1);
+            }
+            if(input2 != null) {
                 output2 = algorithms.performGrabCut(input2, boundingBox2);
+                refObj2 = algorithms.performRefObjDetection(input2);
+            }
         }
+
 
         public void showResults() {
             Intent results = new Intent(context, ResultsActivity.class);
@@ -111,7 +117,7 @@ public class ImageProcessor {
 
                 if(output2 != null) {
                     fOut = new FileOutputStream(out2);
-                    output2.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+                    refObj2.compress(Bitmap.CompressFormat.PNG, 100, fOut);
                     fOut.flush();
                     fOut.close();
                 }
