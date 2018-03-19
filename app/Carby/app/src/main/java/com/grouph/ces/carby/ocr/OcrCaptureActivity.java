@@ -196,8 +196,8 @@ public final class OcrCaptureActivity extends AppCompatActivity {
         //if passed a barcode
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            Integer barcode = extras.getInt(getString(R.string.ocr_intent_barcode));
-            if(barcode.intValue()!=0){
+            String barcode = extras.getString(getString(R.string.ocr_intent_barcode));
+            if(barcode!=null){
                 processor = new OcrDetectorProcessor(getApplicationContext(),mGraphicOverlay,barcode);
             }
         }

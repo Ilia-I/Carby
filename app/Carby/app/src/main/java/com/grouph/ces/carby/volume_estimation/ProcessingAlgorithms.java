@@ -45,6 +45,7 @@ public class ProcessingAlgorithms {
 
     private Mat mCameraMatrix = new Mat();
     private Mat mDistortionCoefficients = new Mat();
+    private final int scalingFactor = 2;
 
     public ProcessingAlgorithms(Context context) {
         if (CalibrationResult.tryLoad(context, mCameraMatrix, mDistortionCoefficients)) {
@@ -53,24 +54,21 @@ public class ProcessingAlgorithms {
             Log.e(TAG, "Camera not calibrated");
     }
 
+    public Bitmap performRefObjDetection(Bitmap input){
+        Bitmap scaledPicture = getScaledBitmap(input);
+        Mat origImage = performScaling(input,scaledPicture);
+
+        Mat dst = new Mat(origImage.size(),CvType.CV_8UC3,white);
+        Mat refObjMat =findRefObject(origImage);
+        origImage.copyTo(dst,refObjMat);
+        dst=featureDetect(dst);
+        Utils.matToBitmap(dst, scaledPicture);
+        return scaledPicture;
+    }
+
     public Bitmap performGrabCut(Bitmap input, Rect boundingBox) {
-        // Convert to correct image format
-        Bitmap picture32 = input.copy(Bitmap.Config.ARGB_8888, true);
-
-        final int scalingFactor = 2;
-        int scaledWidth = input.getWidth() / scalingFactor;
-        int scaledHeight = input.getHeight() / scalingFactor;
-
-        Bitmap scaledPicture = Bitmap.createScaledBitmap(picture32, scaledWidth, scaledHeight, false);
-
-        // Convert to OpenCV origImage
-        Mat origImage = new Mat(scaledWidth, scaledHeight, CvType.CV_8UC3);
-
-        // Place bitmap in origImage
-        Utils.bitmapToMat(scaledPicture, origImage);
-
-        // Remove alpha channels from bitmap
-        Imgproc.cvtColor(origImage,origImage,Imgproc.COLOR_RGBA2RGB);
+        Bitmap scaledPicture = getScaledBitmap(input);
+        Mat origImage = performScaling(input,scaledPicture);
 
         // Initialise models, masks, foreground and background
         Mat background = new Mat(origImage.size(), CvType.CV_8UC3, white);
@@ -117,17 +115,33 @@ public class ProcessingAlgorithms {
         fgModel.release();
         vals.release();
 
-        Mat refObjMat =findRectangle(origImage);
-        origImage.copyTo(dst,refObjMat);
         dst=featureDetect(dst);
-
-        //uncomment to draw the bounding box
-//        Scalar color = new Scalar(255, 0, 0, 255);
-//        Imgproc.rectangle(dst, p1, p2, color);
 
         //convert back to bitmap
         Utils.matToBitmap(dst, scaledPicture);
         return scaledPicture;
+    }
+
+    private Bitmap getScaledBitmap(Bitmap input){
+        Bitmap picture32 = input.copy(Bitmap.Config.ARGB_8888, true);
+
+        int scaledWidth = input.getWidth() / scalingFactor;
+        int scaledHeight = input.getHeight() / scalingFactor;
+
+        Bitmap scaledPicture = Bitmap.createScaledBitmap(picture32, scaledWidth, scaledHeight, false);
+
+        return scaledPicture;
+
+    }
+    private Mat performScaling(Bitmap input, Bitmap scaledPicture){
+        Mat origImage = new Mat(input.getWidth() / scalingFactor, input.getHeight() / scalingFactor, CvType.CV_8UC3);
+
+        // Place bitmap in origImage
+        Utils.bitmapToMat(scaledPicture, origImage);
+        // Remove alpha channels from bitmap
+        Imgproc.cvtColor(origImage,origImage,Imgproc.COLOR_RGBA2RGB);
+
+        return origImage;
     }
 
     private Mat grayImg(Mat img){
@@ -149,7 +163,7 @@ public class ProcessingAlgorithms {
         return img;
     }
 
-    private Mat findRectangle(Mat src) {
+    private Mat findRefObject(Mat src) {
         Mat blurred = src.clone();
         Imgproc.medianBlur(src, blurred, 9);
 
@@ -192,20 +206,8 @@ public class ProcessingAlgorithms {
                 new Scalar(0, 0, 0));
         if (maxId >= 0) {
             Imgproc.drawContours(mask, contours, maxId, white, -1);
-            //Imgproc.drawContours(mask, contours, -1, white, 1);
         }
         return mask;
-    }
-
-
-    private double angle(Point p1, Point p2, Point p0) {
-        double dx1 = p1.x - p0.x;
-        double dy1 = p1.y - p0.y;
-        double dx2 = p2.x - p0.x;
-        double dy2 = p2.y - p0.y;
-        return (dx1 * dx2 + dy1 * dy2)
-                / Math.sqrt((dx1 * dx1 + dy1 * dy1) * (dx2 * dx2 + dy2 * dy2)
-                + 1e-10);
     }
 
 }

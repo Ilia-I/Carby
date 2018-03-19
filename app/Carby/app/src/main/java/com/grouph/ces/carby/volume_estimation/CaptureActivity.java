@@ -45,7 +45,7 @@ import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
 public final class CaptureActivity extends AppCompatActivity implements Camera.PictureCallback{
 
-    private static String TAG = "VolumeCpature";
+    private static String TAG = "VolumeCapture";
 
     // Permission request codes need to be < 256
     private static final int RC_HANDLE_CAMERA_PERM = 2;
@@ -220,6 +220,7 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
         Bitmap pictureTaken = BitmapFactory.decodeByteArray(data, 0, data.length);
 
         imageProcessor.addImage(pictureTaken, mOpenCvCameraView.getBoundingBox());
+        mOpenCvCameraView.resetCamera();
 
         if(++imagesTaken == 2) {
             mOpenCvCameraView.disableView();
@@ -227,7 +228,6 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
         }
 
         if(imagesTaken == 1) {
-            mOpenCvCameraView.resetCamera();
             Toast.makeText(this, "Captured 1st image", Toast.LENGTH_SHORT).show();
         }
         else
