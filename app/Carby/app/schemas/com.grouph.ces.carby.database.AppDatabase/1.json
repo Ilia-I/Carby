@@ -2,17 +2,23 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "1b674e022324b3f670de6d9b4f1f2045",
+    "identityHash": "d33581c7cbaa459a76d0047084a6a454",
     "entities": [
       {
         "tableName": "NutritionData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`barcode` INTEGER NOT NULL, `nutritionTable` TEXT, PRIMARY KEY(`barcode`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`key` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `barcode` TEXT, `nutritionTable` TEXT)",
         "fields": [
+          {
+            "fieldPath": "key",
+            "columnName": "key",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "barcode",
             "columnName": "barcode",
-            "affinity": "INTEGER",
-            "notNull": true
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "nt",
@@ -23,9 +29,9 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "barcode"
+            "key"
           ],
-          "autoGenerate": false
+          "autoGenerate": true
         },
         "indices": [],
         "foreignKeys": []
@@ -33,7 +39,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"1b674e022324b3f670de6d9b4f1f2045\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"d33581c7cbaa459a76d0047084a6a454\")"
     ]
   }
 }

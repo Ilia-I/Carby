@@ -143,12 +143,11 @@ public class MainBarcodeActivity extends AppCompatActivity implements View.OnCli
 
     private void processBarcode(Barcode barcode) {
         if(barcode.valueFormat==Barcode.PRODUCT){
-            int barcodeNum = Integer.parseInt(barcode.displayValue);
-            Log.d(this.getClass().getName(),"Barcode: " + barcodeNum);
+            Log.d(this.getClass().getName(),"Barcode: " + barcode.displayValue);
             INutritionTable result = null;
 
             //1. check local database
-            NutritionDataDB data = db.nutritionDataDao().findByBarcode(barcodeNum);
+            NutritionDataDB data = db.nutritionDataDao().findByBarcode(barcode.displayValue);
             if(data!=null) {
                 result = data.getNt();
                 if (result != null) {
@@ -171,12 +170,12 @@ public class MainBarcodeActivity extends AppCompatActivity implements View.OnCli
             }
 
             //3. prompt user to scan nutrition table
-            startOCR(barcodeNum);
+            startOCR(barcode.displayValue);
             return;
         }
     }
 
-    private void startOCR(int barcodeNum) {
+    private void startOCR(String barcode) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setMessage(R.string.dialog_message_check_barcode);
@@ -184,7 +183,7 @@ public class MainBarcodeActivity extends AppCompatActivity implements View.OnCli
 
         builder.setPositiveButton(R.string.ok, (DialogInterface dialog, int id) -> {
             Intent i = new Intent(getApplicationContext(), OcrCaptureActivity.class);
-            i.putExtra(getResources().getString(R.string.ocr_intent_barcode), new Integer(barcodeNum));
+            i.putExtra(getResources().getString(R.string.ocr_intent_barcode), barcode);
             startActivity(i);
             dialog.dismiss();
         });
