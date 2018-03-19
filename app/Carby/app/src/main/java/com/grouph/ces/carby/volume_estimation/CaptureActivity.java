@@ -226,8 +226,10 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
             imageProcessor.processImages();
         }
 
-        if(imagesTaken == 1)
+        if(imagesTaken == 1) {
+            mOpenCvCameraView.resetCamera();
             Toast.makeText(this, "Captured 1st image", Toast.LENGTH_SHORT).show();
+        }
         else
             Toast.makeText(this, "Captured 2nd image", Toast.LENGTH_SHORT).show();
     }
