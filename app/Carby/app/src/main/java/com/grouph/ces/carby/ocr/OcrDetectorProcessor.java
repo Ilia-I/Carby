@@ -48,7 +48,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
     private Context context;
     private GraphicOverlay<OcrGraphic> mGraphicOverlay;
     private int scan;
-    private Integer barcode;
+    private String barcode;
     private boolean scanComplete = false;
     private List<List<String>> lineCollector;
     private long startTime;
@@ -61,7 +61,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         lineCollector = new ArrayList<>();
     }
 
-    public OcrDetectorProcessor(Context applicationContext, GraphicOverlay<OcrGraphic> ocrGraphicOverlay, int barcode) {
+    public OcrDetectorProcessor(Context applicationContext, GraphicOverlay<OcrGraphic> ocrGraphicOverlay, String barcode) {
         this(applicationContext,ocrGraphicOverlay);
         this.barcode = barcode;
     }
@@ -93,7 +93,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
             Log.d(this.getClass().getName(),"LineCorrector:"+lineCollector.size());
             INutritionTable nt = tableMatcher(errorCorrectNums());
             Log.v("OcrDetectorProcessor","NutritionTable:\n"+nt);
-            if(barcode!=null)   record(barcode.intValue(),nt);
+            if(barcode!=null)   record(barcode,nt);
             scanComplete = false;
             //TODO display table
             Log.d(this.getClass().getName(),"exec time:"+(System.currentTimeMillis() - startTime)+"ms");
@@ -219,7 +219,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
      * @param barcode - barcode identifier for the nutrition table
      * @param nt - nutrition table to store
      */
-    private void record(int barcode, INutritionTable nt) {
+    private void record(String barcode, INutritionTable nt) {
         AppDatabase db = Room.databaseBuilder(context ,AppDatabase.class,"myDB").allowMainThreadQueries().build();
         db.nutritionDataDao().insertAll(new NutritionDataDB(barcode,nt));
         Log.d(this.getClass().getName(),"Barcode: "+barcode+"\nLoaded Table:\n"+db.nutritionDataDao().findByBarcode(barcode).getNt());

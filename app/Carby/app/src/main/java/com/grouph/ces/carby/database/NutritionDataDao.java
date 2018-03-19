@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  * Created by Martin Peev on 18.02.2018 г..
- * Version: 0.2
+ * Version: 0.4
  */
 @Dao
 @TypeConverters({NutritionTableConverter.class})
@@ -21,14 +21,17 @@ public interface NutritionDataDao {
     List<NutritionDataDB> getAll();
 
     @Query("SELECT * FROM NutritionData WHERE barcode = :barcode LIMIT 1")
-    NutritionDataDB findByBarcode(int barcode);
+    NutritionDataDB findByBarcode(String barcode);
 
     @Query("UPDATE NutritionData SET nutritionTable = :nt WHERE barcode = :barcode")
-    void update(int barcode, INutritionTable nt);
+    void update(String barcode, INutritionTable nt);
 
     @Insert
     void insertAll(NutritionDataDB... goals);
 
     @Delete
     void delete(NutritionDataDB goal);
+
+    @Query("DELETE FROM NutritionData")
+    public void nukeTable();
 }

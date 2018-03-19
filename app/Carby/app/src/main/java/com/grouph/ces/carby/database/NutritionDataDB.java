@@ -9,27 +9,38 @@ import com.grouph.ces.carby.nutrition_data.INutritionTable;
 
 /**
  * Created by Martin Peev on 18.02.2018 г..
- * Version: 0.2
+ * Version: 0.4
  */
 @Entity(tableName = "NutritionData")
 @TypeConverters({NutritionTableConverter.class})
 public class NutritionDataDB {
-    @PrimaryKey(autoGenerate = false)
-    private int barcode;
+    @PrimaryKey(autoGenerate = true)
+    private int key;
+
+    @ColumnInfo(name = "barcode")
+    private String barcode;
 
     @ColumnInfo(name = "nutritionTable")
     private INutritionTable nt;
 
-    public NutritionDataDB(int barcode, INutritionTable nt){
+    public NutritionDataDB(String barcode, INutritionTable nt){
         this.barcode = barcode;
         this.nt = nt;
     }
 
-    public int getBarcode() {
+    public int getKey() {
+        return key;
+    }
+
+    public void setKey(int key) {
+        this.key = key;
+    }
+
+    public String getBarcode() {
         return barcode;
     }
 
-    public void setBarcode(int barcode) {
+    public void setBarcode(String barcode) {
         this.barcode = barcode;
     }
 
