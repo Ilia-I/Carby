@@ -33,5 +33,5 @@ public interface NutritionDataDao {
     void delete(NutritionDataDB goal);
 
     @Query("DELETE FROM NutritionData")
-    public void nukeTable();
+    void nukeTable();
 }
