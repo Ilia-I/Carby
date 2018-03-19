@@ -53,7 +53,7 @@ public class ProcessingAlgorithms {
             Log.e(TAG, "Camera not calibrated");
     }
 
-    public Bitmap performGrabCut(Bitmap input) {
+    public Bitmap performGrabCut(Bitmap input, Rect boundingBox) {
         // Convert to correct image format
         Bitmap picture32 = input.copy(Bitmap.Config.ARGB_8888, true);
 
@@ -82,9 +82,13 @@ public class ProcessingAlgorithms {
         Mat dst = new Mat();
 
         // Create bounding box
-        int boxSize = 300/scalingFactor;
-        Point p1 = new Point((origImage.size().width-boxSize)/2,(origImage.size().height-boxSize)/2);
-        Point p2 = new Point((origImage.size().width+boxSize)/2, (origImage.size().height+boxSize)/2);
+        Point p1 = new Point(boundingBox.x, boundingBox.y);
+        Point p2 = new Point(boundingBox.x + boundingBox.width, boundingBox.y + boundingBox.height);
+
+        p1.x = p1.x / scalingFactor;
+        p1.y = p1.y / scalingFactor;
+        p2.x = p2.x / scalingFactor;
+        p2.y = p2.y / scalingFactor;
         Rect rect = new Rect(p1, p2);
 
         Imgproc.grabCut(origImage, firstMask, rect, bgModel, fgModel,

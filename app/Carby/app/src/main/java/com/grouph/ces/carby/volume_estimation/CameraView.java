@@ -5,6 +5,7 @@ import org.opencv.android.JavaCameraView;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
@@ -24,6 +25,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     private int boxSize = 300;
     private Point p1;
     private Point p2;
+    private Scalar boxColor;
 
     private Mat mRgba;
     private Mat mRgbaF;
@@ -71,15 +73,10 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         mCamera.startPreview();
     }
 
-    private void initBoundingBox() {
-        p1 = new Point((mRgba.size().width-boxSize)/2,(mRgba.size().height-boxSize)/2);
-        p2 = new Point((mRgba.size().width+boxSize)/2, (mRgba.size().height+boxSize)/2);
-    }
-
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
-        Imgproc.rectangle(mRgba, p1, p2, new Scalar(255,255,0));
+        Imgproc.rectangle(mRgba, p1, p2, boxColor);
         return mRgba;
     }
 
@@ -99,6 +96,17 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         mRgba.release();
     }
 
+    public Rect getBoundingBox() {
+        return new Rect(p1,p2);
+    }
+
+    private void initBoundingBox() {
+        p1 = new Point((mRgba.size().width-boxSize)/2,(mRgba.size().height-boxSize)/2);
+        p2 = new Point((mRgba.size().width+boxSize)/2, (mRgba.size().height+boxSize)/2);
+        boxColor = new Scalar(255, 255,0);
+    }
+
+
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         android.graphics.Rect r = new android.graphics.Rect();
@@ -106,9 +114,13 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         int touchX = (int) motionEvent.getX() - r.centerX() + (int) mRgba.size().width/2;
         int touchY = (int) motionEvent.getY() - r.centerY() + (int) mRgba.size().height/2;
 
+        Corner c = getCornerTouch(touchX, touchY);
+        if(c == null)
+            return true;
+
         switch (motionEvent.getAction()) {
             case MotionEvent.ACTION_MOVE:
-                Corner c = getCornerTouch(touchX, touchY);
+                boxColor = new Scalar(255,0,0);
                 if(c != null)
                     switch (c) {
                         case TP_LEFT:
@@ -127,7 +139,10 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
                             p2.x = touchX;
                             p2.y = touchY;
                     }
-            break;
+                break;
+            case MotionEvent.ACTION_UP:
+                boxColor = new Scalar(255, 255, 0);
+                break;
         }
         return true;
     }

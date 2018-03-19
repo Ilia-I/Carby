@@ -169,7 +169,7 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
 //                    e.printStackTrace();
 //                }
 
-                imageProcessor.addImage(selectedImage);
+                imageProcessor.addImage(selectedImage, mOpenCvCameraView.getBoundingBox());
                 imagesTaken++;
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -219,7 +219,7 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
     public void onPictureTaken(byte[] data, Camera camera) {
         Bitmap pictureTaken = BitmapFactory.decodeByteArray(data, 0, data.length);
 
-        imageProcessor.addImage(pictureTaken);
+        imageProcessor.addImage(pictureTaken, mOpenCvCameraView.getBoundingBox());
 
         if(++imagesTaken == 2) {
             mOpenCvCameraView.disableView();

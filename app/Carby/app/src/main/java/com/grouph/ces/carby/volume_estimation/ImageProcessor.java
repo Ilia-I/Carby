@@ -4,8 +4,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.AsyncTask;
-import android.os.Environment;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -20,8 +20,10 @@ public class ImageProcessor {
 
     private Context context;
 
-    private Bitmap b1;
-    private Bitmap b2;
+    private Bitmap input1;
+    private Bitmap input2;
+    private org.opencv.core.Rect boundingBox1;
+    private org.opencv.core.Rect boundingBox2;
     private Bitmap output1;
     private Bitmap output2;
 
@@ -32,25 +34,28 @@ public class ImageProcessor {
         this.algorithms = new ProcessingAlgorithms(context);
     }
 
-    public void addImage(Bitmap image) {
-        if(b1 == null) {
-            b1 = image;
+    public void addImage(Bitmap image, org.opencv.core.Rect boundingBox) {
+        if(input1 == null) {
+            input1 = image;
+            boundingBox1 = boundingBox;
         }
-        else if (b2 == null)
-            b2 = image;
+        else if (input2 == null) {
+            input2 = image;
+            boundingBox2 = boundingBox;
+        }
     }
 
     public void reset() {
-        b1 = null;
-        b2 = null;
+        input1 = null;
+        input2 = null;
     }
 
     public void processImages() {
-        new ProcessTask().execute();
+        new ProcessImageTask().execute();
     }
 
 
-    private class ProcessTask extends AsyncTask<Void, Void, Void> {
+    private class ProcessImageTask extends AsyncTask<Void, Void, Void> {
 
         private ProgressDialog dialog = new ProgressDialog(context);
 
@@ -82,11 +87,11 @@ public class ImageProcessor {
             // Do grab cut
             // Feature matching
             // ...
-            if(b1 != null)
-                output1 = algorithms.performGrabCut(b1);
+            if(input1 != null)
+                output1 = algorithms.performGrabCut(input1, boundingBox1);
 
-            if(b2 != null)
-                output2 = algorithms.performGrabCut(b2);
+            if(input2 != null)
+                output2 = algorithms.performGrabCut(input2, boundingBox2);
         }
 
         public void showResults() {
