@@ -7,4 +7,7 @@
     <color name="menu1">#F1B136</color>
     <color name="menu2">#13B0A5</color>
     <color name="menu3">#EF6363</color>
+
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
 </resources>
