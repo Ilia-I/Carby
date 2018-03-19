@@ -67,9 +67,8 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         Log.e(TAG, "Taking picture");
         // Postview and jpeg are sent in the same buffers if the queue is not empty when performing a capture.
         // Clear up buffers to avoid mCamera.takePicture to be stuck because of a memory issue
-//        mCamera.setPreviewCallback(null);
+        mCamera.setPreviewCallback(null);
         mCamera.takePicture(null, null, callback);
-//        mCamera.setPreviewCallback(this);
 //        mCamera.startPreview();
     }
 
@@ -77,6 +76,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 //        disconnectCamera();
 //        connectCamera(getWidth(),getHeight());
         mCamera.stopPreview();
+        mCamera.setPreviewCallback(this);
         mCamera.startPreview();
     }
 
