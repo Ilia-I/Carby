@@ -95,9 +95,12 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
         @Override
         protected Mat doInBackground(Mat... mats) {
+            int scalingFactor =1;
             Mat src = mats[0];
-            Mat blurred = src.clone();
-            Imgproc.medianBlur(src, blurred, 9);
+            Mat newmat = new Mat();
+            Imgproc.resize(src,newmat, new org.opencv.core.Size(src.width()/scalingFactor,src.height()/scalingFactor));
+            Mat blurred = newmat.clone();
+            Imgproc.medianBlur(newmat, blurred, 7);
 
             Mat gray0 = new Mat(blurred.size(), CvType.CV_8U), gray = new Mat();
 
@@ -108,7 +111,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
             gray0Channel.add(gray0);
 
             MatOfPoint2f approxCurve;
-            double maxArea = 2500;
+            double minArea = 2500/scalingFactor;
             int maxId = -1;
 
             for (int c = 0; c < 3; c++) {
@@ -116,6 +119,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
                 Core.mixChannels(blurredChannel, gray0Channel, new MatOfInt(ch));
                 Imgproc.Canny(gray0, gray, 10, 30, 3, true);
+                Imgproc.dilate(gray, gray, new Mat(), new Point(-1, -1), 2); // 1
 
                 Imgproc.findContours(gray, contours, new Mat(),
                         Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
@@ -127,8 +131,8 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
                     approxCurve = new MatOfPoint2f();
                     Imgproc.approxPolyDP(temp, approxCurve,
                             Imgproc.arcLength(temp, true) * 0.02, true);
-                    if (approxCurve.total() == 4 && area >= maxArea) {
-                        maxArea = area;
+                    if (approxCurve.total() == 4 && area >= minArea) {
+                        minArea = area;
                         maxId = contours.indexOf(contour);
                     }
                 }
@@ -138,13 +142,13 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
                 MatOfPoint points = new MatOfPoint(contours.get(maxId).toArray());
                 Rect rect = Imgproc.boundingRect(points);
                 // draw enclosing rectangle (all same color, but you could use variable i to make them unique)
-                Imgproc.rectangle(src,
-                        new Point(rect.x,rect.y),
-                        new Point(rect.x+rect.width,rect.y+rect.height),
+                Imgproc.rectangle(gray,
+                        new Point(rect.x*scalingFactor,rect.y*scalingFactor),
+                        new Point((rect.x+rect.width)*scalingFactor,(rect.y+rect.height)*scalingFactor),
                         new Scalar(255, 0, 0, 255), 3);
             }
 
-            return src;
+            return gray;
         }
     }
 
@@ -256,11 +260,11 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         return false;
     }
 
-    static {
-        System.loadLibrary("native-lib");
-    }
-
-    public native void salt(long matAddrGray, int nbrElem);
+//    static {
+//        System.loadLibrary("native-lib");
+//    }
+//
+//    public native void salt(long matAddrGray, int nbrElem);
 
 
 }
