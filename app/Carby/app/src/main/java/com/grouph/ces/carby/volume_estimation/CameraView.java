@@ -100,7 +100,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
             Mat blurred = new Mat();
             Imgproc.resize(src,blurred, new org.opencv.core.Size(src.width()/scalingFactor,src.height()/scalingFactor));
 
-            Imgproc.medianBlur(blurred, blurred, 5);
+            Imgproc.medianBlur(blurred, blurred, 7);
 
             Mat gray0 = new Mat(blurred.size(), CvType.CV_8U), gray = new Mat();
 
@@ -119,10 +119,10 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
                 int ch[] = { c, 0 };
 
                 Core.mixChannels(blurredChannel, gray0Channel, new MatOfInt(ch));
-                Imgproc.Canny(gray0, gray, 15, 30, 3, false);
+                Imgproc.Canny(gray0, gray, 15, 30, 3, true);
 
                 Imgproc.findContours(gray, contours, new Mat(),
-                        Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+                        Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 
                 for (MatOfPoint contour : contours) {
                     MatOfPoint2f temp = new MatOfPoint2f(contour.toArray());
@@ -130,7 +130,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
                     double area = Imgproc.contourArea(contour);
                     approxCurve = new MatOfPoint2f();
                     Imgproc.approxPolyDP(temp, approxCurve,
-                            Imgproc.arcLength(temp, true) * 0.04, true);
+                            Imgproc.arcLength(temp, true) * 0.05, true);
                     if (approxCurve.total() == 4 && area >= minArea) {
                         minArea = area;
                         maxId = contours.indexOf(contour);
