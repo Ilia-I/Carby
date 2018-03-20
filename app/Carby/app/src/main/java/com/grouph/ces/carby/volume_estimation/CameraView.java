@@ -114,15 +114,15 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
             double minArea = 2500/scalingFactor;
             int maxId = -1;
 
+            //find contours for all 3 channels
             for (int c = 0; c < 3; c++) {
                 int ch[] = { c, 0 };
 
                 Core.mixChannels(blurredChannel, gray0Channel, new MatOfInt(ch));
-                Imgproc.Canny(gray0, gray, 10, 20, 3, false);
-                //Imgproc.dilate(gray, gray, new Mat(), new Point(-1, -1), 2); // 1
+                Imgproc.Canny(gray0, gray, 15, 30, 3, false);
 
                 Imgproc.findContours(gray, contours, new Mat(),
-                        Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_NONE);
+                        Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
                 for (MatOfPoint contour : contours) {
                     MatOfPoint2f temp = new MatOfPoint2f(contour.toArray());
@@ -130,7 +130,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
                     double area = Imgproc.contourArea(contour);
                     approxCurve = new MatOfPoint2f();
                     Imgproc.approxPolyDP(temp, approxCurve,
-                            Imgproc.arcLength(temp, true) * 0.02, true);
+                            Imgproc.arcLength(temp, true) * 0.04, true);
                     if (approxCurve.total() == 4 && area >= minArea) {
                         minArea = area;
                         maxId = contours.indexOf(contour);
