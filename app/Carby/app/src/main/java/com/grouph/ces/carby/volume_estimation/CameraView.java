@@ -95,12 +95,12 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
         @Override
         protected Mat doInBackground(Mat... mats) {
-            int scalingFactor =1;
+            int scalingFactor =4;
             Mat src = mats[0];
-            Mat newmat = new Mat();
-            Imgproc.resize(src,newmat, new org.opencv.core.Size(src.width()/scalingFactor,src.height()/scalingFactor));
-            Mat blurred = newmat.clone();
-            Imgproc.medianBlur(newmat, blurred, 7);
+            Mat blurred = new Mat();
+            Imgproc.resize(src,blurred, new org.opencv.core.Size(src.width()/scalingFactor,src.height()/scalingFactor));
+
+            Imgproc.medianBlur(blurred, blurred, 5);
 
             Mat gray0 = new Mat(blurred.size(), CvType.CV_8U), gray = new Mat();
 
@@ -118,11 +118,11 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
                 int ch[] = { c, 0 };
 
                 Core.mixChannels(blurredChannel, gray0Channel, new MatOfInt(ch));
-                Imgproc.Canny(gray0, gray, 10, 30, 3, true);
-                Imgproc.dilate(gray, gray, new Mat(), new Point(-1, -1), 2); // 1
+                Imgproc.Canny(gray0, gray, 10, 20, 3, false);
+                //Imgproc.dilate(gray, gray, new Mat(), new Point(-1, -1), 2); // 1
 
                 Imgproc.findContours(gray, contours, new Mat(),
-                        Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+                        Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_NONE);
 
                 for (MatOfPoint contour : contours) {
                     MatOfPoint2f temp = new MatOfPoint2f(contour.toArray());
@@ -142,11 +142,17 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
                 MatOfPoint points = new MatOfPoint(contours.get(maxId).toArray());
                 Rect rect = Imgproc.boundingRect(points);
                 // draw enclosing rectangle (all same color, but you could use variable i to make them unique)
+//                Imgproc.rectangle(src,
+//                        new Point(rect.x*scalingFactor,rect.y*scalingFactor),
+//                        new Point((rect.x+rect.width)*scalingFactor,(rect.y+rect.height)*scalingFactor),
+//                        new Scalar(255, 0, 0, 255), 3);
                 Imgproc.rectangle(gray,
-                        new Point(rect.x*scalingFactor,rect.y*scalingFactor),
-                        new Point((rect.x+rect.width)*scalingFactor,(rect.y+rect.height)*scalingFactor),
+                        new Point(rect.x,rect.y),
+                        new Point(rect.x+rect.width,rect.y+rect.height),
                         new Scalar(255, 0, 0, 255), 3);
             }
+
+            Imgproc.resize(gray,gray, new org.opencv.core.Size(src.width(),src.height()));
 
             return gray;
         }
