@@ -2,8 +2,12 @@ package com.grouph.ces.carby.volume_estimation;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.JavaCameraView;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfInt;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -13,14 +17,21 @@ import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.Size;
+import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 public class CameraView extends JavaCameraView implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
 
     private static final String TAG = "myCameraView";
+
+    private int counter = 0;
 
     private int boxSize = 300;
     private Point p1;
@@ -80,9 +91,76 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         mCamera.startPreview();
     }
 
+    private class FindRefObjectTask extends AsyncTask<Mat, Void, Mat> {
+
+        @Override
+        protected Mat doInBackground(Mat... mats) {
+            Mat src = mats[0];
+            Mat blurred = src.clone();
+            Imgproc.medianBlur(src, blurred, 9);
+
+            Mat gray0 = new Mat(blurred.size(), CvType.CV_8U), gray = new Mat();
+
+            List<MatOfPoint> contours = new ArrayList<>();
+            List<Mat> blurredChannel = new ArrayList<>();
+            blurredChannel.add(blurred);
+            List<Mat> gray0Channel = new ArrayList<>();
+            gray0Channel.add(gray0);
+
+            MatOfPoint2f approxCurve;
+            double maxArea = 2500;
+            int maxId = -1;
+
+            for (int c = 0; c < 3; c++) {
+                int ch[] = { c, 0 };
+
+                Core.mixChannels(blurredChannel, gray0Channel, new MatOfInt(ch));
+                Imgproc.Canny(gray0, gray, 10, 30, 3, true);
+
+                Imgproc.findContours(gray, contours, new Mat(),
+                        Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+                for (MatOfPoint contour : contours) {
+                    MatOfPoint2f temp = new MatOfPoint2f(contour.toArray());
+
+                    double area = Imgproc.contourArea(contour);
+                    approxCurve = new MatOfPoint2f();
+                    Imgproc.approxPolyDP(temp, approxCurve,
+                            Imgproc.arcLength(temp, true) * 0.02, true);
+                    if (approxCurve.total() == 4 && area >= maxArea) {
+                        maxArea = area;
+                        maxId = contours.indexOf(contour);
+                    }
+                }
+            }
+
+            if(maxId >= 0) {
+                MatOfPoint points = new MatOfPoint(contours.get(maxId).toArray());
+                Rect rect = Imgproc.boundingRect(points);
+                // draw enclosing rectangle (all same color, but you could use variable i to make them unique)
+                Imgproc.rectangle(src,
+                        new Point(rect.x,rect.y),
+                        new Point(rect.x+rect.width,rect.y+rect.height),
+                        new Scalar(255, 0, 0, 255), 3);
+            }
+
+            return src;
+        }
+    }
+
+
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
+
+        try {
+            mRgba = new FindRefObjectTask().execute(mRgba).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
         Imgproc.rectangle(mRgba, p1, p2, boxColor, 3, Imgproc.LINE_AA,0);
         return mRgba;
     }
@@ -177,4 +255,12 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
         return false;
     }
+
+    static {
+        System.loadLibrary("native-lib");
+    }
+
+    public native void salt(long matAddrGray, int nbrElem);
+
+
 }
