@@ -4,7 +4,12 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.util.Log;
+
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,8 +24,8 @@ public class ImageProcessor {
 
     private Context context;
 
-    private Bitmap input1;
-    private Bitmap input2;
+    private Mat input1 = null;
+    private Mat input2 = null;
     private org.opencv.core.Rect boundingBox1;
     private org.opencv.core.Rect boundingBox2;
     private Bitmap output1;
@@ -36,13 +41,13 @@ public class ImageProcessor {
         this.algorithms = new ProcessingAlgorithms(context);
     }
 
-    public void addImage(Bitmap image, org.opencv.core.Rect boundingBox) {
+    public void addImage(Mat image, org.opencv.core.Rect boundingBox) {
         if(input1 == null) {
-            input1 = image;
+            input1 = image.clone();
             boundingBox1 = boundingBox;
         }
         else if (input2 == null) {
-            input2 = image;
+            input2 = image.clone();
             boundingBox2 = boundingBox;
         }
     }
@@ -89,13 +94,20 @@ public class ImageProcessor {
             // Do grab cut
             // Feature matching
             // ...
+
             if(input1 != null) {
-                output1 = algorithms.performGrabCut(input1, boundingBox1);
-                refObj1 = algorithms.performRefObjDetection(input1);
+                Mat grabCut = algorithms.performGrabCut(input1, boundingBox1);
+                output1 = algorithms.matToBitmap(grabCut);
+
+                Mat refDetect = algorithms.performRefObjDetection(input1);
+                refObj1 = algorithms.matToBitmap(refDetect);
             }
             if(input2 != null) {
-                output2 = algorithms.performGrabCut(input2, boundingBox2);
-                refObj2 = algorithms.performRefObjDetection(input2);
+                Mat grabCut = algorithms.performGrabCut(input2, boundingBox2);
+                output2 = algorithms.matToBitmap(grabCut);
+
+                Mat refDetect = algorithms.performRefObjDetection(input2);
+                refObj2 = algorithms.matToBitmap(refDetect);
             }
         }
 
@@ -117,7 +129,7 @@ public class ImageProcessor {
 
                 if(output2 != null) {
                     fOut = new FileOutputStream(out2);
-                    refObj2.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+                    refObj1.compress(Bitmap.CompressFormat.PNG, 100, fOut);
                     fOut.flush();
                     fOut.close();
                 }

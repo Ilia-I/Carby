@@ -43,7 +43,7 @@ import java.util.Date;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
 
-public final class CaptureActivity extends AppCompatActivity implements Camera.PictureCallback{
+public final class CaptureActivity extends AppCompatActivity {
 
     private static String TAG = "VolumeCapture";
 
@@ -81,7 +81,7 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
 
         FloatingActionButton captureButton = findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
-            mOpenCvCameraView.takePicture(this);
+            this.takePicture();
         });
 
         FloatingActionButton searchGallery = findViewById(R.id.search_gallery);
@@ -132,8 +132,6 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, mLoaderCallback);
-
-            imageProcessor = new ImageProcessor(this);
         } else {
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
@@ -169,8 +167,8 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
 //                    e.printStackTrace();
 //                }
 
-                imageProcessor.addImage(selectedImage, mOpenCvCameraView.getBoundingBox());
-                imagesTaken++;
+//                imageProcessor.addImage(selectedImage, mOpenCvCameraView.getBoundingBox());
+//                imagesTaken++;
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
                 Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
@@ -215,12 +213,8 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
         };
     }
 
-    @Override
-    public void onPictureTaken(byte[] data, Camera camera) {
-        Bitmap pictureTaken = BitmapFactory.decodeByteArray(data, 0, data.length);
-
-        imageProcessor.addImage(pictureTaken, mOpenCvCameraView.getBoundingBox());
-        mOpenCvCameraView.resetCamera();
+    public void takePicture() {
+        imageProcessor.addImage(mOpenCvCameraView.getOrignalFrame(), mOpenCvCameraView.getBoundingBox());
 
         if(++imagesTaken == 2) {
             mOpenCvCameraView.disableView();

@@ -25,6 +25,7 @@ import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.features2d.FeatureDetector;
 import org.opencv.features2d.Features2d;
 import org.opencv.imgproc.Imgproc;
@@ -41,7 +42,6 @@ public class ProcessingAlgorithms {
 
     private static String TAG = "ProcessingAlgorithms";
     private Scalar white = new Scalar(255,255,255);
-    private ArrayList<Bitmap> grabCutPictures = new ArrayList<>();
 
     private Mat mCameraMatrix = new Mat();
     private Mat mDistortionCoefficients = new Mat();
@@ -54,21 +54,19 @@ public class ProcessingAlgorithms {
             Log.e(TAG, "Camera not calibrated");
     }
 
-    public Bitmap performRefObjDetection(Bitmap input){
-        Bitmap scaledPicture = getScaledBitmap(input);
-        Mat origImage = performScaling(input,scaledPicture);
+    public Mat performRefObjDetection(Mat input){
+        Mat origImage = performScaling(input);
 
         Mat dst = new Mat(origImage.size(),CvType.CV_8UC3,white);
         Mat refObjMat =findRefObject(origImage);
         origImage.copyTo(dst,refObjMat);
-        dst=featureDetect(dst);
-        Utils.matToBitmap(dst, scaledPicture);
-        return scaledPicture;
+//        dst=featureDetect(dst);
+
+        return dst;
     }
 
-    public Bitmap performGrabCut(Bitmap input, Rect boundingBox) {
-        Bitmap scaledPicture = getScaledBitmap(input);
-        Mat origImage = performScaling(input,scaledPicture);
+    public Mat performGrabCut(Mat input, Rect boundingBox) {
+        Mat origImage = performScaling(input);
 
         // Initialise models, masks, foreground and background
         Mat background = new Mat(origImage.size(), CvType.CV_8UC3, white);
@@ -114,34 +112,29 @@ public class ProcessingAlgorithms {
         bgModel.release();
         fgModel.release();
         vals.release();
+//        dst=featureDetect(dst);
 
-        dst=featureDetect(dst);
-
-        //convert back to bitmap
-        Utils.matToBitmap(dst, scaledPicture);
-        return scaledPicture;
+        return dst;
     }
 
-    private Bitmap getScaledBitmap(Bitmap input){
-        Bitmap picture32 = input.copy(Bitmap.Config.ARGB_8888, true);
+    private Mat performScaling(Mat input){
+        Mat origImage = new Mat(input.width() / scalingFactor, input.height() / scalingFactor, CvType.CV_8UC3);
 
-        int scaledWidth = input.getWidth() / scalingFactor;
-        int scaledHeight = input.getHeight() / scalingFactor;
+        Imgproc.resize(input, origImage, new Size(input.width() / scalingFactor, input.height() / scalingFactor));
 
-        Bitmap scaledPicture = Bitmap.createScaledBitmap(picture32, scaledWidth, scaledHeight, false);
-
-        return scaledPicture;
-
-    }
-    private Mat performScaling(Bitmap input, Bitmap scaledPicture){
-        Mat origImage = new Mat(input.getWidth() / scalingFactor, input.getHeight() / scalingFactor, CvType.CV_8UC3);
-
-        // Place bitmap in origImage
-        Utils.bitmapToMat(scaledPicture, origImage);
         // Remove alpha channels from bitmap
-        Imgproc.cvtColor(origImage,origImage,Imgproc.COLOR_RGBA2RGB);
+        Imgproc.cvtColor(origImage, origImage, Imgproc.COLOR_RGBA2RGB);
 
         return origImage;
+    }
+
+    public Bitmap matToBitmap(Mat input) {
+        Imgproc.resize(input, input, new Size(input.width() * scalingFactor, input.height() * scalingFactor));
+
+        Bitmap bitmap = Bitmap.createBitmap(input.cols(), input.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(input, bitmap);
+
+        return bitmap;
     }
 
     private Mat grayImg(Mat img){
