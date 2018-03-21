@@ -31,9 +31,13 @@ public class NutritionResultActivity extends AppCompatActivity {
             }
         }
 
+        TextView mFatVal = findViewById(R.id.carb_val);
+        TextView mSaturatesVal = findViewById(R.id.carb_sugars_val);
         TextView mCarbVal = findViewById(R.id.carb_val);
         TextView mCarbSugarsVal = findViewById(R.id.carb_sugars_val);
 
+        mFatVal.setText(Double.toString((nutritionTable.getFats().getTotal())) + nutritionTable.getFatsUnit());
+        mSaturatesVal.setText(Double.toString((nutritionTable.getFats().getContentOf("saturates")))  + nutritionTable.getFatsUnit());
         mCarbVal.setText(Double.toString(nutritionTable.getCarbohydrates().getTotal()) + nutritionTable.getCarbohydratesUnit());
         mCarbSugarsVal.setText(Double.toString(nutritionTable.getCarbohydrates().getContentOf("sugars")) + nutritionTable.getCarbohydratesUnit());
     }

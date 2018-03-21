@@ -54,13 +54,6 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
             nutritionTable.setComponent("sugars", 5);
             JSONObject jsonNutritionTable = nutritionTable.toJasonObject();
 
-//            try {
-//                INutritionTable nutritionTable2 = new NutritionTable();
-//                nutritionTable2.setAll(jsonNutritionTable);
-//            } catch (JSONException e){
-//                Log.e("Error", "JSONException error");
-//            }
-
             Intent intent = new Intent(this, NutritionResultActivity.class);
             intent.putExtra("jsonNutritionTable", jsonNutritionTable.toString());
             startActivity(intent);
