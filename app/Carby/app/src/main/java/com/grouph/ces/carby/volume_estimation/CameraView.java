@@ -134,10 +134,9 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
                     double area = Imgproc.contourArea(contour);
                     approxCurve = new MatOfPoint2f();
                     Imgproc.approxPolyDP(temp, approxCurve,
-                            Imgproc.arcLength(temp, true) * 0.05, true);
+                            Imgproc.arcLength(temp, true) * 0.07, true);
 
                     if (approxCurve.total() == 4 && area >= minArea && area <= maxArea) {
-                        Log.e(TAG, "doInBackground: "+area);
                         RotatedRect rect = Imgproc.minAreaRect(temp);
                         Point points[] = new Point[4];
                         rect.points(points);
@@ -150,7 +149,6 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
             }
 
             if(maxId >= 0) {
-
                 Imgproc.drawContours(output, contours, maxId, new Scalar(255, 0,0), 1);
                 Imgproc.resize(output,output, new org.opencv.core.Size(src.width(),src.height()));
                 return output;
