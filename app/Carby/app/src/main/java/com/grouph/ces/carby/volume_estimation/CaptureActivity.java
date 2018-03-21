@@ -58,8 +58,6 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
     private ImageProcessor imageProcessor;
 
     private int imagesTaken = 0;
-    private Bitmap b1;
-    private Bitmap b2;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -93,6 +91,8 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
         resetButton.setOnClickListener((view) -> {
             imagesTaken = 0;
         });
+
+        Toast.makeText(this, "Drag the corners to fit the image", Toast.LENGTH_LONG).show();
     }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
