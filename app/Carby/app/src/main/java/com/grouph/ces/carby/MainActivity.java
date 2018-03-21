@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 
-import com.grouph.ces.carby.barcodescanner.MainBarcodeActivity;
+import com.grouph.ces.carby.barcodescanner.BarcodeCaptureActivity;
 import com.grouph.ces.carby.ocr.OcrCaptureActivity;
 import com.grouph.ces.carby.volume_estimation.CaptureActivity;
 
@@ -36,8 +36,8 @@ public class MainActivity extends BaseActivity implements OnClickListener {
         int id = view.getId();
 
         if (id == R.id.colored_bar1) {
-            Intent myIntent1 = new Intent(this, MainBarcodeActivity.class);
-            startActivity(myIntent1);
+            Intent myIntent = new Intent(this, BarcodeCaptureActivity.class);
+            startActivity(myIntent);
             // Handle the camera action
         } else if (id == R.id.colored_bar2) {
             Intent ocr = new Intent(this, OcrCaptureActivity.class);
