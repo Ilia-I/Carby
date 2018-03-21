@@ -2,10 +2,15 @@ package com.grouph.ces.carby.volume_estimation;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.JavaCameraView;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfInt;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
@@ -13,14 +18,22 @@ import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.Size;
+import android.os.AsyncTask;
+import android.provider.ContactsContract;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 public class CameraView extends JavaCameraView implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
 
     private static final String TAG = "myCameraView";
+
+    private int counter = 0;
 
     private int boxSize = 300;
     private Point p1;
@@ -80,9 +93,94 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         mCamera.startPreview();
     }
 
+    private class FindRefObjectTask extends AsyncTask<Mat, Void, Mat> {
+
+        @Override
+        protected Mat doInBackground(Mat... mats) {
+            int scalingFactor =4;
+            Mat src = mats[0];
+            Mat blurred = new Mat();
+            Imgproc.resize(src,blurred, new org.opencv.core.Size(src.width()/scalingFactor,src.height()/scalingFactor));
+            Mat output = blurred.clone();
+
+            Imgproc.medianBlur(blurred, blurred, 7);
+
+            Mat gray0 = new Mat(blurred.size(), CvType.CV_8U), gray = new Mat();
+
+            List<MatOfPoint> contours = new ArrayList<>();
+            List<Mat> blurredChannel = new ArrayList<>();
+            blurredChannel.add(blurred);
+            List<Mat> gray0Channel = new ArrayList<>();
+            gray0Channel.add(gray0);
+
+            MatOfPoint2f approxCurve;
+            double minArea = 16000/(scalingFactor*scalingFactor);
+            double maxArea = 80000/(scalingFactor*scalingFactor);
+            int maxId = -1;
+
+            //find contours for all 3 channels
+            for (int c = 0; c < 3; c++) {
+                int ch[] = { c, 0 };
+
+                Core.mixChannels(blurredChannel, gray0Channel, new MatOfInt(ch));
+                Imgproc.Canny(gray0, gray, 15, 30, 3, true);
+                Imgproc.dilate(gray,gray,new Mat());
+                Imgproc.findContours(gray, contours, new Mat(),
+                        Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+
+                for (MatOfPoint contour : contours) {
+                    MatOfPoint2f temp = new MatOfPoint2f(contour.toArray());
+                    Imgproc.boundingRect(contour);
+                    double area = Imgproc.contourArea(contour);
+                    approxCurve = new MatOfPoint2f();
+                    Imgproc.approxPolyDP(temp, approxCurve,
+                            Imgproc.arcLength(temp, true) * 0.07, true);
+
+                    if (approxCurve.total() == 4 && area >= minArea && area <= maxArea) {
+                        RotatedRect rect = Imgproc.minAreaRect(temp);
+                        Point points[] = new Point[4];
+                        rect.points(points);
+                        if (checkRatio(points)){
+                            minArea = area;
+                            maxId = contours.indexOf(contour);
+                        }
+                    }
+                }
+            }
+
+            if(maxId >= 0) {
+                Imgproc.drawContours(output, contours, maxId, new Scalar(255, 0,0), 1);
+                Imgproc.resize(output,output, new org.opencv.core.Size(src.width(),src.height()));
+                return output;
+            }
+
+            return mats[0];
+        }
+    }
+
+    //checks if the ratio of the detected card is within the actual dimension limit
+    private boolean checkRatio(Point[] points){
+        double width = points[2].x-points[1].x;
+        double height = points[0].y-points[1].y;
+        double ratio = width/height;
+        if ((1.5<ratio && ratio<1.7) || (0.53<ratio && ratio<0.73)) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
+
+        try {
+            mRgba = new FindRefObjectTask().execute(mRgba).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
         Imgproc.rectangle(mRgba, p1, p2, boxColor, 3, Imgproc.LINE_AA,0);
         return mRgba;
     }
@@ -182,4 +280,13 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
         return false;
     }
+
+
+//    static {
+//        System.loadLibrary("native-lib");
+//    }
+//
+//    public native void salt(long matAddrGray, int nbrElem);
+
+
 }
