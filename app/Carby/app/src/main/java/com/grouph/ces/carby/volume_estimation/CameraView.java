@@ -18,6 +18,7 @@ import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.Size;
 import android.os.AsyncTask;
+import android.provider.ContactsContract;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -99,6 +100,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
             Mat src = mats[0];
             Mat blurred = new Mat();
             Imgproc.resize(src,blurred, new org.opencv.core.Size(src.width()/scalingFactor,src.height()/scalingFactor));
+            Mat output = blurred.clone();
 
             Imgproc.medianBlur(blurred, blurred, 7);
 
@@ -139,22 +141,12 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
             }
 
             if(maxId >= 0) {
-                MatOfPoint points = new MatOfPoint(contours.get(maxId).toArray());
-                Rect rect = Imgproc.boundingRect(points);
-                // draw enclosing rectangle (all same color, but you could use variable i to make them unique)
-//                Imgproc.rectangle(src,
-//                        new Point(rect.x*scalingFactor,rect.y*scalingFactor),
-//                        new Point((rect.x+rect.width)*scalingFactor,(rect.y+rect.height)*scalingFactor),
-//                        new Scalar(255, 0, 0, 255), 3);
-                Imgproc.rectangle(gray,
-                        new Point(rect.x,rect.y),
-                        new Point(rect.x+rect.width,rect.y+rect.height),
-                        new Scalar(255, 0, 0, 255), 3);
+                Imgproc.drawContours(output, contours, maxId, new Scalar(255, 0,0), 1);
+                Imgproc.resize(output,output, new org.opencv.core.Size(src.width(),src.height()));
+                return output;
             }
 
-            Imgproc.resize(gray,gray, new org.opencv.core.Size(src.width(),src.height()));
-
-            return gray;
+            return mats[0];
         }
     }
 
