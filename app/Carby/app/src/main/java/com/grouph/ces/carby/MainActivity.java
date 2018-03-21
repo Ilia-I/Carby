@@ -2,21 +2,12 @@ package com.grouph.ces.carby;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 
 import com.grouph.ces.carby.barcodescanner.MainBarcodeActivity;
-import com.grouph.ces.carby.camera_calibration.CameraCalibrationActivity;
 import com.grouph.ces.carby.ocr.OcrCaptureActivity;
 import com.grouph.ces.carby.volume_estimation.CaptureActivity;
 

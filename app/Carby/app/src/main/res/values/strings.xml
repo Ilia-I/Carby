@@ -44,4 +44,13 @@
     <string name="dialog_title_check_barcode">Scan Nutrition Table?</string>
     <string name="dialog_message_check_barcode">Nutrition information not found for scanned barcode. Do you wish to scan the package nutrition table and associate it with this barcode for future use?</string>
 
+    <!--Preferences-->
+    <string name="key_wipe_consume">pref_wipe_consume</string>
+    <string name="title_wipe_consume">Delete Consumption Data</string>
+    <string name="summary_wipe_consume">Erase all stored consumption history data.</string>
+    <string name="key_wipe_all">pref_wipe_all</string>
+    <string name="title_wipe_all">Delete App Data</string>
+    <string name="summary_wipe_all">Erase all stored consumption history and nutrition table scan data.</string>
+    <string name="dialog_message_wipe_all">Are you sure you want to permanently delete all stored application data?</string>
+    <string name="dialog_message_wipe_consume">Are you sure you want to permanently delete all consumption data?</string>
 </resources>
