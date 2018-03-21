@@ -43,9 +43,9 @@ import java.util.Date;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
 
-public final class CaptureActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, Camera.PictureCallback{
+public final class CaptureActivity extends AppCompatActivity implements Camera.PictureCallback{
 
-    private static String TAG = "VolumeCpature";
+    private static String TAG = "VolumeCapture";
 
     // Permission request codes need to be < 256
     private static final int RC_HANDLE_CAMERA_PERM = 2;
@@ -56,10 +56,6 @@ public final class CaptureActivity extends AppCompatActivity implements CameraBr
 
     private CameraView mOpenCvCameraView;
     private ImageProcessor imageProcessor;
-
-    private Mat mRgba;
-    private Mat mRgbaF;
-    private Mat mRgbaT;
 
     private int imagesTaken = 0;
     private Bitmap b1;
@@ -76,7 +72,8 @@ public final class CaptureActivity extends AppCompatActivity implements CameraBr
 
         mOpenCvCameraView = findViewById(R.id.camera_preview);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
-        mOpenCvCameraView.setCvCameraViewListener(this);
+        mOpenCvCameraView.setCvCameraViewListener(mOpenCvCameraView);
+        mOpenCvCameraView.setOnTouchListener(mOpenCvCameraView);
         if (rc == PackageManager.PERMISSION_GRANTED)
             mOpenCvCameraView.enableView();
         else
@@ -84,7 +81,7 @@ public final class CaptureActivity extends AppCompatActivity implements CameraBr
 
         FloatingActionButton captureButton = findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
-            mOpenCvCameraView.takePicture("Hello", this);
+            mOpenCvCameraView.takePicture(this);
         });
 
         FloatingActionButton searchGallery = findViewById(R.id.search_gallery);
@@ -172,7 +169,7 @@ public final class CaptureActivity extends AppCompatActivity implements CameraBr
 //                    e.printStackTrace();
 //                }
 
-                imageProcessor.addImage(selectedImage);
+                imageProcessor.addImage(selectedImage, mOpenCvCameraView.getBoundingBox());
                 imagesTaken++;
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -218,53 +215,21 @@ public final class CaptureActivity extends AppCompatActivity implements CameraBr
         };
     }
 
-
-    @Override
-    public void onCameraViewStarted(int width, int height) {
-        mRgba = new Mat(height,width, CvType.CV_8UC4);
-        mRgbaF = new Mat(height,width, CvType.CV_8UC4);
-        mRgbaT = new Mat(height,width, CvType.CV_8UC4);
-
-        mOpenCvCameraView.setResolution(1280,720);
-        mOpenCvCameraView.getPreviewSize();
-        mOpenCvCameraView.getPictureSize();
-    }
-
-    @Override
-    public void onCameraViewStopped() {
-        mRgba.release();
-    }
-
-
-    @Override
-    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        mRgba = inputFrame.rgba();
-
-//        Core.transpose(mRgba, mRgbaT);
-//        Imgproc.resize(mRgbaT,mRgbaF,mRgbaF.size(),0,0,0);
-//        Core.flip(mRgbaF, mRgba,1);
-
-        int box = 300;
-
-        org.opencv.core.Point p1 = new org.opencv.core.Point((mRgba.size().width-box)/2,(mRgba.size().height-box)/2);
-        org.opencv.core.Point p2 = new org.opencv.core.Point((mRgba.size().width+box)/2, (mRgba.size().height+box)/2);
-        Imgproc.rectangle(mRgba, p1, p2, new Scalar(255,255,0));
-        return mRgba;
-    }
-
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
         Bitmap pictureTaken = BitmapFactory.decodeByteArray(data, 0, data.length);
 
-        imageProcessor.addImage(pictureTaken);
+        imageProcessor.addImage(pictureTaken, mOpenCvCameraView.getBoundingBox());
+        mOpenCvCameraView.resetCamera();
 
         if(++imagesTaken == 2) {
             mOpenCvCameraView.disableView();
             imageProcessor.processImages();
         }
 
-        if(imagesTaken == 1)
+        if(imagesTaken == 1) {
             Toast.makeText(this, "Captured 1st image", Toast.LENGTH_SHORT).show();
+        }
         else
             Toast.makeText(this, "Captured 2nd image", Toast.LENGTH_SHORT).show();
     }

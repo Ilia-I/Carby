@@ -34,23 +34,26 @@
             android:id="@+id/imageView2"
             android:layout_width="80dp"
             android:layout_height="73dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/ic_barcode_icon"
-            app:layout_constraintBottom_toTopOf="@+id/label_barcode2"
+            app:layout_constraintBottom_toBottomOf="@+id/colored_bar1"
             app:layout_constraintEnd_toEndOf="@+id/colored_bar1"
-            app:layout_constraintStart_toStartOf="@+id/colored_bar1" />
+            app:layout_constraintStart_toStartOf="@+id/colored_bar1"
+            app:layout_constraintTop_toTopOf="@+id/colored_bar1" />
 
         <TextView
             android:id="@+id/label_barcode2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="28dp"
+            android:layout_marginBottom="10dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:fontFamily="@font/nunito_sans"
             android:text="Barcode Scanner"
             android:textColor="@android:color/white"
             android:textSize="20sp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/colored_bar1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -82,23 +85,25 @@
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/ic_table_white"
-            app:layout_constraintBottom_toTopOf="@+id/label_table2"
+            app:layout_constraintBottom_toBottomOf="@+id/colored_bar2"
             app:layout_constraintEnd_toEndOf="@+id/colored_bar2"
-            app:layout_constraintStart_toStartOf="@+id/colored_bar2" />
+            app:layout_constraintStart_toStartOf="@+id/colored_bar2"
+            app:layout_constraintTop_toTopOf="@+id/colored_bar2" />
 
         <TextView
             android:id="@+id/label_table2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="28dp"
+            android:layout_marginBottom="10dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:fontFamily="@font/nunito_sans"
             android:text="Nutrition Table Scanner"
             android:textColor="@android:color/white"
             android:textSize="20sp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/colored_bar2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -132,23 +137,25 @@
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/ic_cube"
-            app:layout_constraintBottom_toTopOf="@+id/label_volume2"
+            app:layout_constraintBottom_toBottomOf="@+id/colored_bar3"
             app:layout_constraintEnd_toEndOf="@+id/colored_bar3"
-            app:layout_constraintStart_toStartOf="@+id/colored_bar3" />
+            app:layout_constraintStart_toStartOf="@+id/colored_bar3"
+            app:layout_constraintTop_toTopOf="@+id/colored_bar3" />
 
         <TextView
             android:id="@+id/label_volume2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="28dp"
+            android:layout_marginBottom="10dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:fontFamily="@font/nunito_sans"
             android:text="Volume Estimation"
             android:textColor="@android:color/white"
             android:textSize="20sp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/colored_bar3"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 

@@ -33,7 +33,12 @@ import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.database.AppDatabase;
 import com.grouph.ces.carby.database.NutritionDataDB;
 import com.grouph.ces.carby.nutrition_data.INutritionTable;
+import com.grouph.ces.carby.nutrition_data.NutritionResultActivity;
 import com.grouph.ces.carby.ocr.OcrCaptureActivity;
+
+import org.json.JSONObject;
+
+import java.util.concurrent.ExecutionException;
 
 /**
  * Main activity demonstrating how to pass extra parameters to an activity that
@@ -67,6 +72,11 @@ public class MainBarcodeActivity extends AppCompatActivity implements View.OnCli
 
         //TODO async if slow
         db = Room.databaseBuilder(getApplicationContext() ,AppDatabase.class,"myDB").allowMainThreadQueries().build();
+
+        Intent intent = new Intent(this, BarcodeCaptureActivity.class);
+        intent.putExtra(BarcodeCaptureActivity.AutoFocus, true);
+
+        startActivityForResult(intent, RC_BARCODE_CAPTURE);
     }
 
     /**
@@ -147,7 +157,7 @@ public class MainBarcodeActivity extends AppCompatActivity implements View.OnCli
                 result = data.getNt();
                 if (result != null) {
                     Log.d("OcrDetectorProcessor", "Loaded Table:\n" + result);
-                    //TODO display INutritionTable
+                    sendToNutritionResult(result);
                     barcodeHeader.setText(R.string.barcode_found_localDB);
                     productResult.setText(result.toString());
                     productResult.setVisibility(View.VISIBLE);
@@ -156,9 +166,17 @@ public class MainBarcodeActivity extends AppCompatActivity implements View.OnCli
             }
 
             //TODO 2. check open food facts database (get info about result and set result variable)
-            BarcodeLookup barcodeLookup = new BarcodeLookup(barcodeHeader, productResult, progressBar);
-            barcodeLookup.execute(barcode);
+            BarcodeLookup barcodeLookup = new BarcodeLookup();
+            try {
+                result = barcodeLookup.execute(barcode).get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
             if(result!=null){
+                sendToNutritionResult(result);
+                Log.e("", result.toString());
                 productResult.setText(result.toString());
                 productResult.setVisibility(View.VISIBLE);
                 return;
@@ -168,6 +186,14 @@ public class MainBarcodeActivity extends AppCompatActivity implements View.OnCli
             startOCR(barcode.displayValue);
             return;
         }
+    }
+
+    private void sendToNutritionResult(INutritionTable result) {
+        JSONObject jsonNutritionTable = result.toJasonObject();
+
+        Intent intent = new Intent(this, NutritionResultActivity.class);
+        intent.putExtra("jsonNutritionTable", jsonNutritionTable.toString());
+        startActivity(intent);
     }
 
     private void startOCR(String barcode) {
