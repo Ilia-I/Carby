@@ -121,6 +121,11 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         int touchX = (int) motionEvent.getX() - r.centerX() + (int) mRgba.size().width/2;
         int touchY = (int) motionEvent.getY() - r.centerY() + (int) mRgba.size().height/2;
 
+        touchX = touchX >= 1280 ? 1280 : touchX;
+        touchX = touchX <= 0 ? 0 : touchX;
+        touchY= touchY >= 720 ? 720 : touchY;
+        touchY = touchY <= 0 ? 0 : touchY;
+
         Corner c = getCornerTouch(touchX, touchY);
         if(c == null)
             return true;
