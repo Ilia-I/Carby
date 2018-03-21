@@ -10,6 +10,7 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
@@ -111,7 +112,8 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
             gray0Channel.add(gray0);
 
             MatOfPoint2f approxCurve;
-            double minArea = 2500/scalingFactor;
+            double minArea = 16000/(scalingFactor*scalingFactor);
+            double maxArea = 80000/(scalingFactor*scalingFactor);
             int maxId = -1;
 
             //find contours for all 3 channels
@@ -120,20 +122,27 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
                 Core.mixChannels(blurredChannel, gray0Channel, new MatOfInt(ch));
                 Imgproc.Canny(gray0, gray, 15, 30, 3, true);
-
+                Imgproc.dilate(gray,gray,new Mat());
                 Imgproc.findContours(gray, contours, new Mat(),
                         Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 
                 for (MatOfPoint contour : contours) {
                     MatOfPoint2f temp = new MatOfPoint2f(contour.toArray());
-
+                    Imgproc.boundingRect(contour);
                     double area = Imgproc.contourArea(contour);
                     approxCurve = new MatOfPoint2f();
                     Imgproc.approxPolyDP(temp, approxCurve,
                             Imgproc.arcLength(temp, true) * 0.05, true);
-                    if (approxCurve.total() == 4 && area >= minArea) {
-                        minArea = area;
-                        maxId = contours.indexOf(contour);
+
+                    if (approxCurve.total() == 4 && area >= minArea && area <= maxArea) {
+                        Log.e(TAG, "doInBackground: "+area);
+                        RotatedRect rect = Imgproc.minAreaRect(temp);
+                        Point points[] = new Point[4];
+                        rect.points(points);
+                        if (checkRatio(points)){
+                            minArea = area;
+                            maxId = contours.indexOf(contour);
+                        }
                     }
                 }
             }
@@ -141,11 +150,6 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
             if(maxId >= 0) {
                 MatOfPoint points = new MatOfPoint(contours.get(maxId).toArray());
                 Rect rect = Imgproc.boundingRect(points);
-                // draw enclosing rectangle (all same color, but you could use variable i to make them unique)
-//                Imgproc.rectangle(src,
-//                        new Point(rect.x*scalingFactor,rect.y*scalingFactor),
-//                        new Point((rect.x+rect.width)*scalingFactor,(rect.y+rect.height)*scalingFactor),
-//                        new Scalar(255, 0, 0, 255), 3);
                 Imgproc.rectangle(gray,
                         new Point(rect.x,rect.y),
                         new Point(rect.x+rect.width,rect.y+rect.height),
@@ -158,6 +162,16 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         }
     }
 
+    //checks if the ratio of the detected card is within the actual dimension limit
+    private boolean checkRatio(Point[] points){
+        double width = points[2].x-points[1].x;
+        double height = points[0].y-points[1].y;
+        double ratio = width/height;
+        if ((1.5<ratio && ratio<1.7) || (0.53<ratio && ratio<0.73)) {
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
@@ -265,6 +279,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
         return false;
     }
+
 
 //    static {
 //        System.loadLibrary("native-lib");
