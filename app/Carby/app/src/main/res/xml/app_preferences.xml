@@ -23,4 +23,15 @@
 
     </android.support.v7.preference.PreferenceCategory>
 
+    <android.support.v7.preference.PreferenceCategory android:title="Storage">
+        <Preference
+            android:key="@string/key_wipe_consume"
+            android:title="@string/title_wipe_consume"
+            android:summary="@string/summary_wipe_consume"/>
+        <Preference
+            android:key="@string/key_wipe_all"
+            android:title="@string/title_wipe_all"
+            android:summary="@string/summary_wipe_all"/>
+    </android.support.v7.preference.PreferenceCategory>
+
 </android.support.v7.preference.PreferenceScreen>
