@@ -41,8 +41,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     private Scalar boxColor;
 
     private Mat mRgba;
-    private Mat mRgbaF;
-    private Mat mRgbaT;
+    private Mat orignalFrame;
 
     private enum Corner { TP_LEFT, TP_RIGHT, BTM_LEFT, BTM_RIGHT }
 
@@ -73,24 +72,6 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
                 " x " + mCamera.getParameters().getPreviewSize().height);
 
         mCamera.setPreviewCallback(this);
-    }
-
-
-    public void takePicture(PictureCallback callback) {
-        Log.e(TAG, "Taking picture");
-        // Postview and jpeg are sent in the same buffers if the queue is not empty when performing a capture.
-        // Clear up buffers to avoid mCamera.takePicture to be stuck because of a memory issue
-        mCamera.setPreviewCallback(null);
-        mCamera.takePicture(null, null, callback);
-//        mCamera.startPreview();
-    }
-
-    public void resetCamera() {
-//        disconnectCamera();
-//        connectCamera(getWidth(),getHeight());
-        mCamera.stopPreview();
-        mCamera.setPreviewCallback(this);
-        mCamera.startPreview();
     }
 
     private class FindRefObjectTask extends AsyncTask<Mat, Void, Mat> {
@@ -159,18 +140,24 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     }
 
     //checks if the ratio of the detected card is within the actual dimension limit
-    private boolean checkRatio(Point[] points){
-        double width = points[2].x-points[1].x;
-        double height = points[0].y-points[1].y;
-        double ratio = width/height;
-        if ((1.5<ratio && ratio<1.7) || (0.53<ratio && ratio<0.73)) {
+    private boolean checkRatio(Point[] points) {
+        double width = points[2].x - points[1].x;
+        double height = points[0].y - points[1].y;
+        double ratio = width / height;
+        if ((1.5 < ratio && ratio < 1.7) || (0.53 < ratio && ratio < 0.73)) {
             return true;
         }
         return false;
+
+    }
+
+    public Mat getFrame() {
+        return orignalFrame;
     }
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        orignalFrame = inputFrame.rgba().clone();
         mRgba = inputFrame.rgba();
 
         try {
@@ -188,8 +175,6 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     @Override
     public void onCameraViewStarted(int width, int height) {
         mRgba = new Mat(height,width, CvType.CV_8UC4);
-        mRgbaF = new Mat(height,width, CvType.CV_8UC4);
-        mRgbaT = new Mat(height,width, CvType.CV_8UC4);
 
         setResolution(1280,720);
 
@@ -280,13 +265,5 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
         return false;
     }
-
-
-//    static {
-//        System.loadLibrary("native-lib");
-//    }
-//
-//    public native void salt(long matAddrGray, int nbrElem);
-
 
 }
