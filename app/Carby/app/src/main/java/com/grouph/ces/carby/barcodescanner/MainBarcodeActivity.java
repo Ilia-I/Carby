@@ -35,6 +35,8 @@ import com.grouph.ces.carby.database.NutritionDataDB;
 import com.grouph.ces.carby.nutrition_data.INutritionTable;
 import com.grouph.ces.carby.ocr.OcrCaptureActivity;
 
+import java.util.concurrent.ExecutionException;
+
 /**
  * Main activity demonstrating how to pass extra parameters to an activity that
  * reads barcodes.
@@ -161,9 +163,16 @@ public class MainBarcodeActivity extends AppCompatActivity implements View.OnCli
             }
 
             //TODO 2. check open food facts database (get info about result and set result variable)
-            BarcodeLookup barcodeLookup = new BarcodeLookup(barcodeHeader, productResult, progressBar);
-            barcodeLookup.execute(barcode);
+            BarcodeLookup barcodeLookup = new BarcodeLookup();
+            try {
+                result = barcodeLookup.execute(barcode).get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
             if(result!=null){
+                Log.e("", result.toString());
                 productResult.setText(result.toString());
                 productResult.setVisibility(View.VISIBLE);
                 return;

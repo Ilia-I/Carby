@@ -1,16 +1,15 @@
 package com.grouph.ces.carby.barcodescanner;
 
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.grouph.ces.carby.nutrition_data.INutritionTable;
+import com.grouph.ces.carby.nutrition_data.NutritionTable;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -18,35 +17,17 @@ import java.net.URL;
 
 /**
  * Created by George on 15/02/2018.
- *
+ * <p>
  * Class for the OpenFoodFacts look-up of scanned barcode
  */
 
-public class BarcodeLookup extends AsyncTask<Barcode, Void, JsonElement> {
-
-    private TextView barcodeHeader;
-    private TextView productResult;
-    private ProgressBar progressBar;
-
-    public BarcodeLookup(TextView barcodeHeader, TextView productResult, ProgressBar progressBar){
-        this.barcodeHeader = barcodeHeader;
-        this.productResult = productResult;
-        this.progressBar = progressBar;
-    }
+public class BarcodeLookup extends AsyncTask<Barcode, Void, INutritionTable> {
 
     @Override
-    protected  void onPreExecute(){
-        progressBar.setVisibility(View.VISIBLE);
-        barcodeHeader.setText("Searching Open Food Facts database");
-        productResult.setVisibility(View.GONE);
-    }
-
-    @Override
-    protected JsonElement doInBackground(Barcode... barcode){
+    protected INutritionTable doInBackground(Barcode... barcode) {
         String DataURL = "https://world.openfoodfacts.org/api/v0/product/";
         DataURL += barcode[0].displayValue + ".json";
         //DataURL += "50457236.json";
-        //TODO change back to actual barcode value and not test value
 
         try {
             URL url = new URL(DataURL);
@@ -60,60 +41,74 @@ public class BarcodeLookup extends AsyncTask<Barcode, Void, JsonElement> {
 
             int status = root.getAsJsonObject().get("status").getAsInt();
 
-            if(status==0){
+            if (status == 0) {
                 return null;
-            }else{
-                return root;
+            } else {
+                if (root != null) {
+                    try {
+                        JsonElement product = root.getAsJsonObject().get("product");
+                        JsonElement nutrients = product.getAsJsonObject().get("nutriments");
+
+                        String productName = product.getAsJsonObject().get("product_name").toString().replace("\"", "");
+                        String servingSize = product.getAsJsonObject().get("serving_size").toString().replace("\"", "");
+
+                        double energy100g = getNutrientValue(nutrients, "energy_100g");
+
+                        double fat100g = getNutrientValue(nutrients, "fat_100g");
+                        double monoUnsatFat100g = getNutrientValue(nutrients, "monounsaturated-fat_100g");
+                        double polyUnsatFat100g = getNutrientValue(nutrients, "polyunsaturated-fat_100g");
+                        double saturatedFat100g = getNutrientValue(nutrients, "satured-fat_100g");
+
+                        double carbohydrate100g = getNutrientValue(nutrients, "carbohydrates_100g");
+                        double sugars100g = getNutrientValue(nutrients, "sugars_100g");
+                        double polyols100g = getNutrientValue(nutrients, "polyols_100g");
+                        double starch100g = getNutrientValue(nutrients, "starch_100g");
+
+                        double fibre100g = getNutrientValue(nutrients, "fiber_100g");
+                        double protein100g = getNutrientValue(nutrients, "proteins_100g");
+                        double salt100g = getNutrientValue(nutrients, "sodium_100g");
+
+                        INutritionTable nutritionTable = new NutritionTable();
+                        nutritionTable.setComponent("Energy", energy100g);
+                        nutritionTable.setComponent("Fat", fat100g);
+                        nutritionTable.setComponent("mono-unsaturates", monoUnsatFat100g);
+                        nutritionTable.setComponent("polyunsaturates", polyUnsatFat100g);
+                        nutritionTable.setComponent("saturates", saturatedFat100g);
+
+                        nutritionTable.setComponent("Carbohydrate", carbohydrate100g);
+                        nutritionTable.setComponent("sugars", sugars100g);
+                        nutritionTable.setComponent("polyols", polyols100g);
+                        nutritionTable.setComponent("starch", starch100g);
+
+                        nutritionTable.setComponent("Fibre", fibre100g);
+                        nutritionTable.setComponent("Protein", protein100g);
+                        nutritionTable.setComponent("Salt", salt100g);
+
+                        return nutritionTable;
+
+                    } catch (NumberFormatException e) {
+                        Log.e("Tag", "This is not good, product may be missing information: " + e.toString() + "\n");
+                        return null;
+                    }
+                } else {
+                    return null;
+                }
             }
 
-        } catch (Exception e){
+        } catch (IOException e) {
             Log.e("Tag", "Likely could not connect to internet/server: " + e.toString());
         }
-
         return null;
     }
 
-    @Override
-    protected void onPostExecute(JsonElement root){
-        if( root!= null) {
-            try {
-                String rootStr = root.toString();
-                JsonElement product = root.getAsJsonObject().get("product");
-                JsonElement nutrients = product.getAsJsonObject().get("nutriments");
-
-                String productName = product.getAsJsonObject().get("product_name").toString().replace("\"", "");
-                String servingSize = product.getAsJsonObject().get("serving_size").toString().replace("\"", "");
-                String carbsPerServing = nutrients.getAsJsonObject().get("carbohydrates_serving").toString();
-
-
-                Log.i("Tag", "Connection established...");
-                Log.i("Tag", rootStr);
-
-                Log.i("Tag", productName);
-                Log.i("Tag", servingSize);
-                Log.i("Tag", carbsPerServing);
-
-                String result = carbsPerServing + "g carbohydrates per " + servingSize + " serving";
-
-
-                barcodeHeader.setText(productName);
-                barcodeHeader.setTypeface(barcodeHeader.getTypeface(), Typeface.BOLD);
-                productResult.setText(result);
-
-                progressBar.setVisibility(View.GONE);
-                barcodeHeader.setVisibility(View.VISIBLE);
-                productResult.setVisibility(View.VISIBLE);
-            }catch(Exception e){
-                Log.e("Tag", "This is not good, product may be missing information: " + e.toString());
-                productNotFound();
-            }
-        }else{
-            productNotFound();
-        }
+    /* Returns -1.0 if null value */
+    private double getNutrientValue(JsonElement nutrients, String jsonName) {
+        JsonElement nullableText = nutrients.getAsJsonObject().get(jsonName);
+        return (nullableText == null) ? -1 : Double.parseDouble(nullableText.toString().replace("\"", ""));
     }
 
-    private void productNotFound(){
-        barcodeHeader.setText("Could not find product information");
-        progressBar.setVisibility(View.GONE);
+    @Override
+    protected void onPostExecute(INutritionTable nutritionTable) {
+        super.onPostExecute(nutritionTable);
     }
 }
