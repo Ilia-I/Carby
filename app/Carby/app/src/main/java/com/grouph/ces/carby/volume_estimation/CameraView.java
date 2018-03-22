@@ -122,8 +122,8 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
                         Point points[] = new Point[4];
                         rect.points(points);
                         if (checkRatio(points)){
-                            minArea = area;
                             maxId = contours.indexOf(contour);
+                            Log.e(TAG, "doInBackground: "+area);
                         }
                     }
                 }
@@ -139,12 +139,65 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         }
     }
 
+    private class FindPound extends AsyncTask<Mat, Void, Mat> {
+
+        @Override
+        protected Mat doInBackground(Mat... mats) {
+            int scalingFactor =4;
+            Mat src = mats[0];
+            Mat output = src.clone();
+            Mat blurred = new Mat();
+            Imgproc.resize(src,blurred, new org.opencv.core.Size(src.width()/scalingFactor,src.height()/scalingFactor));
+
+            Imgproc.medianBlur(blurred, blurred, 5);
+
+            Mat gray0 = new Mat(blurred.size(), CvType.CV_8U);
+
+            Mat circles=new Mat();
+            List<Mat> blurredChannel = new ArrayList<>();
+            blurredChannel.add(blurred);
+            List<Mat> gray0Channel = new ArrayList<>();
+            gray0Channel.add(gray0);
+
+            double minArea = 16000/(scalingFactor*scalingFactor);
+            double maxArea = 80000/(scalingFactor*scalingFactor);
+
+            for (int c = 0; c < 3; c++) {
+                int ch[] = { c, 0 };
+
+                Core.mixChannels(blurredChannel, gray0Channel, new MatOfInt(ch));
+                Imgproc.HoughCircles(gray0,circles, Imgproc.HOUGH_GRADIENT,2,500/scalingFactor,200,50,20/scalingFactor,100/scalingFactor);
+                double x = 0.0;
+                double y = 0.0;
+                int r = 0;
+
+                if (circles.rows()>0)
+                {
+                    double[] data = circles.get(0, 0);
+                    for(int j = 0 ; j < data.length ; j++){
+                        x = data[0]*scalingFactor;
+                        y = data[1]*scalingFactor;
+                        r = (int) data[2]*scalingFactor;
+                    }
+                    Point center = new Point(x,y);
+                    // circle center
+                    Imgproc.circle( output, center, 3, new Scalar(0,255,0), -1);
+                    // circle outline
+                    Imgproc.circle( output, center, r, new Scalar(255,0,0), 1);
+
+                }
+            }
+
+            return output;
+        }
+    }
+
     //checks if the ratio of the detected card is within the actual dimension limit
     private boolean checkRatio(Point[] points) {
         double width = points[2].x - points[1].x;
         double height = points[0].y - points[1].y;
         double ratio = width / height;
-        if ((1.5 < ratio && ratio < 1.7) || (0.53 < ratio && ratio < 0.73)) {
+        if ((1.55 < ratio && ratio < 1.65) || (0.58 < ratio && ratio < 0.68)) {
             return true;
         }
         return false;
@@ -161,7 +214,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         mRgba = inputFrame.rgba();
 
         try {
-            mRgba = new FindRefObjectTask().execute(mRgba).get();
+            mRgba = new FindPound().execute(mRgba).get();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
