@@ -38,7 +38,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
@@ -56,6 +58,7 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
 
     private CameraView mOpenCvCameraView;
     private ImageProcessor imageProcessor;
+    private List<Bitmap> userSelectedImageBitmapList = null;
 
     private int imagesTaken = 0;
 
@@ -160,6 +163,19 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
                 final InputStream imageStream = getContentResolver().openInputStream(imageUri);
                 final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
 
+                if(userSelectedImageBitmapList == null)
+                {
+                    userSelectedImageBitmapList = new ArrayList<Bitmap>();
+                }
+                userSelectedImageBitmapList.add(selectedImage);
+                if(userSelectedImageBitmapList.size() == 2) {
+                    imageProcessor.addImage(userSelectedImageBitmapList.get(0), mOpenCvCameraView.getBoundingBox());
+                    imageProcessor.addImage(userSelectedImageBitmapList.get(1), mOpenCvCameraView.getBoundingBox());
+                    mOpenCvCameraView.disableView();
+                    imageProcessor.processImages();
+                    userSelectedImageBitmapList = null;
+                }
+
 //                try {
 //                    File newFile = ProcessingAlgorithms.getOutputMediaFile(MEDIA_TYPE_IMAGE);
 //                    FileOutputStream fos = new FileOutputStream(newFile);
@@ -168,9 +184,6 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
 //                } catch (IOException e) {
 //                    e.printStackTrace();
 //                }
-
-                imageProcessor.addImage(selectedImage, mOpenCvCameraView.getBoundingBox());
-                imagesTaken++;
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
                 Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
