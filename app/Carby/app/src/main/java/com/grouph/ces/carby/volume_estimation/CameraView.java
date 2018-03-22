@@ -38,10 +38,16 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     private int boxSize = 300;
     private Point p1;
     private Point p2;
-    private Scalar boxColor;
+    private Scalar boxColor = new Scalar(255, 255,0);
 
     private Mat mRgba;
     private Mat orignalFrame;
+
+    private boolean refObjectDetected = false;
+
+    public boolean isRefObjectDetected() {
+        return refObjectDetected;
+    }
 
     private enum Corner { TP_LEFT, TP_RIGHT, BTM_LEFT, BTM_RIGHT }
 
@@ -78,7 +84,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
         @Override
         protected Mat doInBackground(Mat... mats) {
-            int scalingFactor =4;
+            int scalingFactor = 4;
             Mat src = mats[0];
             Mat blurred = new Mat();
             Imgproc.resize(src,blurred, new org.opencv.core.Size(src.width()/scalingFactor,src.height()/scalingFactor));
@@ -130,13 +136,16 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
             }
 
             if(maxId >= 0) {
+                refObjectDetected = true;
                 Imgproc.drawContours(output, contours, maxId, new Scalar(255, 0,0), 1);
                 Imgproc.resize(output,output, new org.opencv.core.Size(src.width(),src.height()));
                 return output;
             }
 
+            refObjectDetected = false;
             return mats[0];
         }
+
     }
 
     private class FindPound extends AsyncTask<Mat, Void, Mat> {
@@ -222,6 +231,10 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         }
 
         Imgproc.rectangle(mRgba, p1, p2, boxColor, 3, Imgproc.LINE_AA,0);
+        Imgproc.circle(mRgba, p1, 20, boxColor, 3);
+        Imgproc.circle(mRgba, new Point(p2.x, p1.y), 20, boxColor, 3);
+        Imgproc.circle(mRgba, new Point(p1.x, p2.y), 20, boxColor, 3);
+        Imgproc.circle(mRgba, p2, 20, boxColor, 3);
         return mRgba;
     }
 
@@ -247,8 +260,8 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         p1 = new Point((mRgba.size().width-boxSize)/2,(mRgba.size().height-boxSize)/2);
         p2 = new Point((mRgba.size().width+boxSize)/2, (mRgba.size().height+boxSize)/2);
         boxColor = new Scalar(255, 255,0);
-    }
 
+    }
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {

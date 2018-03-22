@@ -24,6 +24,7 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.features2d.FeatureDetector;
@@ -52,17 +53,6 @@ public class ProcessingAlgorithms {
             Log.e(TAG, "Camera calibrated: " + mCameraMatrix.toString());
         } else
             Log.e(TAG, "Camera not calibrated");
-    }
-
-    public Mat performRefObjDetection(Mat input){
-        Mat origImage = performScaling(input);
-
-        Mat dst = new Mat(origImage.size(),CvType.CV_8UC3,white);
-        Mat refObjMat =findRefObject(origImage);
-        origImage.copyTo(dst,refObjMat);
-//        dst=featureDetect(dst);
-
-        return dst;
     }
 
     public Mat performGrabCut(Mat input, Rect boundingBox) {
@@ -156,9 +146,12 @@ public class ProcessingAlgorithms {
         return img;
     }
 
-    private Mat findRefObject(Mat src) {
-        Mat blurred = src.clone();
-        Imgproc.medianBlur(src, blurred, 9);
+    public Mat findRefObject(Mat src) {
+        Log.e(TAG, "findRefObject: " + src.size().toString());
+        int scalingFactor = 4;
+        Mat blurred = new Mat();
+        Imgproc.resize(src, blurred, new org.opencv.core.Size(src.width()/scalingFactor,src.height()/scalingFactor));
+        Imgproc.medianBlur(blurred, blurred, 7);
 
         Mat gray0 = new Mat(blurred.size(), CvType.CV_8U), gray = new Mat();
 
@@ -169,38 +162,63 @@ public class ProcessingAlgorithms {
         gray0Channel.add(gray0);
 
         MatOfPoint2f approxCurve;
-        double maxArea = 2500;
+        double minArea = 16000/(scalingFactor*scalingFactor);
+        double maxArea = 80000/(scalingFactor*scalingFactor);
         int maxId = -1;
 
+        //find contours for all 3 channels
         for (int c = 0; c < 3; c++) {
             int ch[] = { c, 0 };
 
             Core.mixChannels(blurredChannel, gray0Channel, new MatOfInt(ch));
-            Imgproc.Canny(gray0, gray, 10, 30, 3, true);
-
+            Imgproc.Canny(gray0, gray, 15, 30, 3, true);
+            Imgproc.dilate(gray, gray, new Mat());
             Imgproc.findContours(gray, contours, new Mat(),
-                    Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+                    Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 
             for (MatOfPoint contour : contours) {
                 MatOfPoint2f temp = new MatOfPoint2f(contour.toArray());
-
+                Imgproc.boundingRect(contour);
                 double area = Imgproc.contourArea(contour);
                 approxCurve = new MatOfPoint2f();
                 Imgproc.approxPolyDP(temp, approxCurve,
-                        Imgproc.arcLength(temp, true) * 0.02, true);
-                 if (approxCurve.total() == 4 && area >= maxArea) {
-                     maxArea = area;
-                     maxId = contours.indexOf(contour);
-                 }
+                        Imgproc.arcLength(temp, true) * 0.07, true);
+
+                if (approxCurve.total() == 4 && area >= minArea && area <= maxArea) {
+                    RotatedRect rect = Imgproc.minAreaRect(temp);
+                    Point points[] = new Point[4];
+                    rect.points(points);
+                    if (checkRatio(points)){
+                        minArea = area;
+                        maxId = contours.indexOf(contour);
+                    }
+                }
             }
         }
 
-        Mat mask = new Mat(src.size(), CvType.CV_8UC3,
-                new Scalar(0, 0, 0));
-        if (maxId >= 0) {
-            Imgproc.drawContours(mask, contours, maxId, white, -1);
+        Mat output = new Mat(src.rows()/scalingFactor, src.cols()/scalingFactor, CvType.CV_8UC3, new Scalar(255,255,255));
+        Log.e(TAG, "output 1 size: " + output.size().toString());
+
+        if(maxId >= 0) {
+            Imgproc.drawContours(output, contours, maxId, new Scalar(255, 0,0), 1);
+            Imgproc.resize(output, output, new org.opencv.core.Size(src.width(), src.height()));
+            Log.e(TAG, "output 2 size: " + output.size().toString());
+
+            return output;
         }
-        return mask;
+
+        return output;
+    }
+
+    private boolean checkRatio(Point[] points) {
+        double width = points[2].x - points[1].x;
+        double height = points[0].y - points[1].y;
+        double ratio = width / height;
+        if ((1.5 < ratio && ratio < 1.7) || (0.53 < ratio && ratio < 0.73)) {
+            return true;
+        }
+        return false;
+
     }
 
 }

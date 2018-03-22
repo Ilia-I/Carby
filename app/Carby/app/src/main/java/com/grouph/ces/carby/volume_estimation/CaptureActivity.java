@@ -20,11 +20,16 @@ import com.grouph.ces.carby.R;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
@@ -42,10 +47,9 @@ public final class CaptureActivity extends AppCompatActivity {
 
     private CameraView mOpenCvCameraView;
     private ImageProcessor imageProcessor;
+    private List<Mat> userSelectedImageBitmapList = null;
 
     private int imagesTaken = 0;
-    private Bitmap b1;
-    private Bitmap b2;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -67,7 +71,10 @@ public final class CaptureActivity extends AppCompatActivity {
 
         FloatingActionButton captureButton = findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
-            this.takePicture();
+            if(mOpenCvCameraView.isRefObjectDetected())
+                this.takePicture();
+            else
+                Toast.makeText(this, "No reference object detected", Toast.LENGTH_SHORT).show();
         });
 
         FloatingActionButton searchGallery = findViewById(R.id.search_gallery);
@@ -79,6 +86,8 @@ public final class CaptureActivity extends AppCompatActivity {
         resetButton.setOnClickListener((view) -> {
             imagesTaken = 0;
         });
+
+        Toast.makeText(this, "Drag the corners to fit the image", Toast.LENGTH_LONG).show();
     }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -143,6 +152,23 @@ public final class CaptureActivity extends AppCompatActivity {
                 final Uri imageUri = data.getData();
                 final InputStream imageStream = getContentResolver().openInputStream(imageUri);
                 final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                final Mat mat = new Mat();
+
+                Utils.bitmapToMat(selectedImage, mat);
+                if(userSelectedImageBitmapList == null)
+                {
+                    userSelectedImageBitmapList = new ArrayList<Mat>();
+                    Toast.makeText(this, "1st image chosen", Toast.LENGTH_LONG).show();
+                }
+                userSelectedImageBitmapList.add(mat);
+                if(userSelectedImageBitmapList.size() == 2) {
+                    Toast.makeText(this, "2nd image chosen", Toast.LENGTH_LONG).show();
+                    imageProcessor.addImage(userSelectedImageBitmapList.get(0), mOpenCvCameraView.getBoundingBox());
+                    imageProcessor.addImage(userSelectedImageBitmapList.get(1), mOpenCvCameraView.getBoundingBox());
+                    mOpenCvCameraView.disableView();
+                    imageProcessor.processImages();
+                    userSelectedImageBitmapList = null;
+                }
 
 //                try {
 //                    File newFile = ProcessingAlgorithms.getOutputMediaFile(MEDIA_TYPE_IMAGE);
@@ -153,8 +179,6 @@ public final class CaptureActivity extends AppCompatActivity {
 //                    e.printStackTrace();
 //                }
 
-//                imageProcessor.addImage(selectedImage, mOpenCvCameraView.getBoundingBox());
-//                imagesTaken++;
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
                 Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
