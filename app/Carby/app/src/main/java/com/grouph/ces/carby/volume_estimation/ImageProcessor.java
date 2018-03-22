@@ -165,7 +165,7 @@ public class ImageProcessor {
             File out1 = new File(context.getCacheDir(), "1.png");
             File out2 = new File(context.getCacheDir(), "2.png");
 
-            saveImages();
+            //saveImages();
 
             try {
                 FileOutputStream fOut;
