@@ -43,6 +43,12 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     private Mat mRgba;
     private Mat orignalFrame;
 
+    private boolean refObjectDetected = false;
+
+    public boolean isRefObjectDetected() {
+        return refObjectDetected;
+    }
+
     private enum Corner { TP_LEFT, TP_RIGHT, BTM_LEFT, BTM_RIGHT }
 
     public CameraView(Context context, AttributeSet attrs) {
@@ -78,7 +84,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
         @Override
         protected Mat doInBackground(Mat... mats) {
-            int scalingFactor =4;
+            int scalingFactor = 4;
             Mat src = mats[0];
             Mat blurred = new Mat();
             Imgproc.resize(src,blurred, new org.opencv.core.Size(src.width()/scalingFactor,src.height()/scalingFactor));
@@ -130,11 +136,13 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
             }
 
             if(maxId >= 0) {
+                refObjectDetected = true;
                 Imgproc.drawContours(output, contours, maxId, new Scalar(255, 0,0), 1);
                 Imgproc.resize(output,output, new org.opencv.core.Size(src.width(),src.height()));
                 return output;
             }
 
+            refObjectDetected = false;
             return mats[0];
         }
     }

@@ -67,7 +67,10 @@ public final class CaptureActivity extends AppCompatActivity {
 
         FloatingActionButton captureButton = findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
-            this.takePicture();
+            if(mOpenCvCameraView.isRefObjectDetected())
+                this.takePicture();
+            else
+                Toast.makeText(this, "No reference object detected", Toast.LENGTH_SHORT).show();
         });
 
         FloatingActionButton searchGallery = findViewById(R.id.search_gallery);
