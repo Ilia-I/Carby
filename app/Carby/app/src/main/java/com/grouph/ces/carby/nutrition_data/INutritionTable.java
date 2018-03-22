@@ -32,6 +32,7 @@ public interface INutritionTable {
 
     public List<String> listOfContents();
     public boolean setComponent(String name, double value);
+    public Double getComponentValue(String name);
 
     public boolean setEnergy(double value, @MeasurementUnit String unit);
     public boolean setFats(IComposite fats, @MeasurementUnit String unit);
