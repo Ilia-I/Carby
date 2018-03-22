@@ -166,9 +166,11 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
                 if(userSelectedImageBitmapList == null)
                 {
                     userSelectedImageBitmapList = new ArrayList<Bitmap>();
+                    Toast.makeText(this, "1st image chosen", Toast.LENGTH_LONG).show();
                 }
                 userSelectedImageBitmapList.add(selectedImage);
                 if(userSelectedImageBitmapList.size() == 2) {
+                    Toast.makeText(this, "2nd image chosen", Toast.LENGTH_LONG).show();
                     imageProcessor.addImage(userSelectedImageBitmapList.get(0), mOpenCvCameraView.getBoundingBox());
                     imageProcessor.addImage(userSelectedImageBitmapList.get(1), mOpenCvCameraView.getBoundingBox());
                     mOpenCvCameraView.disableView();
