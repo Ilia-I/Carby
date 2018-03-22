@@ -60,14 +60,14 @@ public class Composite implements IComposite {
     /**
      *
      * @param name
-     * @return contents of specified component or -1 if not found
+     * @return contents of specified component or null if not found
      */
     @Override
-    public double getContentOf(String name) {
+    public Double getContentOf(String name) {
         if(components.containsKey(name)) {
             return components.get(name);
         } else {
-            return 0;
+            return null;
         }
     }
 

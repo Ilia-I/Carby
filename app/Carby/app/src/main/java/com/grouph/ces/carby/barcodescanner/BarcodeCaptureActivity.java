@@ -518,22 +518,30 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
     private void startOCR(String barcode) {
         this.runOnUiThread(() -> {
+            mCameraSource.stop();
+            mPreview.stop();
+
             android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
 
             builder.setMessage(R.string.dialog_message_check_barcode);
             builder.setTitle(R.string.dialog_title_check_barcode);
 
-            builder.setPositiveButton(R.string.ok, (DialogInterface dialog, int id) -> {
+            builder.setPositiveButton(R.string.dialog_positive_check_barcode, (DialogInterface dialog, int id) -> {
                 Intent i = new Intent(getApplicationContext(), OcrCaptureActivity.class);
                 i.putExtra(getResources().getString(R.string.ocr_intent_barcode), barcode);
                 startActivity(i);
                 dialog.dismiss();
             });
             builder.setNegativeButton(R.string.cancel, (DialogInterface dialog, int id) -> {
+                // Lazy restart of scan on Cancel
+                Intent intent = new Intent (context, BarcodeCaptureActivity.class);
+                startActivity(intent);
                 dialog.dismiss();
             });
+            builder.setCancelable(false);
 
             android.support.v7.app.AlertDialog dialog = builder.create();
+            dialog.setCanceledOnTouchOutside(false);
             dialog.show();
         });
     }
