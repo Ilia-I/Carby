@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.util.Log;
 
 import org.opencv.core.Mat;
 
@@ -16,8 +15,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
 /**
  * Created by matthewball on 13/03/2018.
@@ -36,7 +33,6 @@ public class ImageProcessor {
     private Bitmap refObj1;
     private Bitmap refObj2;
 
-
     private ProcessingAlgorithms algorithms;
 
     public ImageProcessor(Context context) {
@@ -53,11 +49,6 @@ public class ImageProcessor {
             sideIn = image.clone();
             boundingBox2 = boundingBox;
         }
-    }
-
-    public void reset() {
-        topDownIn = null;
-        sideIn = null;
     }
 
     public void processImages() {

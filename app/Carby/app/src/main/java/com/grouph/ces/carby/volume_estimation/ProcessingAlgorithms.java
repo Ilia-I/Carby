@@ -147,7 +147,6 @@ public class ProcessingAlgorithms {
     }
 
     public Mat findRefObject(Mat src) {
-        Log.e(TAG, "findRefObject: " + src.size().toString());
         int scalingFactor = 4;
         Mat blurred = new Mat();
         Imgproc.resize(src, blurred, new org.opencv.core.Size(src.width()/scalingFactor,src.height()/scalingFactor));
@@ -197,13 +196,10 @@ public class ProcessingAlgorithms {
         }
 
         Mat output = new Mat(src.rows()/scalingFactor, src.cols()/scalingFactor, CvType.CV_8UC3, new Scalar(255,255,255));
-        Log.e(TAG, "output 1 size: " + output.size().toString());
 
         if(maxId >= 0) {
             Imgproc.drawContours(output, contours, maxId, new Scalar(255, 0,0), 1);
             Imgproc.resize(output, output, new org.opencv.core.Size(src.width(), src.height()));
-            Log.e(TAG, "output 2 size: " + output.size().toString());
-
             return output;
         }
 

@@ -16,10 +16,8 @@ import org.opencv.imgproc.Imgproc;
 
 import android.content.Context;
 import android.hardware.Camera;
-import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.Size;
 import android.os.AsyncTask;
-import android.provider.ContactsContract;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
