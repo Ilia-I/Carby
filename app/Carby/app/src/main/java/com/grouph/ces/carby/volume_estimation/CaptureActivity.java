@@ -6,33 +6,22 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Point;
-import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.Toast;
-
 import com.grouph.ces.carby.R;
-
 import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
+import org.opencv.android.Utils;
 import org.opencv.core.Mat;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -45,7 +34,7 @@ import java.util.List;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
 
-public final class CaptureActivity extends AppCompatActivity implements Camera.PictureCallback{
+public final class CaptureActivity extends AppCompatActivity {
 
     private static String TAG = "VolumeCapture";
 
@@ -58,7 +47,7 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
 
     private CameraView mOpenCvCameraView;
     private ImageProcessor imageProcessor;
-    private List<Bitmap> userSelectedImageBitmapList = null;
+    private List<Mat> userSelectedImageBitmapList = null;
 
     private int imagesTaken = 0;
 
@@ -82,7 +71,7 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
 
         FloatingActionButton captureButton = findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
-            mOpenCvCameraView.takePicture(this);
+            this.takePicture();
         });
 
         FloatingActionButton searchGallery = findViewById(R.id.search_gallery);
@@ -135,8 +124,6 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, mLoaderCallback);
-
-            imageProcessor = new ImageProcessor(this);
         } else {
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
@@ -162,13 +149,15 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
                 final Uri imageUri = data.getData();
                 final InputStream imageStream = getContentResolver().openInputStream(imageUri);
                 final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                final Mat mat = new Mat();
 
+                Utils.bitmapToMat(selectedImage, mat);
                 if(userSelectedImageBitmapList == null)
                 {
-                    userSelectedImageBitmapList = new ArrayList<Bitmap>();
+                    userSelectedImageBitmapList = new ArrayList<Mat>();
                     Toast.makeText(this, "1st image chosen", Toast.LENGTH_LONG).show();
                 }
-                userSelectedImageBitmapList.add(selectedImage);
+                userSelectedImageBitmapList.add(mat);
                 if(userSelectedImageBitmapList.size() == 2) {
                     Toast.makeText(this, "2nd image chosen", Toast.LENGTH_LONG).show();
                     imageProcessor.addImage(userSelectedImageBitmapList.get(0), mOpenCvCameraView.getBoundingBox());
@@ -186,6 +175,7 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
 //                } catch (IOException e) {
 //                    e.printStackTrace();
 //                }
+
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
                 Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
@@ -230,12 +220,8 @@ public final class CaptureActivity extends AppCompatActivity implements Camera.P
         };
     }
 
-    @Override
-    public void onPictureTaken(byte[] data, Camera camera) {
-        Bitmap pictureTaken = BitmapFactory.decodeByteArray(data, 0, data.length);
-
-        imageProcessor.addImage(pictureTaken, mOpenCvCameraView.getBoundingBox());
-        mOpenCvCameraView.resetCamera();
+    public void takePicture() {
+        imageProcessor.addImage(mOpenCvCameraView.getFrame(), mOpenCvCameraView.getBoundingBox());
 
         if(++imagesTaken == 2) {
             mOpenCvCameraView.disableView();

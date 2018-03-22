@@ -20,6 +20,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -28,16 +29,19 @@ import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -47,11 +51,19 @@ import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.grouph.ces.carby.R;
+import com.grouph.ces.carby.database.AppDatabase;
+import com.grouph.ces.carby.database.NutritionDataDB;
+import com.grouph.ces.carby.nutrition_data.INutritionTable;
+import com.grouph.ces.carby.nutrition_data.NutritionResultActivity;
+import com.grouph.ces.carby.ocr.OcrCaptureActivity;
 import com.grouph.ces.carby.ui.camera.CameraSource;
 import com.grouph.ces.carby.ui.camera.CameraSourcePreview;
 import com.grouph.ces.carby.ui.camera.GraphicOverlay;
 
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Activity for the multi-tracker app.  This app detects barcodes and displays the value with the
@@ -80,6 +92,13 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
 
+    private AppDatabase db;
+
+    private CardView progressCard;
+    private ProgressBar progressBar;
+
+    private Context context = this;
+
     /**
      * Initializes the UI and creates the detector pipeline.
      */
@@ -88,14 +107,22 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         super.onCreate(icicle);
         setContentView(R.layout.barcode_capture);
 
+        //TODO async if slow
+        db = Room.databaseBuilder(getApplicationContext() ,AppDatabase.class,"myDB").allowMainThreadQueries().build();
+
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay<BarcodeGraphic>) findViewById(R.id.graphicOverlay);
+
+        progressBar = findViewById(R.id.progress_bar);
+        progressCard = findViewById(R.id.progress_card);
+
+        progressCard.setVisibility(View.GONE);
 
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // read parameters from the intent used to launch the activity.
-        boolean autoFocus = getIntent().getBooleanExtra(AutoFocus, false);
+        boolean autoFocus = getIntent().getBooleanExtra(AutoFocus, true);
         boolean useFlash = getIntent().getBooleanExtra(UseFlash, false);
 
         // Check for the camera permission before accessing the camera.  If the
@@ -435,11 +462,87 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
     @Override
     public void onBarcodeDetected(Barcode barcode) {
-        Intent data = new Intent();
-        data.putExtra(BarcodeObject, barcode);
-        setResult(RESULT_OK, data);
-        finish();
         Log.i("Barcode", "Barcode detected: " + barcode.displayValue);
         //do something with barcode data returned
+
+        progressCard.setVisibility(View.VISIBLE);
+        INutritionTable nutritionTable = getNutritionTable(barcode);
+
+        if (nutritionTable!=null){
+            //progressCard.setVisibility(View.GONE);
+            sendToNutritionResult(nutritionTable);
+        }else{
+            //progressCard.setVisibility(View.GONE);
+            startOCR(barcode.displayValue);
+        }
+    }
+
+    private INutritionTable getNutritionTable(Barcode barcode) {
+        if(barcode.valueFormat==Barcode.PRODUCT){
+            Log.d(this.getClass().getName(),"Barcode: " + barcode.displayValue);
+            INutritionTable result = null;
+
+            //1. check local database
+            NutritionDataDB data = db.nutritionDataDao().findByBarcode(barcode.displayValue);
+            if(data!=null) {
+                result = data.getNt();
+                if (result != null) {
+                    Log.d("OcrDetectorProcessor", "Loaded Table:\n" + result);
+                    return result;
+                }
+            }
+
+            //TODO 2. check open food facts database (get info about result and set result variable)
+            BarcodeLookup barcodeLookup = new BarcodeLookup();
+            try {
+                result = barcodeLookup.execute(barcode).get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+            if(result!=null){
+                return result;
+            }
+        }
+        return null;
+    }
+
+    private void sendToNutritionResult(INutritionTable result) {
+        JSONObject jsonNutritionTable = result.toJasonObject();
+
+        Intent intent = new Intent(this, NutritionResultActivity.class);
+        intent.putExtra("jsonNutritionTable", jsonNutritionTable.toString());
+        startActivity(intent);
+    }
+
+    private void startOCR(String barcode) {
+        this.runOnUiThread(() -> {
+            mCameraSource.stop();
+            mPreview.stop();
+
+            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
+
+            builder.setMessage(R.string.dialog_message_check_barcode);
+            builder.setTitle(R.string.dialog_title_check_barcode);
+
+            builder.setPositiveButton(R.string.dialog_positive_check_barcode, (DialogInterface dialog, int id) -> {
+                Intent i = new Intent(getApplicationContext(), OcrCaptureActivity.class);
+                i.putExtra(getResources().getString(R.string.ocr_intent_barcode), barcode);
+                startActivity(i);
+                dialog.dismiss();
+            });
+            builder.setNegativeButton(R.string.cancel, (DialogInterface dialog, int id) -> {
+                // Lazy restart of scan on Cancel
+                Intent intent = new Intent (context, BarcodeCaptureActivity.class);
+                startActivity(intent);
+                dialog.dismiss();
+            });
+            builder.setCancelable(false);
+
+            android.support.v7.app.AlertDialog dialog = builder.create();
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.show();
+        });
     }
 }

@@ -2,21 +2,12 @@ package com.grouph.ces.carby;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 
-import com.grouph.ces.carby.barcodescanner.MainBarcodeActivity;
-import com.grouph.ces.carby.camera_calibration.CameraCalibrationActivity;
+import com.grouph.ces.carby.barcodescanner.BarcodeCaptureActivity;
 import com.grouph.ces.carby.ocr.OcrCaptureActivity;
 import com.grouph.ces.carby.volume_estimation.CaptureActivity;
 
@@ -45,8 +36,8 @@ public class MainActivity extends BaseActivity implements OnClickListener {
         int id = view.getId();
 
         if (id == R.id.colored_bar1) {
-            Intent myIntent1 = new Intent(this, MainBarcodeActivity.class);
-            startActivity(myIntent1);
+            Intent myIntent = new Intent(this, BarcodeCaptureActivity.class);
+            startActivity(myIntent);
             // Handle the camera action
         } else if (id == R.id.colored_bar2) {
             Intent ocr = new Intent(this, OcrCaptureActivity.class);
