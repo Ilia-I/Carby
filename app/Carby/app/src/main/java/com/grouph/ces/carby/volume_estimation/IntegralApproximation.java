@@ -41,7 +41,6 @@ public class IntegralApproximation {
         File topReferenceFile = new File(dir, "topRef.png");
         File sideReferenceFile =  new File(dir, "sideRef.png");
 
-
         Utils.bitmapToMat(BitmapFactory.decodeFile(topFile.getAbsolutePath()), top);
         Utils.bitmapToMat(BitmapFactory.decodeFile(sideFile.getAbsolutePath()), side);
         Utils.bitmapToMat(BitmapFactory.decodeFile(topReferenceFile.getAbsolutePath()), topRef);

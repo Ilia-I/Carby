@@ -31,14 +31,27 @@ public class NutritionResultActivity extends AppCompatActivity {
             }
         }
 
-        TextView mFatVal = findViewById(R.id.carb_val);
-        TextView mSaturatesVal = findViewById(R.id.carb_sugars_val);
-        TextView mCarbVal = findViewById(R.id.carb_val);
-        TextView mCarbSugarsVal = findViewById(R.id.carb_sugars_val);
+        if(nutritionTable != null) {
+            TextView mFatVal = findViewById(R.id.carb_val);
+            TextView mSaturatesVal = findViewById(R.id.carb_sugars_val);
+            TextView mCarbVal = findViewById(R.id.carb_val);
+            TextView mCarbSugarsVal = findViewById(R.id.carb_sugars_val);
+            TextView mCarbStarchVal = findViewById(R.id.carb_starch_val);
+            TextView mCarbPolyolsVal = findViewById(R.id.carb_starch_val);
+            TextView mFibreVal = findViewById(R.id.fibre_val);
+            TextView mProteinVal = findViewById(R.id.protein_val);
+            TextView mSaltVal = findViewById(R.id.salt_val);
 
-        mFatVal.setText(Double.toString((nutritionTable.getFats().getTotal())) + nutritionTable.getFatsUnit());
-        mSaturatesVal.setText(Double.toString((nutritionTable.getFats().getContentOf("saturates")))  + nutritionTable.getFatsUnit());
-        mCarbVal.setText(Double.toString(nutritionTable.getCarbohydrates().getTotal()) + nutritionTable.getCarbohydratesUnit());
-        mCarbSugarsVal.setText(Double.toString(nutritionTable.getCarbohydrates().getContentOf("sugars")) + nutritionTable.getCarbohydratesUnit());
+            mFatVal.setText(Double.toString((nutritionTable.getFats().getTotal())) + nutritionTable.getFatsUnit());
+            mSaturatesVal.setText(Double.toString((nutritionTable.getFats().getContentOf("saturates"))) + nutritionTable.getFatsUnit());
+            mCarbVal.setText(Double.toString(nutritionTable.getCarbohydrates().getTotal()) + nutritionTable.getCarbohydratesUnit());
+            mCarbSugarsVal.setText(Double.toString(nutritionTable.getCarbohydrates().getContentOf("sugars")) + nutritionTable.getCarbohydratesUnit());
+            mCarbStarchVal.setText(Double.toString(nutritionTable.getCarbohydrates().getContentOf("polyols")) + nutritionTable.getCarbohydratesUnit());
+            mCarbPolyolsVal.setText(Double.toString(nutritionTable.getCarbohydrates().getContentOf("starch")) + nutritionTable.getCarbohydratesUnit());
+
+            mFibreVal.setText(Double.toString(nutritionTable.getFibre()) + nutritionTable.getFibreUnit());
+            mProteinVal.setText(Double.toString(nutritionTable.getProtein()) + nutritionTable.getProteinUnit());
+            mSaltVal.setText(Double.toString(nutritionTable.getSalt()) + nutritionTable.getSaltUnit());
+        }
     }
 }

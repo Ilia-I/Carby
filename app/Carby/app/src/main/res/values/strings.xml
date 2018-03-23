@@ -42,7 +42,8 @@
     <string name="ocr_intent_barcode">barcode</string>
     <string name="cancel">Cancel</string>
     <string name="dialog_title_check_barcode">Scan Nutrition Table?</string>
-    <string name="dialog_message_check_barcode">Nutrition information not found for scanned barcode. Do you wish to scan the package nutrition table and associate it with this barcode for future use?</string>
+    <string name="dialog_positive_check_barcode">Scan</string>
+    <string name="dialog_message_check_barcode">Nutrition information not found locally or online, would you like to scan the nutrition label?</string>
 
     <!--Preferences-->
     <string name="key_wipe_consume">pref_wipe_consume</string>

@@ -97,6 +97,42 @@ public class NutritionTable extends ANutritionTable{
         }
     }
 
+    /**
+     * Get the corresponding value to the component
+     * @param name - name of component - one of listOfContents()
+     * @return value or null if not set
+     */
+    @Override
+    public Double getComponentValue(String name) {
+        IComposite component = null;
+        switch (name) {
+            case "Energy":
+            case "Fat":
+            case "Carbohydrate":
+            case "Fibre":
+            case "Protein":
+            case "Salt":
+                component = nutritionalInformation.get(name);
+                if(component!=null) return component.getTotal();
+                else return null;
+
+            case "mono-unsaturates":
+            case "polyunsaturates":
+            case "saturates":
+                component = nutritionalInformation.get("Fat");
+                if(component!=null) return component.getContentOf(name);
+                else return null;
+            case "sugars":
+            case "polyols":
+            case "starch":
+                component = nutritionalInformation.get("Carbohydrate");
+                if(component!=null) return component.getContentOf(name);
+                else return null;
+            default:
+                return null;
+        }
+    }
+
     private void initListOfContents(){
         listOfContents = new ArrayList<>();
         listOfContents.add("Energy");
