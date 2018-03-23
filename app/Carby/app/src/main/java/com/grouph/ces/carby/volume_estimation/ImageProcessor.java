@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.util.Log;
 
 import org.opencv.core.Mat;
 
@@ -21,6 +22,8 @@ import java.util.Date;
  */
 
 public class ImageProcessor {
+
+    private static String TAG = "ImageProcessor";
 
     private Context context;
 
@@ -156,7 +159,7 @@ public class ImageProcessor {
             File out1 = new File(context.getCacheDir(), "1.png");
             File out2 = new File(context.getCacheDir(), "2.png");
 
-            saveImages();
+            //saveImages();
 
             try {
                 FileOutputStream fOut;

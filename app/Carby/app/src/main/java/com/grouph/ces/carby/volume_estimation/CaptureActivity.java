@@ -127,6 +127,7 @@ public final class CaptureActivity extends AppCompatActivity {
         }
         imageProcessor = new ImageProcessor(this);
         mOpenCvCameraView.enableView();
+
         imagesTaken = 0;
     }
 

@@ -118,10 +118,10 @@ public class ProcessingAlgorithms {
         return origImage;
     }
 
-    public Bitmap matToBitmap(Mat input) {
-        Imgproc.resize(input, input, new Size(input.width() * scalingFactor, input.height() * scalingFactor));
-
-        Bitmap bitmap = Bitmap.createBitmap(input.cols(), input.rows(), Bitmap.Config.ARGB_8888);
+    public Bitmap matToBitmap(Mat src) {
+        Mat input = src.clone();
+//        Imgproc.resize(src, input, new Size(1280, 720));
+        Bitmap bitmap = Bitmap.createBitmap(input.width(), input.height(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(input, bitmap);
 
         return bitmap;
@@ -133,23 +133,22 @@ public class ProcessingAlgorithms {
         return gray;
     }
 
-    private Mat featureDetect(Mat img){
-        //convert to gray
-        Mat gray = grayImg(img);
-
-        FeatureDetector fd = FeatureDetector.create(FeatureDetector.FAST);
-        MatOfKeyPoint regions = new MatOfKeyPoint();
-        fd.detect(gray, regions);
-
-        Features2d.drawKeypoints(img, regions,img );
-
-        return img;
-    }
+//    private Mat featureDetect(Mat img){
+//        //convert to gray
+//        Mat gray = grayImg(img);
+//
+//        FeatureDetector fd = FeatureDetector.create(FeatureDetector.FAST);
+//        MatOfKeyPoint regions = new MatOfKeyPoint();
+//        fd.detect(gray, regions);
+//
+//        Features2d.drawKeypoints(img, regions,img );
+//
+//        return img;
+//    }
 
     public Mat findRefObject(Mat src) {
-        int scalingFactor = 4;
         Mat blurred = new Mat();
-        Imgproc.resize(src, blurred, new org.opencv.core.Size(src.width()/scalingFactor,src.height()/scalingFactor));
+        Imgproc.resize(src, blurred, new org.opencv.core.Size(src.width(),src.height()));
         Imgproc.medianBlur(blurred, blurred, 7);
 
         Mat gray0 = new Mat(blurred.size(), CvType.CV_8U), gray = new Mat();
@@ -161,8 +160,8 @@ public class ProcessingAlgorithms {
         gray0Channel.add(gray0);
 
         MatOfPoint2f approxCurve;
-        double minArea = 16000/(scalingFactor*scalingFactor);
-        double maxArea = 80000/(scalingFactor*scalingFactor);
+        double minArea = 16000;
+        double maxArea = 80000;
         int maxId = -1;
 
         //find contours for all 3 channels
@@ -195,11 +194,10 @@ public class ProcessingAlgorithms {
             }
         }
 
-        Mat output = new Mat(src.rows()/scalingFactor, src.cols()/scalingFactor, CvType.CV_8UC3, new Scalar(255,255,255));
-
+        Mat output = new Mat(src.rows(), src.cols(), CvType.CV_8UC3, new Scalar(255,255,255));
         if(maxId >= 0) {
+            Log.e(TAG, "DETECTED REF OBJECT: ");
             Imgproc.drawContours(output, contours, maxId, new Scalar(255, 0,0), 1);
-            Imgproc.resize(output, output, new org.opencv.core.Size(src.width(), src.height()));
             return output;
         }
 
