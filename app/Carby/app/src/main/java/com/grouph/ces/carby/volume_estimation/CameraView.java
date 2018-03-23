@@ -2,31 +2,23 @@ package com.grouph.ces.carby.volume_estimation;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.JavaCameraView;
-import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfInt;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import android.content.Context;
 import android.hardware.Camera;
-import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.Size;
-import android.os.AsyncTask;
-import android.provider.ContactsContract;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.grouph.ces.carby.volume_estimation.ImageTasks.FindPoundTask;
+
 import java.util.concurrent.ExecutionException;
 
 public class CameraView extends JavaCameraView implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {

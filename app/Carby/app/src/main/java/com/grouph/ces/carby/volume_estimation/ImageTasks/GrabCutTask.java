@@ -1,4 +1,4 @@
-package com.grouph.ces.carby.volume_estimation;
+package com.grouph.ces.carby.volume_estimation.ImageTasks;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -28,8 +28,6 @@ public class GrabCutTask extends AsyncTask<Object, Void, Mat> {
     private static String TAG = "GrabCutTask";
     private final int scalingFactor = 2;
     private Scalar white = new Scalar(255,255,255);
-
-
 
     @Override
     protected Mat doInBackground(Object... params) {

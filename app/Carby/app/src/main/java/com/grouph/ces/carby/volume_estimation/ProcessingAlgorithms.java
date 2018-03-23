@@ -42,7 +42,6 @@ import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 public class ProcessingAlgorithms {
 
     private static String TAG = "ProcessingAlgorithms";
-    private Scalar white = new Scalar(255,255,255);
 
     private Mat mCameraMatrix = new Mat();
     private Mat mDistortionCoefficients = new Mat();

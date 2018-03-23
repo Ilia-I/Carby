@@ -1,16 +1,12 @@
-package com.grouph.ces.carby.volume_estimation;
+package com.grouph.ces.carby.volume_estimation.ImageTasks;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfInt;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
-import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
@@ -26,8 +22,8 @@ public class FindPoundTask extends AsyncTask<Mat, Void, FindPoundTask.Result> {
     private static String TAG = "FindPoundTask";
 
     public class Result {
-        boolean detected = false;
-        Mat refObject;
+        public boolean detected = false;
+        public Mat refObject;
 
         public Result(boolean detected, Mat refObject) {
             this.detected = detected;

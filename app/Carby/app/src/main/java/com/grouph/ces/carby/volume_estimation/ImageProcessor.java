@@ -7,6 +7,9 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Environment;
 
+import com.grouph.ces.carby.volume_estimation.ImageTasks.FindPoundTask;
+import com.grouph.ces.carby.volume_estimation.ImageTasks.GrabCutTask;
+
 import org.opencv.core.Mat;
 
 import java.io.File;
