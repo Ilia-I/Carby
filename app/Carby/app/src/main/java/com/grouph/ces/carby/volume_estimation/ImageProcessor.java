@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.util.Log;
 
 import org.opencv.core.Mat;
 
@@ -16,8 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by matthewball on 13/03/2018.
@@ -36,12 +34,15 @@ public class ImageProcessor {
     private Bitmap refObj1;
     private Bitmap refObj2;
 
-
     private ProcessingAlgorithms algorithms;
 
     public ImageProcessor(Context context) {
         this.context = context;
         this.algorithms = new ProcessingAlgorithms(context);
+    }
+
+    public ProcessingAlgorithms getAlgorithms() {
+        return algorithms;
     }
 
     public void addImage(Mat image, org.opencv.core.Rect boundingBox) {
@@ -141,20 +142,23 @@ public class ImageProcessor {
             // Feature matching
             // ...
 
-            if(topDownIn != null) {
-                Mat grabCut = algorithms.performGrabCut(topDownIn, boundingBox1);
-                topDownOut = algorithms.matToBitmap(grabCut);
+            AsyncTask grabCutTop = new GrabCutTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topDownIn, boundingBox1);
+            AsyncTask grabCutSide = new GrabCutTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, sideIn, boundingBox2);
+            AsyncTask refDetectTop = new FindPoundTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topDownIn);
+            AsyncTask refDetectSide = new FindPoundTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, sideIn);
 
-                Mat refDetect = algorithms.findRefObject(topDownIn);
-                refObj1 = algorithms.matToBitmap(refDetect);
-            }
+            try {
+                FindPoundTask.Result r1 = (FindPoundTask.Result) refDetectTop.get();
+                FindPoundTask.Result r2 = (FindPoundTask.Result) refDetectSide.get();
 
-            if(sideIn != null) {
-                Mat grabCut = algorithms.performGrabCut(sideIn, boundingBox2);
-                sideOut = algorithms.matToBitmap(grabCut);
-
-                Mat refDetect = algorithms.findRefObject(sideIn);
-                refObj2 = algorithms.matToBitmap(refDetect);
+                topDownOut = algorithms.matToBitmap((Mat) grabCutTop.get());
+                sideOut = algorithms.matToBitmap((Mat) grabCutSide.get());
+                refObj1 = algorithms.matToBitmap(r1.refObject);
+                refObj2 = algorithms.matToBitmap(r2.refObject);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
             }
         }
 
@@ -165,7 +169,7 @@ public class ImageProcessor {
             File out1 = new File(context.getCacheDir(), "1.png");
             File out2 = new File(context.getCacheDir(), "2.png");
 
-            //saveImages();
+            saveImages();
 
             try {
                 FileOutputStream fOut;
