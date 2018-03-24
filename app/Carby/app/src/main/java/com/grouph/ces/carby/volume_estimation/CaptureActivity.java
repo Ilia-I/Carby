@@ -3,6 +3,7 @@ package com.grouph.ces.carby.volume_estimation;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,11 +13,14 @@ import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Toast;
+
 import com.grouph.ces.carby.R;
+
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
@@ -50,6 +54,7 @@ public final class CaptureActivity extends AppCompatActivity {
     private List<Mat> userSelectedImageBitmapList = null;
 
     private int imagesTaken = 0;
+    private SharedPreferences preferences;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -64,6 +69,8 @@ public final class CaptureActivity extends AppCompatActivity {
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(mOpenCvCameraView);
         mOpenCvCameraView.setOnTouchListener(mOpenCvCameraView);
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         if (rc == PackageManager.PERMISSION_GRANTED)
             mOpenCvCameraView.enableView();
         else
@@ -225,6 +232,12 @@ public final class CaptureActivity extends AppCompatActivity {
 
     public void takePicture() {
         imageProcessor.addImage(mOpenCvCameraView.getFrame(), mOpenCvCameraView.getBoundingBox());
+
+        //save img if dev mode
+        if (preferences.getBoolean(getResources().getString(R.string.key_dev_mode),false)) {
+            RecordFrame rf = new RecordFrame(preferences, mOpenCvCameraView.getFrame(), mOpenCvCameraView.getBoundingBox());
+            rf.saveObj();
+        }
 
         if(++imagesTaken == 2) {
             mOpenCvCameraView.disableView();
