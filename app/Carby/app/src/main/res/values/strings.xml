@@ -54,4 +54,10 @@
     <string name="summary_wipe_all">Erase all stored consumption history and nutrition table scan data.</string>
     <string name="dialog_message_wipe_all">Are you sure you want to permanently delete all stored application data?</string>
     <string name="dialog_message_wipe_consume">Are you sure you want to permanently delete all consumption data?</string>
+    <string name="key_dev_mode">pref_dev_mode</string>
+    <string name="title_dev_mode">Enable Dev Mode</string>
+    <string name="summary_dev_mode">Enables the developer mode of the app. This provides more developer options and turns on verbose.</string>
+    <string name="key_camera_calibration">pref_key_camera_calibration</string>
+    <string name="title_camera_calibration">Calibrate Camera</string>
+    <string name="summary_camera_calibration">Launches chess board camera calibration tool.</string>
 </resources>
