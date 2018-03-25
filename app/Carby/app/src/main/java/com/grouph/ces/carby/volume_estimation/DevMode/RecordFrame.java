@@ -1,10 +1,12 @@
-package com.grouph.ces.carby.volume_estimation;
+package com.grouph.ces.carby.volume_estimation.DevMode;
 
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.google.gson.Gson;
 
+import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 
@@ -21,29 +23,35 @@ import java.util.Map;
 public class RecordFrame {
     private static final String prefix = "takePicture_";
     private String fileName;
-    private Mat frame;
+    private Bitmap frame;
     private Rect boundingBox;
-    private SharedPreferences preferences;
 
     public RecordFrame(SharedPreferences preferences, String fileName){
-        this.preferences = preferences;
         this.fileName = namePrefix(fileName);
-        loadObj();
+        loadObj(preferences);
     }
 
-    public RecordFrame(SharedPreferences preferences, Mat frame, Rect boundingBox){
-        this(preferences, ""+Calendar.getInstance().getTime().getTime(),frame,boundingBox);
+    public RecordFrame(Mat frame, Rect boundingBox){
+        this(""+Calendar.getInstance().getTime().getTime(),frame,boundingBox);
     }
 
-    public RecordFrame(SharedPreferences preferences, String fileName, Mat frame, Rect boundingBox) {
-        this.preferences = preferences;
+    public RecordFrame(String fileName, Mat frame, Rect boundingBox) {
+        this.fileName = namePrefix(fileName);
+        this.frame = matToBitmap(frame);
+        this.boundingBox = boundingBox;
+    }
+
+    public RecordFrame(Bitmap frame, Rect boundingBox){
+        this(""+Calendar.getInstance().getTime().getTime(),frame,boundingBox);
+    }
+
+    public RecordFrame(String fileName, Bitmap frame, Rect boundingBox) {
         this.fileName = namePrefix(fileName);
         this.frame = frame;
         this.boundingBox = boundingBox;
-        saveObj();
     }
 
-    public void saveObj(){
+    public void saveObj(SharedPreferences preferences){
         SharedPreferences.Editor prefsEditor = preferences.edit();
         Gson gson = new Gson();
         String json = gson.toJson(this);
@@ -51,7 +59,7 @@ public class RecordFrame {
         prefsEditor.apply();
     }
 
-    private boolean loadObj() {
+    private boolean loadObj(SharedPreferences preferences) {
         Gson gson = new Gson();
         String defValue = "";
         String json = preferences.getString(fileName, defValue);
@@ -66,7 +74,7 @@ public class RecordFrame {
         return fileName;
     }
 
-    public Mat getFrame() {
+    public Bitmap getFrame() {
         return frame;
     }
 
@@ -96,5 +104,37 @@ public class RecordFrame {
             }
         }
         return names;
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        Log.d(this.getClass().getName(),"compare:");
+        if(obj==null){
+            Log.d(this.getClass().getName(),"null");
+            return false;
+        }
+        if(!(obj instanceof RecordFrame)){
+            Log.d(this.getClass().getName(),"not RF");
+            return false;
+        }
+        RecordFrame rf = (RecordFrame) obj;
+        if(!this.getFileName().equals(rf.getFileName())){
+            Log.d(this.getClass().getName(),"different name");
+            return false;
+        }
+        if(!this.getBoundingBox().equals(rf.getBoundingBox())){
+            Log.d(this.getClass().getName(),"different BoundingBox");
+        }
+        if(!this.getFrame().equals(rf.getFrame())) {
+            Log.d(this.getClass().getName(),"different frame");
+            return false;
+        }
+        return true;
+    }
+
+    private Bitmap matToBitmap(Mat input){
+        Bitmap bitmap = Bitmap.createBitmap(input.cols(), input.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(input, bitmap);
+        return bitmap;
     }
 }

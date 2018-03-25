@@ -20,6 +20,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.grouph.ces.carby.R;
+import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
+import com.grouph.ces.carby.volume_estimation.DevMode.ShowFramesActivity;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -48,6 +50,7 @@ public final class CaptureActivity extends AppCompatActivity {
     private static final int RC_HANDLE_READ_PERM = 4;
 
     private static final int PICK_IMAGE = 100;
+    private static final int DEV_IMG = 7;
 
     private CameraView mOpenCvCameraView;
     private ImageProcessor imageProcessor;
@@ -144,10 +147,13 @@ public final class CaptureActivity extends AppCompatActivity {
     }
 
     private void openGallery() {
-        Intent gallery =
-                new Intent(Intent.ACTION_PICK,
-                        android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-        startActivityForResult(gallery, PICK_IMAGE);
+//        Intent gallery =
+//                new Intent(Intent.ACTION_PICK,
+//                        android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+//        startActivityForResult(gallery, PICK_IMAGE);
+
+        Intent rfGallery = new Intent(this, ShowFramesActivity.class);
+        startActivityForResult(rfGallery,DEV_IMG);
     }
 
     @Override
@@ -155,40 +161,47 @@ public final class CaptureActivity extends AppCompatActivity {
         super.onActivityResult(reqCode, resultCode, data);
 
         if (resultCode == RESULT_OK) {
-            try {
-                final Uri imageUri = data.getData();
-                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
-                final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                final Mat mat = new Mat();
+            switch (reqCode){
+                case PICK_IMAGE:
+                    try {
+                        final Uri imageUri = data.getData();
+                        final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+                        final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                        final Mat mat = new Mat();
 
-                Utils.bitmapToMat(selectedImage, mat);
-                if(userSelectedImageBitmapList == null)
-                {
-                    userSelectedImageBitmapList = new ArrayList<Mat>();
-                    Toast.makeText(this, "1st image chosen", Toast.LENGTH_LONG).show();
-                }
-                userSelectedImageBitmapList.add(mat);
-                if(userSelectedImageBitmapList.size() == 2) {
-                    Toast.makeText(this, "2nd image chosen", Toast.LENGTH_LONG).show();
-                    imageProcessor.addImage(userSelectedImageBitmapList.get(0), mOpenCvCameraView.getBoundingBox());
-                    imageProcessor.addImage(userSelectedImageBitmapList.get(1), mOpenCvCameraView.getBoundingBox());
-                    mOpenCvCameraView.disableView();
-                    imageProcessor.processImages();
-                    userSelectedImageBitmapList = null;
-                }
+                        Utils.bitmapToMat(selectedImage, mat);
+                        if (userSelectedImageBitmapList == null) {
+                            userSelectedImageBitmapList = new ArrayList<Mat>();
+                            Toast.makeText(this, "1st image chosen", Toast.LENGTH_LONG).show();
+                        }
+                        userSelectedImageBitmapList.add(mat);
+                        if (userSelectedImageBitmapList.size() == 2) {
+                            Toast.makeText(this, "2nd image chosen", Toast.LENGTH_LONG).show();
+                            imageProcessor.addImage(userSelectedImageBitmapList.get(0), mOpenCvCameraView.getBoundingBox());
+                            imageProcessor.addImage(userSelectedImageBitmapList.get(1), mOpenCvCameraView.getBoundingBox());
+                            mOpenCvCameraView.disableView();
+                            imageProcessor.processImages();
+                            userSelectedImageBitmapList = null;
+                        }
 
-//                try {
-//                    File newFile = ProcessingAlgorithms.getOutputMediaFile(MEDIA_TYPE_IMAGE);
-//                    FileOutputStream fos = new FileOutputStream(newFile);
-//                    selectedImage.compress(Bitmap.CompressFormat.PNG, 90, fos);
-//                    fos.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
+    //                try {
+    //                    File newFile = ProcessingAlgorithms.getOutputMediaFile(MEDIA_TYPE_IMAGE);
+    //                    FileOutputStream fos = new FileOutputStream(newFile);
+    //                    selectedImage.compress(Bitmap.CompressFormat.PNG, 90, fos);
+    //                    fos.close();
+    //                } catch (IOException e) {
+    //                    e.printStackTrace();
+    //                }
 
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
+                    }
+                    break;
+                case DEV_IMG:
+                    //TODO receive images
+                    break;
+                default:Toast.makeText(this, "You haven't picked Image",Toast.LENGTH_LONG).show();
             }
         } else
             Toast.makeText(this, "You haven't picked Image",Toast.LENGTH_LONG).show();
@@ -235,8 +248,9 @@ public final class CaptureActivity extends AppCompatActivity {
 
         //save img if dev mode
         if (preferences.getBoolean(getResources().getString(R.string.key_dev_mode),false)) {
-            RecordFrame rf = new RecordFrame(preferences, mOpenCvCameraView.getFrame(), mOpenCvCameraView.getBoundingBox());
-            rf.saveObj();
+            RecordFrame rf = new RecordFrame(mOpenCvCameraView.getFrame(), mOpenCvCameraView.getBoundingBox());
+            rf.saveObj(preferences);
+            Log.d(this.getClass().getName(),"compare:"+rf.equals(new RecordFrame(preferences,rf.getFileName())));
         }
 
         if(++imagesTaken == 2) {
