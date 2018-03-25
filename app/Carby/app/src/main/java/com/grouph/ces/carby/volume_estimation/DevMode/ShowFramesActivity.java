@@ -3,6 +3,11 @@ package com.grouph.ces.carby.volume_estimation.DevMode;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -31,6 +36,7 @@ import java.util.List;
 public class ShowFramesActivity extends AppCompatActivity {
     private List<RecordFrame> rfs;
     private List<Integer> selected;
+    private GridView gridview;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -39,7 +45,7 @@ public class ShowFramesActivity extends AppCompatActivity {
         getRecordFrames();
         selected = new ArrayList<>();
 
-        GridView gridview = findViewById(R.id.gridview);
+        gridview = findViewById(R.id.gridview);
         for(RecordFrame rf:rfs){
             Log.d(this.getClass().getName(),"rf:"+rf.getFileName());
             if(rf.getBoundingBox()==null) Log.d(this.getClass().getName(),"bounding box null");
@@ -59,7 +65,7 @@ public class ShowFramesActivity extends AppCompatActivity {
         } else {
             selected.add(position);
         }
-
+        gridview.invalidate();
         for(Integer i:selected) Log.d(this.getClass().getName(),"selected:"+i);
     }
 
@@ -79,6 +85,7 @@ public class ShowFramesActivity extends AppCompatActivity {
         private AppCompatActivity superActivity;
         private int width;
         private int height;
+        private Bitmap markedOverlay;
 
         private ImageGridAdapter(AppCompatActivity superActivity){
             super();
@@ -86,7 +93,29 @@ public class ShowFramesActivity extends AppCompatActivity {
             double div = 2.5;
             this.width = (int) (1280/div);
             this.height = (int) (720/div);
+            markedOverlay = makeTransparent(BitmapFactory.decodeResource(superActivity.getResources(),R.drawable.img_overlay),170);
             Log.d(this.getClass().getName(),"init success");
+        }
+
+        public Bitmap makeTransparent(Bitmap src, int value) {
+            int width = src.getWidth();
+            int height = src.getHeight();
+            Bitmap transBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(transBitmap);
+            canvas.drawARGB(0, 0, 0, 0);
+            // config paint
+            final Paint paint = new Paint();
+            paint.setAlpha(value);
+            canvas.drawBitmap(src, 0, 0, paint);
+            return transBitmap;
+        }
+
+        private Bitmap overlay(Bitmap bmp1, Bitmap bmp2) {
+            Bitmap bmOverlay = Bitmap.createBitmap(bmp1.getWidth(), bmp1.getHeight(), bmp1.getConfig());
+            Canvas canvas = new Canvas(bmOverlay);
+            canvas.drawBitmap(bmp1, new Matrix(), null);
+            canvas.drawBitmap(bmp2, new Matrix(), null);
+            return bmOverlay;
         }
 
         @Override
@@ -118,7 +147,11 @@ public class ShowFramesActivity extends AppCompatActivity {
                 imageView = (ImageView) convertView;
             }
 
-            imageView.setImageBitmap(rfs.get(position).getFrame());
+            if(selected.contains(position)){
+                imageView.setImageBitmap(overlay(rfs.get(position).getFrame(),markedOverlay));
+            } else {
+                imageView.setImageBitmap(rfs.get(position).getFrame());
+            }
             return imageView;
         }
     }
