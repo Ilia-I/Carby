@@ -39,9 +39,9 @@ public class ShowFramesActivity extends AppCompatActivity {
         }
         gridview.setAdapter(new ImageGridAdapter(this));
 
-        gridview.setOnItemClickListener((AdapterView<?> parent, View v, int position, long id) -> {
-            Log.d(this.getClass().getName(), "Image "+rfs.get(position).getFileName()+" at " + position);
-        });
+        gridview.setOnItemClickListener((AdapterView<?> parent, View v, int position, long id) ->
+            Log.d(this.getClass().getName(), "Image "+rfs.get(position).getFileName()+" at " + position)
+        );
     }
 
     private void getRecordFrames() {
@@ -61,7 +61,7 @@ public class ShowFramesActivity extends AppCompatActivity {
         private int width;
         private int height;
 
-        public ImageGridAdapter(AppCompatActivity superActivity){
+        private ImageGridAdapter(AppCompatActivity superActivity){
             super();
             this.superActivity = superActivity;
             double div = 2.5;

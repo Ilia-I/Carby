@@ -146,8 +146,8 @@ public class RecordFrame {
     /**
      * This functions converts Bitmap picture to a string which can be
      * JSONified.
-     * @param bitmapPicture
-     * @return
+     * @param bitmapPicture Bitmap to encode
+     * @return encoded image string
      */
     private String getStringFromBitmap(Bitmap bitmapPicture) {
         final int COMPRESSION_QUALITY = 100;
@@ -161,12 +161,11 @@ public class RecordFrame {
 
     /**
      * This Function converts the String back to Bitmap
-     * @param stringPicture
-     * @return
+     * @param stringPicture encoded image string
+     * @return decoded Bitmap
      */
     private Bitmap getBitmapFromString(String stringPicture) {
         byte[] decodedString = Base64.decode(stringPicture, Base64.DEFAULT);
-        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-        return decodedByte;
+        return BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
     }
 }
