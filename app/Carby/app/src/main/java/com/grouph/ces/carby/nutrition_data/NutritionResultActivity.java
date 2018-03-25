@@ -33,8 +33,10 @@ public class NutritionResultActivity extends AppCompatActivity {
 
         if(nutritionTable != null) {
             TextView mEnergyVal = findViewById(R.id.energy_val);
-            TextView mFatVal = findViewById(R.id.carb_val);
-            TextView mSaturatesVal = findViewById(R.id.carb_sugars_val);
+            TextView mFatVal = findViewById(R.id.fat_val);
+            TextView mMonoUnsat = findViewById(R.id.monounsaturated_val);
+            TextView mPolyUnsat = findViewById(R.id.polyunsaturated_val);
+            TextView mSaturatedVal = findViewById(R.id.saturated_val);
             TextView mCarbVal = findViewById(R.id.carb_val);
             TextView mCarbSugarsVal = findViewById(R.id.carb_sugars_val);
             TextView mCarbStarchVal = findViewById(R.id.carb_starch_val);
@@ -51,8 +53,16 @@ public class NutritionResultActivity extends AppCompatActivity {
                 mFatVal.setText(Double.toString(nutritionTable.getComponentValue("Fat")) + nutritionTable.getFatsUnit());
             }
 
+            if(nutritionTable.getComponentValue("mono-unsaturates") !=null){
+                mMonoUnsat.setText(Double.toString(nutritionTable.getComponentValue("mono-unsaturates")) + nutritionTable.getFatsUnit());
+            }
+
+            if(nutritionTable.getComponentValue("polyunsaturates") !=null){
+                mPolyUnsat.setText(Double.toString(nutritionTable.getComponentValue("polyunsaturates")) + nutritionTable.getFatsUnit());
+            }
+
             if(nutritionTable.getComponentValue("saturates") !=null){
-                mSaturatesVal.setText(Double.toString(nutritionTable.getComponentValue("saturates")) + nutritionTable.getFatsUnit());
+                mSaturatedVal.setText(Double.toString(nutritionTable.getComponentValue("saturates")) + nutritionTable.getFatsUnit());
             }
 
             if(nutritionTable.getComponentValue("Carbohydrate") !=null){
