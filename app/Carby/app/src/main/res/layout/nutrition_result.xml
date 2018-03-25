@@ -36,7 +36,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:text="Per 100 g"
+        android:text="Per 100g"
         android:textColor="@color/black"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -54,11 +54,11 @@
         app:layout_constraintTop_toBottomOf="@+id/view5" />
 
     <TextView
-        android:id="@+id/textView6"
+        android:id="@+id/energy_val"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:text="##kJ / ##kcal"
+        android:text="-"
         android:textColor="@color/black"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
