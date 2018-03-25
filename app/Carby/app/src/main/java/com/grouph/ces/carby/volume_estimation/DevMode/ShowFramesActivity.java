@@ -58,15 +58,15 @@ public class ShowFramesActivity extends AppCompatActivity {
 
     private void mark(int position) {
         Log.d(this.getClass().getName(), "Mark image "+rfs.get(position).getFileName()+" at " + position);
-        if(selected.contains(position)){
-            selected.remove(new Integer(position));
+        int idx = selected.indexOf(new Integer(position));
+        if(idx>=0){
+            selected.remove(idx);
         } else if(selected.size()>=2){
             Toast.makeText(this, "Maximum number of images marked", Toast.LENGTH_SHORT).show();
         } else {
             selected.add(position);
         }
-        gridview.invalidate();
-        for(Integer i:selected) Log.d(this.getClass().getName(),"selected:"+i);
+        gridview.invalidateViews();
     }
 
     private void getRecordFrames() {
