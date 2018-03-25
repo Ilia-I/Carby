@@ -14,11 +14,12 @@ import android.widget.ImageView;
 import com.grouph.ces.carby.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * Created by Martin Peev on 25.03.2018 г..
- * Version: 0.3
+ * Version: 0.4
  */
 
 public class ShowFramesActivity extends AppCompatActivity {
@@ -50,6 +51,9 @@ public class ShowFramesActivity extends AppCompatActivity {
             Log.d(this.getClass().getName(),"load "+name);
             rfs.add(new RecordFrame(preferences,name));
         }
+
+        Collections.sort(rfs, (Object softDrinkOne, Object softDrinkTwo) ->
+                ((RecordFrame)softDrinkOne).getFileName().compareTo(((RecordFrame)softDrinkTwo).getFileName()));
     }
 
     class ImageGridAdapter extends BaseAdapter {
@@ -85,7 +89,6 @@ public class ShowFramesActivity extends AppCompatActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
             ImageView imageView;
             if (convertView == null) {
-                Log.d(this.getClass().getName(),"convertView is null");
                 // if it's not recycled, initialize some attributes
                 imageView = new ImageView(superActivity);
                 imageView.setLayoutParams(new GridView.LayoutParams(width,height));
