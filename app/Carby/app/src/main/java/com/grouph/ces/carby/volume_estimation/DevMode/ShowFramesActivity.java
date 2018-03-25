@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -37,9 +38,9 @@ public class ShowFramesActivity extends AppCompatActivity {
         }
         gridview.setAdapter(new ImageGridAdapter(this));
 
-//        gridview.setOnItemClickListener((AdapterView<?> parent, View v, int position, long id) -> {
-//            Log.d(this.getClass().getName(), "Image "+rfs.get(position).getFileName()+" at " + position);
-//        });
+        gridview.setOnItemClickListener((AdapterView<?> parent, View v, int position, long id) -> {
+            Log.d(this.getClass().getName(), "Image "+rfs.get(position).getFileName()+" at " + position);
+        });
     }
 
     private void getRecordFrames() {
@@ -53,10 +54,15 @@ public class ShowFramesActivity extends AppCompatActivity {
 
     class ImageGridAdapter extends BaseAdapter {
         private AppCompatActivity superActivity;
+        private int width;
+        private int height;
 
         public ImageGridAdapter(AppCompatActivity superActivity){
             super();
             this.superActivity = superActivity;
+            double div = 2.5;
+            this.width = (int) (1280/div);
+            this.height = (int) (720/div);
             Log.d(this.getClass().getName(),"init success");
         }
 
@@ -79,11 +85,13 @@ public class ShowFramesActivity extends AppCompatActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
             ImageView imageView;
             if (convertView == null) {
+                Log.d(this.getClass().getName(),"convertView is null");
                 // if it's not recycled, initialize some attributes
                 imageView = new ImageView(superActivity);
-                imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
+                imageView.setLayoutParams(new GridView.LayoutParams(width,height));
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                imageView.setPadding(8, 8, 8, 8);
+                int pad = 10;
+                imageView.setPadding(pad, pad, pad, pad);
             } else {
                 imageView = (ImageView) convertView;
             }

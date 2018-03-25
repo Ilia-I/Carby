@@ -250,7 +250,7 @@ public final class CaptureActivity extends AppCompatActivity {
         if (preferences.getBoolean(getResources().getString(R.string.key_dev_mode),false)) {
             RecordFrame rf = new RecordFrame(mOpenCvCameraView.getFrame(), mOpenCvCameraView.getBoundingBox());
             rf.saveObj(preferences);
-            Log.d(this.getClass().getName(),"compare:"+rf.equals(new RecordFrame(preferences,rf.getFileName())));
+//            Log.d(this.getClass().getName(),"compare:"+rf.equals(new RecordFrame(preferences,rf.getFileName())));
         }
 
         if(++imagesTaken == 2) {

@@ -20,7 +20,7 @@ import java.util.Map;
 
 /**
  * Created by Martin Peev on 24.03.2018 г..
- * Version: 0.1
+ * Version: 0.6
  */
 
 public class RecordFrame {
@@ -150,12 +150,10 @@ public class RecordFrame {
      * @return
      */
     private String getStringFromBitmap(Bitmap bitmapPicture) {
-
         final int COMPRESSION_QUALITY = 100;
         String encodedImage;
         ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
-        bitmapPicture.compress(Bitmap.CompressFormat.PNG, COMPRESSION_QUALITY,
-                byteArrayBitmapStream);
+        bitmapPicture.compress(Bitmap.CompressFormat.PNG, COMPRESSION_QUALITY, byteArrayBitmapStream);
         byte[] b = byteArrayBitmapStream.toByteArray();
         encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
         return encodedImage;
