@@ -199,12 +199,26 @@ public final class CaptureActivity extends AppCompatActivity {
                     }
                     break;
                 case DEV_IMG:
-                    //TODO receive images
+                    addImage(data.getStringExtra(getResources().getString(R.string.rf1)));
+                    addImage(data.getStringExtra(getResources().getString(R.string.rf2)));
+                    startProcessor();
                     break;
                 default:Toast.makeText(this, "You haven't picked Image",Toast.LENGTH_LONG).show();
             }
         } else
             Toast.makeText(this, "You haven't picked Image",Toast.LENGTH_LONG).show();
+    }
+
+    private void addImage(String name){
+        RecordFrame rf = new RecordFrame(preferences,name);
+        Mat mat = new Mat();
+        Utils.bitmapToMat(rf.getFrame(), mat);
+        imageProcessor.addImage(mat, rf.getBoundingBox());
+    }
+
+    private void startProcessor(){
+        mOpenCvCameraView.disableView();
+        imageProcessor.processImages();
     }
 
     private void requestPermissions() {
@@ -254,8 +268,7 @@ public final class CaptureActivity extends AppCompatActivity {
         }
 
         if(++imagesTaken == 2) {
-            mOpenCvCameraView.disableView();
-            imageProcessor.processImages();
+            startProcessor();
         }
 
         if(imagesTaken == 1) {

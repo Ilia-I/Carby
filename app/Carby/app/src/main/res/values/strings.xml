@@ -7,7 +7,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
-
+    <string name="action_accept">Accept</string>
     <string name="ok">OK</string>
     <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
     <string name="no_camera_permission">This application cannot run because it does not have the camera permission.  The application will now exit.</string>
@@ -60,4 +60,8 @@
     <string name="key_camera_calibration">pref_key_camera_calibration</string>
     <string name="title_camera_calibration">Calibrate Camera</string>
     <string name="summary_camera_calibration">Launches chess board camera calibration tool.</string>
+
+    <!--intents msg-->
+    <string name="rf1">rf1Name</string>
+    <string name="rf2">rf2Name</string>
 </resources>

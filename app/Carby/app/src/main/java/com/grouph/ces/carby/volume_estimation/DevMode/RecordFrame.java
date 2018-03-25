@@ -20,7 +20,7 @@ import java.util.Map;
 
 /**
  * Created by Martin Peev on 24.03.2018 г..
- * Version: 0.6
+ * Version: 0.7
  */
 
 public class RecordFrame {
