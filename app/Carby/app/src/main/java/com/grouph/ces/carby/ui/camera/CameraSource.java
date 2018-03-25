@@ -71,7 +71,7 @@ import java.util.Map;
  * </ul>
  */
 @SuppressWarnings("deprecation")
-public class CameraSource {
+public class   CameraSource {
     @SuppressLint("InlinedApi")
     public static final int CAMERA_FACING_BACK = CameraInfo.CAMERA_FACING_BACK;
     @SuppressLint("InlinedApi")

@@ -7,7 +7,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
-
+    <string name="action_accept">Accept</string>
     <string name="ok">OK</string>
     <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
     <string name="no_camera_permission">This application cannot run because it does not have the camera permission.  The application will now exit.</string>
@@ -20,4 +20,48 @@
     <string name="barcode_success">Barcode read successfully</string>
     <string name="barcode_failure">No barcode captured</string>
     <string name="barcode_error">"Error reading barcode: %1$s"</string>
+    <string name="barcode_found_localDB">Nutrition information for barcode found in local database.</string>
+    <string name="barcode_found_offDB">Nutrition information for barcode found in Open Food Facts database.</string>
+
+
+    <!--OpenCV Camera Calibration Strings-->
+    <string name="action_calibrate">Calibrate</string>
+    <string name="calibration">Calibration</string>
+    <string name="undistortion">Undistortion</string>
+    <string name="comparison">Comparison</string>
+    <string name="preview_mode">Preview mode</string>
+    <string name="calibration_successful">Successfully calibrated!\nAvg. re-projection error:</string>
+    <string name="calibration_unsuccessful">Unsuccessful calibration.\nTry again</string>
+    <string name="more_samples">Please, capture more samples</string>
+    <string name="calibrating">Calibrating...</string>
+    <string name="please_wait">Please, wait</string>
+    <string name="original">Original</string>
+    <string name="undistorted">Undistorted</string>
+
+    <!--Start OCR-->
+    <string name="ocr_intent_barcode">barcode</string>
+    <string name="cancel">Cancel</string>
+    <string name="dialog_title_check_barcode">Scan Nutrition Table?</string>
+    <string name="dialog_positive_check_barcode">Scan</string>
+    <string name="dialog_message_check_barcode">Nutrition information not found locally or online, would you like to scan the nutrition label?</string>
+
+    <!--Preferences-->
+    <string name="key_wipe_consume">pref_wipe_consume</string>
+    <string name="title_wipe_consume">Delete Consumption Data</string>
+    <string name="summary_wipe_consume">Erase all stored consumption history data.</string>
+    <string name="key_wipe_all">pref_wipe_all</string>
+    <string name="title_wipe_all">Delete App Data</string>
+    <string name="summary_wipe_all">Erase all stored consumption history and nutrition table scan data.</string>
+    <string name="dialog_message_wipe_all">Are you sure you want to permanently delete all stored application data?</string>
+    <string name="dialog_message_wipe_consume">Are you sure you want to permanently delete all consumption data?</string>
+    <string name="key_dev_mode">pref_dev_mode</string>
+    <string name="title_dev_mode">Enable Dev Mode</string>
+    <string name="summary_dev_mode">Enables the developer mode of the app. This provides more developer options and turns on verbose.</string>
+    <string name="key_camera_calibration">pref_key_camera_calibration</string>
+    <string name="title_camera_calibration">Calibrate Camera</string>
+    <string name="summary_camera_calibration">Launches chess board camera calibration tool.</string>
+
+    <!--intents msg-->
+    <string name="rf1">rf1Name</string>
+    <string name="rf2">rf2Name</string>
 </resources>

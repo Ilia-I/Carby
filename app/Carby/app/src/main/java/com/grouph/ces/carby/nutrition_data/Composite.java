@@ -1,7 +1,11 @@
 package com.grouph.ces.carby.nutrition_data;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -11,12 +15,24 @@ import java.util.Map;
  */
 
 public class Composite implements IComposite {
+    private final static String total = "Total";
     private double content;
     private Map<String, Double> components;
 
     public Composite(double content){
         this.content = content;
         components = new HashMap<String, Double>();
+    }
+
+    public Composite(JSONObject jo) throws JSONException {
+        this(jo.getDouble(total));
+        Iterator<String> keys = jo.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            if(!key.equals(total)){
+                components.put(key,jo.getDouble(key));
+            }
+        }
     }
 
     @Override
@@ -44,14 +60,14 @@ public class Composite implements IComposite {
     /**
      *
      * @param name
-     * @return contents of specified component or -1 if not found
+     * @return contents of specified component or null if not found
      */
     @Override
-    public double getContentOf(String name) {
+    public Double getContentOf(String name) {
         if(components.containsKey(name)) {
             return components.get(name);
         } else {
-            return 0;
+            return null;
         }
     }
 
@@ -63,5 +79,11 @@ public class Composite implements IComposite {
             output += key+" "+components.get(key)+"\n";
         }
         return output;
+    }
+
+    public JSONObject toJasonObject(){
+        Map<String,Double> temp = new HashMap<>(components);
+        temp.put(total,getTotal());
+        return new JSONObject(temp);
     }
 }

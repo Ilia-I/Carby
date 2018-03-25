@@ -2,8 +2,12 @@ package com.grouph.ces.carby.nutrition_data;
 
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -83,13 +87,49 @@ public class NutritionTable extends ANutritionTable{
                                 carbohydrates.addSubComponent(name,value);
                                 return setCarbohydrates(carbohydrates,getCarbohydratesUnit());
                             } else {
-                                getCarbohydrates().addSubComponent(name, value);
+                                return getCarbohydrates().addSubComponent(name, value);
                             }
             case "Fibre":   return setFibre(value,getFibreUnit());
             case "Protein": return setProtein(value,getProteinUnit());
             case "Salt":    return setSalt(value,getSaltUnit());
             default:
                 return false;
+        }
+    }
+
+    /**
+     * Get the corresponding value to the component
+     * @param name - name of component - one of listOfContents()
+     * @return value or null if not set
+     */
+    @Override
+    public Double getComponentValue(String name) {
+        IComposite component = null;
+        switch (name) {
+            case "Energy":
+            case "Fat":
+            case "Carbohydrate":
+            case "Fibre":
+            case "Protein":
+            case "Salt":
+                component = nutritionalInformation.get(name);
+                if(component!=null) return component.getTotal();
+                else return null;
+
+            case "mono-unsaturates":
+            case "polyunsaturates":
+            case "saturates":
+                component = nutritionalInformation.get("Fat");
+                if(component!=null) return component.getContentOf(name);
+                else return null;
+            case "sugars":
+            case "polyols":
+            case "starch":
+                component = nutritionalInformation.get("Carbohydrate");
+                if(component!=null) return component.getContentOf(name);
+                else return null;
+            default:
+                return null;
         }
     }
 
@@ -211,5 +251,30 @@ public class NutritionTable extends ANutritionTable{
             output += key+" "+nutritionalInformation.get(key).toString();
         }
         return output;
+    }
+
+    @Override
+    public boolean setAll(JSONObject jo) throws JSONException{
+        Iterator<String> keys = jo.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            nutritionalInformation.put(key, new Composite(jo.getJSONObject(key)));
+        }
+        return true;
+    }
+
+    @Override
+    public JSONObject toJasonObject(){
+        Map<String,JSONObject> temp = new HashMap<>();
+        for(String key: nutritionalInformation.keySet()) {
+            temp.put(key,nutritionalInformation.get(key).toJasonObject());
+        }
+        JSONObject jo = new JSONObject(temp);
+        try {
+            Log.d(this.getClass().getName(), "toJSONObject():" + jo.toString(4));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return new JSONObject(temp);
     }
 }

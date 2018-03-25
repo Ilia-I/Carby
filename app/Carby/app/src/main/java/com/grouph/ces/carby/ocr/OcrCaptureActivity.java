@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
+import android.os.Build;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
@@ -76,12 +77,12 @@ public final class OcrCaptureActivity extends AppCompatActivity {
     private CameraSourcePreview mPreview;
     private GraphicOverlay<OcrGraphic> mGraphicOverlay;
 
-    // Helper objects for detecting taps and pinches.
-    private ScaleGestureDetector scaleGestureDetector;
-    private GestureDetector gestureDetector;
-
-    // A TextToSpeech engine for speaking a String value.
-    private TextToSpeech tts;
+//    // Helper objects for detecting taps and pinches.
+//    private ScaleGestureDetector scaleGestureDetector;
+//    private GestureDetector gestureDetector;
+//
+//    // A TextToSpeech engine for speaking a String value.
+//    private TextToSpeech tts;
 
     private OcrDetectorProcessor processor;
     /**
@@ -108,27 +109,27 @@ public final class OcrCaptureActivity extends AppCompatActivity {
             requestCameraPermission();
         }
 
-        gestureDetector = new GestureDetector(this, new CaptureGestureListener());
-        scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
+//        gestureDetector = new GestureDetector(this, new CaptureGestureListener());
+//        scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
 
-        Snackbar.make(mGraphicOverlay, "Tap to Speak. Pinch/Stretch to zoom",
-                Snackbar.LENGTH_LONG)
-                .show();
+//        Snackbar.make(mGraphicOverlay, "Tap to Speak. Pinch/Stretch to zoom",
+//                Snackbar.LENGTH_LONG)
+//                .show();
 
-        // Set up the Text To Speech engine.
-        TextToSpeech.OnInitListener listener =
-                new TextToSpeech.OnInitListener() {
-                    @Override
-                    public void onInit(final int status) {
-                        if (status == TextToSpeech.SUCCESS) {
-                            Log.d("TTS", "Text to speech engine started successfully.");
-                            tts.setLanguage(Locale.US);
-                        } else {
-                            Log.d("TTS", "Error starting the text to speech engine.");
-                        }
-                    }
-                };
-        tts = new TextToSpeech(this.getApplicationContext(), listener);
+//        // Set up the Text To Speech engine.
+//        TextToSpeech.OnInitListener listener =
+//                new TextToSpeech.OnInitListener() {
+//                    @Override
+//                    public void onInit(final int status) {
+//                        if (status == TextToSpeech.SUCCESS) {
+//                            Log.d("TTS", "Text to speech engine started successfully.");
+//                            tts.setLanguage(Locale.US);
+//                        } else {
+//                            Log.d("TTS", "Error starting the text to speech engine.");
+//                        }
+//                    }
+//                };
+//        tts = new TextToSpeech(this.getApplicationContext(), listener);
 
         OcrController oc = new OcrController(this,(FloatingActionButton)findViewById(R.id.btn_scan_table));
     }
@@ -165,14 +166,14 @@ public final class OcrCaptureActivity extends AppCompatActivity {
                 .show();
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent e) {
-        boolean b = scaleGestureDetector.onTouchEvent(e);
-
-        boolean c = gestureDetector.onTouchEvent(e);
-
-        return b || c || super.onTouchEvent(e);
-    }
+//    @Override
+//    public boolean onTouchEvent(MotionEvent e) {
+//        boolean b = scaleGestureDetector.onTouchEvent(e);
+//
+//        boolean c = gestureDetector.onTouchEvent(e);
+//
+//        return b || c || super.onTouchEvent(e);
+//    }
 
     /**
      * Creates and starts the camera.  Note that this uses a higher resolution in comparison
@@ -190,7 +191,16 @@ public final class OcrCaptureActivity extends AppCompatActivity {
         TextRecognizer textRecognizer = new TextRecognizer.Builder(context).build();
 
         // Set the TextRecognizer's Processor.
-        processor = new OcrDetectorProcessor(mGraphicOverlay);
+        processor = new OcrDetectorProcessor(getApplicationContext(),mGraphicOverlay);
+
+        //if passed a barcode
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            String barcode = extras.getString(getString(R.string.ocr_intent_barcode));
+            if(barcode!=null){
+                processor = new OcrDetectorProcessor(getApplicationContext(),mGraphicOverlay,barcode);
+            }
+        }
         textRecognizer.setProcessor(processor);
 
         // Check if the TextRecognizer is operational.
@@ -330,99 +340,101 @@ public final class OcrCaptureActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * onTap is called to speak the tapped TextBlock, if any, out loud.
-     *
-     * @param rawX - the raw position of the tap
-     * @param rawY - the raw position of the tap.
-     * @return true if the tap was on a TextBlock
-     */
-    private boolean onTap(float rawX, float rawY) {
-        // Speak the text when the user taps on screen.
-        OcrGraphic graphic = mGraphicOverlay.getGraphicAtLocation(rawX, rawY);
-        TextBlock text = null;
-        if (graphic != null) {
-            text = graphic.getTextBlock();
-            if (text != null && text.getValue() != null) {
-                Log.d(TAG, "text data is being spoken! " + text.getValue());
-                // Speak the string.
-                tts.speak(text.getValue(), TextToSpeech.QUEUE_ADD, null, "DEFAULT");
-            }
-            else {
-                Log.d(TAG, "text data is null");
-            }
-        }
-        else {
-            Log.d(TAG,"no text detected");
-        }
-        return text != null;
-    }
+//    /**
+//     * onTap is called to speak the tapped TextBlock, if any, out loud.
+//     *
+//     * @param rawX - the raw position of the tap
+//     * @param rawY - the raw position of the tap.
+//     * @return true if the tap was on a TextBlock
+//     */
+//    private boolean onTap(float rawX, float rawY) {
+//        // Speak the text when the user taps on screen.
+//        OcrGraphic graphic = mGraphicOverlay.getGraphicAtLocation(rawX, rawY);
+//        TextBlock text = null;
+//        if (graphic != null) {
+//            text = graphic.getTextBlock();
+//            if (text != null && text.getValue() != null) {
+//                Log.d(TAG, "text data is being spoken! " + text.getValue());
+//                // Speak the string.
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//                    tts.speak(text.getValue(), TextToSpeech.QUEUE_ADD, null, "DEFAULT");
+//                }
+//            }
+//            else {
+//                Log.d(TAG, "text data is null");
+//            }
+//        }
+//        else {
+//            Log.d(TAG,"no text detected");
+//        }
+//        return text != null;
+//    }
 
     public void scan() {
         processor.scan();
     }
 
-    private class CaptureGestureListener extends GestureDetector.SimpleOnGestureListener {
+//    private class CaptureGestureListener extends GestureDetector.SimpleOnGestureListener {
+//
+//        @Override
+//        public boolean onSingleTapConfirmed(MotionEvent e) {
+//            return onTap(e.getRawX(), e.getRawY()) || super.onSingleTapConfirmed(e);
+//        }
+//    }
 
-        @Override
-        public boolean onSingleTapConfirmed(MotionEvent e) {
-            return onTap(e.getRawX(), e.getRawY()) || super.onSingleTapConfirmed(e);
-        }
-    }
-
-    private class ScaleListener implements ScaleGestureDetector.OnScaleGestureListener {
-
-        /**
-         * Responds to scaling events for a gesture in progress.
-         * Reported by pointer motion.
-         *
-         * @param detector The detector reporting the event - use this to
-         *                 retrieve extended info about event state.
-         * @return Whether or not the detector should consider this event
-         * as handled. If an event was not handled, the detector
-         * will continue to accumulate movement until an event is
-         * handled. This can be useful if an application, for example,
-         * only wants to update scaling factors if the change is
-         * greater than 0.01.
-         */
-        @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            return false;
-        }
-
-        /**
-         * Responds to the beginning of a scaling gesture. Reported by
-         * new pointers going down.
-         *
-         * @param detector The detector reporting the event - use this to
-         *                 retrieve extended info about event state.
-         * @return Whether or not the detector should continue recognizing
-         * this gesture. For example, if a gesture is beginning
-         * with a focal point outside of a region where it makes
-         * sense, onScaleBegin() may return false to ignore the
-         * rest of the gesture.
-         */
-        @Override
-        public boolean onScaleBegin(ScaleGestureDetector detector) {
-            return true;
-        }
-
-        /**
-         * Responds to the end of a scale gesture. Reported by existing
-         * pointers going up.
-         * <p/>
-         * Once a scale has ended, {@link ScaleGestureDetector#getFocusX()}
-         * and {@link ScaleGestureDetector#getFocusY()} will return focal point
-         * of the pointers remaining on the screen.
-         *
-         * @param detector The detector reporting the event - use this to
-         *                 retrieve extended info about event state.
-         */
-        @Override
-        public void onScaleEnd(ScaleGestureDetector detector) {
-            if (mCameraSource != null) {
-                mCameraSource.doZoom(detector.getScaleFactor());
-            }
-        }
-    }
+//    private class ScaleListener implements ScaleGestureDetector.OnScaleGestureListener {
+//
+//        /**
+//         * Responds to scaling events for a gesture in progress.
+//         * Reported by pointer motion.
+//         *
+//         * @param detector The detector reporting the event - use this to
+//         *                 retrieve extended info about event state.
+//         * @return Whether or not the detector should consider this event
+//         * as handled. If an event was not handled, the detector
+//         * will continue to accumulate movement until an event is
+//         * handled. This can be useful if an application, for example,
+//         * only wants to update scaling factors if the change is
+//         * greater than 0.01.
+//         */
+//        @Override
+//        public boolean onScale(ScaleGestureDetector detector) {
+//            return false;
+//        }
+//
+//        /**
+//         * Responds to the beginning of a scaling gesture. Reported by
+//         * new pointers going down.
+//         *
+//         * @param detector The detector reporting the event - use this to
+//         *                 retrieve extended info about event state.
+//         * @return Whether or not the detector should continue recognizing
+//         * this gesture. For example, if a gesture is beginning
+//         * with a focal point outside of a region where it makes
+//         * sense, onScaleBegin() may return false to ignore the
+//         * rest of the gesture.
+//         */
+//        @Override
+//        public boolean onScaleBegin(ScaleGestureDetector detector) {
+//            return true;
+//        }
+//
+//        /**
+//         * Responds to the end of a scale gesture. Reported by existing
+//         * pointers going up.
+//         * <p/>
+//         * Once a scale has ended, {@link ScaleGestureDetector#getFocusX()}
+//         * and {@link ScaleGestureDetector#getFocusY()} will return focal point
+//         * of the pointers remaining on the screen.
+//         *
+//         * @param detector The detector reporting the event - use this to
+//         *                 retrieve extended info about event state.
+//         */
+//        @Override
+//        public void onScaleEnd(ScaleGestureDetector detector) {
+//            if (mCameraSource != null) {
+//                mCameraSource.doZoom(detector.getScaleFactor());
+//            }
+//        }
+//    }
 }

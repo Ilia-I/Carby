@@ -1,5 +1,7 @@
 package com.grouph.ces.carby.nutrition_data;
 
+import org.json.JSONObject;
+
 import java.util.List;
 
 /**
@@ -14,5 +16,6 @@ public interface IComposite {
     public double getTotal();
     public boolean addSubComponent(String name, double content);
     public List<String> getSubComponentNames();
-    public double getContentOf(String name);
+    public Double getContentOf(String name);
+    public JSONObject toJasonObject();
 }
