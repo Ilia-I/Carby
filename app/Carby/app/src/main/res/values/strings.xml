@@ -7,7 +7,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
-
+    <string name="action_accept">Accept</string>
     <string name="ok">OK</string>
     <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
     <string name="no_camera_permission">This application cannot run because it does not have the camera permission.  The application will now exit.</string>
@@ -54,4 +54,14 @@
     <string name="summary_wipe_all">Erase all stored consumption history and nutrition table scan data.</string>
     <string name="dialog_message_wipe_all">Are you sure you want to permanently delete all stored application data?</string>
     <string name="dialog_message_wipe_consume">Are you sure you want to permanently delete all consumption data?</string>
+    <string name="key_dev_mode">pref_dev_mode</string>
+    <string name="title_dev_mode">Enable Dev Mode</string>
+    <string name="summary_dev_mode">Enables the developer mode of the app. This provides more developer options and turns on verbose.</string>
+    <string name="key_camera_calibration">pref_key_camera_calibration</string>
+    <string name="title_camera_calibration">Calibrate Camera</string>
+    <string name="summary_camera_calibration">Launches chess board camera calibration tool.</string>
+
+    <!--intents msg-->
+    <string name="rf1">rf1Name</string>
+    <string name="rf2">rf2Name</string>
 </resources>
