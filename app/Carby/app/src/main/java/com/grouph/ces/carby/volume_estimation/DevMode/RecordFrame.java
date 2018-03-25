@@ -2,6 +2,8 @@ package com.grouph.ces.carby.volume_estimation.DevMode;
 
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -10,6 +12,7 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -23,8 +26,8 @@ import java.util.Map;
 public class RecordFrame {
     private static final String prefix = "takePicture_";
     private String fileName;
-    private Bitmap frame;
     private Rect boundingBox;
+    private String encodedImg;
 
     public RecordFrame(SharedPreferences preferences, String fileName){
         this.fileName = namePrefix(fileName);
@@ -37,7 +40,7 @@ public class RecordFrame {
 
     public RecordFrame(String fileName, Mat frame, Rect boundingBox) {
         this.fileName = namePrefix(fileName);
-        this.frame = matToBitmap(frame);
+        this.encodedImg = getStringFromBitmap(matToBitmap(frame));
         this.boundingBox = boundingBox;
     }
 
@@ -47,7 +50,7 @@ public class RecordFrame {
 
     public RecordFrame(String fileName, Bitmap frame, Rect boundingBox) {
         this.fileName = namePrefix(fileName);
-        this.frame = frame;
+        this.encodedImg = getStringFromBitmap(frame);
         this.boundingBox = boundingBox;
     }
 
@@ -65,7 +68,7 @@ public class RecordFrame {
         String json = preferences.getString(fileName, defValue);
         if(json.equals(defValue)) return false;
         RecordFrame obj = gson.fromJson(json, RecordFrame.class);
-        this.frame = obj.getFrame();
+        this.encodedImg = obj.getEncodedImg();
         this.boundingBox = obj.getBoundingBox();
         return true;
     }
@@ -75,8 +78,10 @@ public class RecordFrame {
     }
 
     public Bitmap getFrame() {
-        return frame;
+        return getBitmapFromString(encodedImg);
     }
+
+    private String getEncodedImg(){return encodedImg;}
 
     public Rect getBoundingBox() {
         return boundingBox;
@@ -125,8 +130,8 @@ public class RecordFrame {
         if(!this.getBoundingBox().equals(rf.getBoundingBox())){
             Log.d(this.getClass().getName(),"different BoundingBox");
         }
-        if(!this.getFrame().equals(rf.getFrame())) {
-            Log.d(this.getClass().getName(),"different frame");
+        if(!this.getEncodedImg().equals(rf.getEncodedImg())) {
+            Log.d(this.getClass().getName(),"different encoded string");
             return false;
         }
         return true;
@@ -136,5 +141,34 @@ public class RecordFrame {
         Bitmap bitmap = Bitmap.createBitmap(input.cols(), input.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(input, bitmap);
         return bitmap;
+    }
+
+    /**
+     * This functions converts Bitmap picture to a string which can be
+     * JSONified.
+     * @param bitmapPicture
+     * @return
+     */
+    private String getStringFromBitmap(Bitmap bitmapPicture) {
+
+        final int COMPRESSION_QUALITY = 100;
+        String encodedImage;
+        ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
+        bitmapPicture.compress(Bitmap.CompressFormat.PNG, COMPRESSION_QUALITY,
+                byteArrayBitmapStream);
+        byte[] b = byteArrayBitmapStream.toByteArray();
+        encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
+        return encodedImage;
+    }
+
+    /**
+     * This Function converts the String back to Bitmap
+     * @param stringPicture
+     * @return
+     */
+    private Bitmap getBitmapFromString(String stringPicture) {
+        byte[] decodedString = Base64.decode(stringPicture, Base64.DEFAULT);
+        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        return decodedByte;
     }
 }
