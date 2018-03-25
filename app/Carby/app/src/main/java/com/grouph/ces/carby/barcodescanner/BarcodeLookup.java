@@ -26,8 +26,8 @@ public class BarcodeLookup extends AsyncTask<Barcode, Void, INutritionTable> {
     @Override
     protected INutritionTable doInBackground(Barcode... barcode) {
         String DataURL = "https://world.openfoodfacts.org/api/v0/product/";
-        //DataURL += barcode[0].displayValue + ".json";
-        DataURL += "50457236.json";
+        DataURL += barcode[0].displayValue + ".json";
+        //DataURL += "50457236.json";
 
         try {
             URL url = new URL(DataURL);
