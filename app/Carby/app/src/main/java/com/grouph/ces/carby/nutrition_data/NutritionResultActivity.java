@@ -80,7 +80,7 @@ public class NutritionResultActivity extends AppCompatActivity {
             }
 
             if(nutritionTable.getComponentValue("Salt") !=null){
-                mSaltVal.setText(Double.toString(nutritionTable.getComponentValue("Salt")) + nutritionTable.getSalt());
+                mSaltVal.setText(Double.toString(nutritionTable.getComponentValue("Salt")) + nutritionTable.getSaltUnit());
             }
         }
     }
