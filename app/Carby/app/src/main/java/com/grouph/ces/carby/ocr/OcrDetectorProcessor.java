@@ -17,6 +17,7 @@ package com.grouph.ces.carby.ocr;
 
 import android.arch.persistence.room.Room;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -27,6 +28,7 @@ import com.google.android.gms.vision.text.TextBlock;
 import com.grouph.ces.carby.database.AppDatabase;
 import com.grouph.ces.carby.database.NutritionDataDB;
 import com.grouph.ces.carby.nutrition_data.INutritionTable;
+import com.grouph.ces.carby.nutrition_data.NutritionResultActivity;
 import com.grouph.ces.carby.nutrition_data.NutritionTable;
 import com.grouph.ces.carby.ui.camera.GraphicOverlay;
 
@@ -95,9 +97,15 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
             Log.v("OcrDetectorProcessor","NutritionTable:\n"+nt);
             if(barcode!=null)   record(barcode,nt);
             scanComplete = false;
-            //TODO display table
             Log.d(this.getClass().getName(),"exec time:"+(System.currentTimeMillis() - startTime)+"ms");
+            showResult(nt);
         }
+    }
+
+    private void showResult(INutritionTable nt) {
+        Intent result = new Intent(context, NutritionResultActivity.class);
+        result.putExtra("jsonNutritionTable",nt.toJasonObject().toString());
+        context.startActivity(result);
     }
 
     /**
