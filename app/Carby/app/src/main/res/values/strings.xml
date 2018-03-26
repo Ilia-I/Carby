@@ -6,8 +6,11 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+    <!--Top bar-->
     <string name="action_settings">Settings</string>
     <string name="action_accept">Accept</string>
+    <string name="action_delete">Delete</string>
+
     <string name="ok">OK</string>
     <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
     <string name="no_camera_permission">This application cannot run because it does not have the camera permission.  The application will now exit.</string>
@@ -64,4 +67,8 @@
     <!--intents msg-->
     <string name="rf1">rf1Name</string>
     <string name="rf2">rf2Name</string>
+
+    <!--ShowFramesActivity-->
+    <string name="dialog_title_delete_img">Delete selected images?</string>
+    <string name="dialog_message_delete_img">Are you sure you wish to permanently delete the selected images?</string>
 </resources>

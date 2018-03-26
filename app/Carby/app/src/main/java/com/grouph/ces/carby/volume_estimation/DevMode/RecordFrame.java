@@ -168,4 +168,10 @@ public class RecordFrame {
         byte[] decodedString = Base64.decode(stringPicture, Base64.DEFAULT);
         return BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
     }
+
+    public void delete(SharedPreferences preferences) {
+        SharedPreferences.Editor prefsEditor = preferences.edit();
+        prefsEditor.remove(getFileName());
+        prefsEditor.apply();
+    }
 }

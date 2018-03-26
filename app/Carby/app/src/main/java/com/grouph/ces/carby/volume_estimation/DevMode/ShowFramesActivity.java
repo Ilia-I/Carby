@@ -1,23 +1,23 @@
 package com.grouph.ces.carby.volume_estimation.DevMode;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
-import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
@@ -33,7 +33,7 @@ import java.util.List;
 
 /**
  * Created by Martin Peev on 25.03.2018 г..
- * Version: 0.6
+ * Version: 0.7
  */
 
 public class ShowFramesActivity extends AppCompatActivity {
@@ -41,6 +41,7 @@ public class ShowFramesActivity extends AppCompatActivity {
     private List<Bitmap> images;
     private List<Integer> selected;
     private GridView gridview;
+    private ImageGridAdapter iga;
 
     private final double downscaleFactor = 2.5;
     private final int bitmapHeight = (int) (720/downscaleFactor);
@@ -55,8 +56,8 @@ public class ShowFramesActivity extends AppCompatActivity {
         selected = new ArrayList<>();
 
         gridview = findViewById(R.id.gridview);
-        gridview.setAdapter(new ImageGridAdapter(this));
-
+        iga = new ImageGridAdapter(this);
+        gridview.setAdapter(iga);
         gridview.setOnItemClickListener((AdapterView<?> parent, View v, int position, long id) -> mark(position));
     }
 
@@ -70,7 +71,7 @@ public class ShowFramesActivity extends AppCompatActivity {
         } else {
             selected.add(position);
         }
-        gridview.invalidateViews();
+        iga.notifyDataSetInvalidated();
     }
 
     private void getRecordFrames() {
@@ -192,6 +193,35 @@ public class ShowFramesActivity extends AppCompatActivity {
                 }
                 return true;
 
+            case R.id.action_delete:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+                builder.setMessage(R.string.dialog_message_delete_img);
+                builder.setTitle(R.string.dialog_title_delete_img);
+
+                builder.setPositiveButton(R.string.ok, (DialogInterface dialog, int id) -> {
+                    Collections.sort(selected, (Integer o1, Integer o2) -> Integer.compare(o1,o2));
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+                    for(int k=selected.size()-1;k>=0;k--){
+                        Integer i = selected.get(k);
+                        RecordFrame rf = rfs.get(i);
+                        rf.delete(preferences);
+                        rfs.remove(i);
+                        images.remove(i);
+                    }
+                    selected = new ArrayList<>();
+                    iga.notifyDataSetInvalidated();
+                    gridview.invalidateViews();
+                    dialog.dismiss();
+                });
+                builder.setNegativeButton(R.string.cancel, (DialogInterface dialog, int id) -> {
+                    dialog.dismiss();
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.show();
+                return true;
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
