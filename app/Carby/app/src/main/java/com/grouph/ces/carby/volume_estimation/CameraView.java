@@ -10,6 +10,7 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import android.content.Context;
+import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.hardware.Camera.Size;
 import android.util.AttributeSet;
@@ -29,20 +30,19 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     private Point p1;
     private Point p2;
     private Scalar boxColor = new Scalar(255, 255,0);
-
     private Mat mRgba;
     private Mat orignalFrame;
 
     private boolean refObjectDetected = false;
 
-    public boolean isRefObjectDetected() {
-        return refObjectDetected;
-    }
-
     private enum Corner { TP_LEFT, TP_RIGHT, BTM_LEFT, BTM_RIGHT }
 
     public CameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    public boolean isRefObjectDetected() {
+        return refObjectDetected;
     }
 
     public void setResolution(int width, int height) {
@@ -120,20 +120,31 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         p1 = new Point((mRgba.size().width-boxSize)/2,(mRgba.size().height-boxSize)/2);
         p2 = new Point((mRgba.size().width+boxSize)/2, (mRgba.size().height+boxSize)/2);
         boxColor = new Scalar(255, 255,0);
+    }
 
+    private int[] toPreviewCoordinates(CameraView view, MotionEvent e) {
+        float pixelRatio = view.getHeight() / 720f;
+        float width = view.getHeight() * 16 / 9;
+        float offset = (view.getWidth() - width) / 2;
+
+        int x = (int) ((e.getX() - offset)/pixelRatio);
+        int y = (int) (e.getY() / pixelRatio);
+        return new int[] {x,y};
     }
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
-        android.graphics.Rect r = new android.graphics.Rect();
-        view.getDrawingRect(r);
-        int touchX = (int) motionEvent.getX() - r.centerX() + (int) mRgba.size().width/2;
-        int touchY = (int) motionEvent.getY() - r.centerY() + (int) mRgba.size().height/2;
+        int[] coords = toPreviewCoordinates((CameraView) view, motionEvent);
+        int touchX = coords[0];
+        int touchY = coords[1];
 
         touchX = touchX >= 1280 ? 1280 : touchX;
         touchX = touchX <= 0 ? 0 : touchX;
         touchY= touchY >= 720 ? 720 : touchY;
         touchY = touchY <= 0 ? 0 : touchY;
+
+//        Log.e(TAG, "pointX, pointY: " + p1.x + ", " + p1.y);
+//        Log.e(TAG, "touchX, touchY: " + touchX + ", " + touchY);
 
         Corner c = getCornerTouch(touchX, touchY);
         if(c == null)

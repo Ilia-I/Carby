@@ -58,6 +58,7 @@ public final class CaptureActivity extends AppCompatActivity {
 
     private int imagesTaken = 0;
     private SharedPreferences preferences;
+    private Toast refObjectToast;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -79,12 +80,13 @@ public final class CaptureActivity extends AppCompatActivity {
         else
             requestPermissions();
 
+        refObjectToast = Toast.makeText(this, "No reference object detected", Toast.LENGTH_SHORT);
         FloatingActionButton captureButton = findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
             if(mOpenCvCameraView.isRefObjectDetected())
                 this.takePicture();
             else
-                Toast.makeText(this, "No reference object detected", Toast.LENGTH_SHORT).show();
+                refObjectToast.show();
         });
 
         FloatingActionButton searchGallery = findViewById(R.id.search_gallery);

@@ -73,7 +73,7 @@ public class FindPoundTask extends AsyncTask<Mat, Void, FindPoundTask.Result> {
                 // circle center
                 Imgproc.circle( output, center, 3, new Scalar(0,255,0), -1);
                 // circle outline
-                Imgproc.circle( output, center, r, new Scalar(255,0,0), 1);
+                Imgproc.circle( output, center, r, new Scalar(255,0,0), 3);
                 return new Result(true, output);
             }
         }
