@@ -44,7 +44,7 @@ public class FindPoundTask extends AsyncTask<Mat, Void, Double> {
             int ch[] = { c, 0 };
 
             Core.mixChannels(blurredChannel, gray0Channel, new MatOfInt(ch));
-            Imgproc.HoughCircles(gray0,circles, Imgproc.HOUGH_GRADIENT,2, (int) (500/scalingFactor),200,50, (int) (20/scalingFactor), (int) (100/scalingFactor));
+            Imgproc.HoughCircles(gray0,circles, Imgproc.HOUGH_GRADIENT,2, 500/scalingFactor,200,50, (int) (20/scalingFactor), (int) (100/scalingFactor));
             double x = 0.0;
             double y = 0.0;
             double r = 0.0;
