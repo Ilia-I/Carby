@@ -66,6 +66,8 @@ public class ImageProcessor {
     }
 
     private void saveImages() {
+
+
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
         File dir = new File(Environment.getExternalStorageDirectory() + "/Carby/" + timeStamp);
         if(!dir.exists())
@@ -80,7 +82,7 @@ public class ImageProcessor {
         try {
             if(topDownOut != null) {
                 fOut = new FileOutputStream(top);
-                topDownOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+                topDownOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);//PNG does not compress as it is a lossless format
                 fOut.flush();
             }
 

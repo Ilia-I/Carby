@@ -1,21 +1,11 @@
 <android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <android.support.v7.preference.PreferenceCategory android:title="Demo mode">
-
-        <android.support.v7.preference.SwitchPreferenceCompat
-            android:defaultValue="false"
-            android:key="demo_mode"
-            android:title="Demo mode"
-            android:summary="Show additional demo and debug information"/>
-
-    </android.support.v7.preference.PreferenceCategory>
-
     <android.support.v7.preference.PreferenceCategory android:title="Camera">
 
         <Preference
-            android:key="mykey"
-            android:title="Calibrate Camera"
-            android:summary="Launches chess board camera calibration tool" >
+            android:key="@string/key_camera_calibration"
+            android:title="@string/title_camera_calibration"
+            android:summary="@string/summary_camera_calibration" >
             <intent android:action="android.intent.action.VIEW"
                 android:targetPackage="com.grouph.ces.carby"
                 android:targetClass="com.grouph.ces.carby.camera_calibration.CameraCalibrationActivity"/>
@@ -34,4 +24,11 @@
             android:summary="@string/summary_wipe_all"/>
     </android.support.v7.preference.PreferenceCategory>
 
+    <android.support.v7.preference.PreferenceCategory android:title="Dev">
+        <android.support.v7.preference.SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="@string/key_dev_mode"
+            android:title="@string/title_dev_mode"
+            android:summary="@string/summary_dev_mode"/>
+    </android.support.v7.preference.PreferenceCategory>
 </android.support.v7.preference.PreferenceScreen>

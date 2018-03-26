@@ -26,8 +26,8 @@ public class BarcodeLookup extends AsyncTask<Barcode, Void, INutritionTable> {
     @Override
     protected INutritionTable doInBackground(Barcode... barcode) {
         String DataURL = "https://world.openfoodfacts.org/api/v0/product/";
-        //DataURL += barcode[0].displayValue + ".json";
-        DataURL += "50457236.json";
+        DataURL += barcode[0].displayValue + ".json";
+        //DataURL += "50457236.json";
 
         try {
             URL url = new URL(DataURL);
@@ -66,23 +66,48 @@ public class BarcodeLookup extends AsyncTask<Barcode, Void, INutritionTable> {
 
                         double fibre100g = getNutrientValue(nutrients, "fiber_100g");
                         double protein100g = getNutrientValue(nutrients, "proteins_100g");
-                        double salt100g = getNutrientValue(nutrients, "sodium_100g");
+                        double salt100g = getNutrientValue(nutrients, "salt_100g");
 
                         INutritionTable nutritionTable = new NutritionTable();
-                        nutritionTable.setComponent("Energy", energy100g);
-                        nutritionTable.setComponent("Fat", fat100g);
-                        nutritionTable.setComponent("mono-unsaturates", monoUnsatFat100g);
-                        nutritionTable.setComponent("polyunsaturates", polyUnsatFat100g);
-                        nutritionTable.setComponent("saturates", saturatedFat100g);
+                        if(energy100g != -1.0) {
+                            nutritionTable.setComponent("Energy", energy100g);
+                        }
+                        if(fat100g!=-1.0){
+                            nutritionTable.setComponent("Fat", fat100g);
+                        }
+                        if(monoUnsatFat100g!=-1.0) {
+                            nutritionTable.setComponent("mono-unsaturates", monoUnsatFat100g);
+                        }
+                        if(polyUnsatFat100g!=-1.0) {
+                            nutritionTable.setComponent("polyunsaturates", polyUnsatFat100g);
+                        }
+                        if(saturatedFat100g!=-1.0) {
+                            nutritionTable.setComponent("saturates", saturatedFat100g);
+                        }
+                        if(carbohydrate100g!=-1.0) {
+                            nutritionTable.setComponent("Carbohydrate", carbohydrate100g);
+                        }
 
-                        nutritionTable.setComponent("Carbohydrate", carbohydrate100g);
-                        nutritionTable.setComponent("sugars", sugars100g);
-                        nutritionTable.setComponent("polyols", polyols100g);
-                        nutritionTable.setComponent("starch", starch100g);
+                        if(sugars100g!=-1.0) {
+                            nutritionTable.setComponent("sugars", sugars100g);
+                        }
+                        if(polyols100g!=-1.0) {
+                            nutritionTable.setComponent("polyols", polyols100g);
+                        }
 
-                        nutritionTable.setComponent("Fibre", fibre100g);
-                        nutritionTable.setComponent("Protein", protein100g);
-                        nutritionTable.setComponent("Salt", salt100g);
+                        if(starch100g>=0) {
+                            nutritionTable.setComponent("starch", starch100g);
+                        }
+
+                        if(fibre100g!=-1.0) {
+                            nutritionTable.setComponent("Fibre", fibre100g);
+                        }
+                        if(protein100g!=-1.0) {
+                            nutritionTable.setComponent("Protein", protein100g);
+                        }
+                        if(salt100g!=-1.0) {
+                            nutritionTable.setComponent("Salt", salt100g);
+                        }
 
                         return nutritionTable;
 
