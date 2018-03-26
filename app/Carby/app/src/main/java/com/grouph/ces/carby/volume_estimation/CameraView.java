@@ -86,10 +86,10 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         frame.setPixelsPerCm(result);
 
         Imgproc.rectangle(mRgba, p1, p2, boxColor, 3, Imgproc.LINE_AA,0);
-        Imgproc.circle(mRgba, p1, 20, boxColor, 30);
-        Imgproc.circle(mRgba, new Point(p2.x, p1.y), 20, boxColor, 30);
-        Imgproc.circle(mRgba, new Point(p1.x, p2.y), 20, boxColor, 30);
-        Imgproc.circle(mRgba, p2, 20, boxColor, 30);
+        Imgproc.circle(mRgba, p1, 5, boxColor, 34);
+        Imgproc.circle(mRgba, new Point(p2.x, p1.y), 5, boxColor, 34);
+        Imgproc.circle(mRgba, new Point(p1.x, p2.y), 5, boxColor, 34);
+        Imgproc.circle(mRgba, p2, 5, boxColor, 34);
         return mRgba;
     }
 
