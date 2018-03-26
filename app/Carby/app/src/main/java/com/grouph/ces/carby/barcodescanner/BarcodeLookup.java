@@ -49,8 +49,8 @@ public class BarcodeLookup extends AsyncTask<Barcode, Void, INutritionTable> {
                         JsonElement product = root.getAsJsonObject().get("product");
                         JsonElement nutrients = product.getAsJsonObject().get("nutriments");
 
-                        String productName = product.getAsJsonObject().get("product_name").toString().replace("\"", "");
-                        String servingSize = product.getAsJsonObject().get("serving_size").toString().replace("\"", "");
+//                        String productName = product.getAsJsonObject().get("product_name").toString().replace("\"", "");
+//                        String servingSize = product.getAsJsonObject().get("serving_size").toString().replace("\"", "");
 
                         double energy100g = getNutrientValue(nutrients, "energy_100g");
 
