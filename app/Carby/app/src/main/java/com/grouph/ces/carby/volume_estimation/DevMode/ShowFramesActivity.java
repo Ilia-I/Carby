@@ -8,6 +8,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -15,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
@@ -30,27 +33,28 @@ import java.util.List;
 
 /**
  * Created by Martin Peev on 25.03.2018 г..
- * Version: 0.5
+ * Version: 0.6
  */
 
 public class ShowFramesActivity extends AppCompatActivity {
     private List<RecordFrame> rfs;
+    private List<Bitmap> images;
     private List<Integer> selected;
     private GridView gridview;
+
+    private final double downscaleFactor = 2.5;
+    private final int bitmapHeight = (int) (720/downscaleFactor);
+    private final int bitmapWidth = (int) (1280/downscaleFactor);
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dev_img_selector);
         getRecordFrames();
+        decodeImages();
         selected = new ArrayList<>();
 
         gridview = findViewById(R.id.gridview);
-        for(RecordFrame rf:rfs){
-            Log.d(this.getClass().getName(),"rf:"+rf.getFileName());
-            if(rf.getBoundingBox()==null) Log.d(this.getClass().getName(),"bounding box null");
-            if(rf.getFrame()==null) Log.d(this.getClass().getName(),"mat null");
-        }
         gridview.setAdapter(new ImageGridAdapter(this));
 
         gridview.setOnItemClickListener((AdapterView<?> parent, View v, int position, long id) -> mark(position));
@@ -81,26 +85,28 @@ public class ShowFramesActivity extends AppCompatActivity {
                 ((RecordFrame)softDrinkOne).getFileName().compareTo(((RecordFrame)softDrinkTwo).getFileName()));
     }
 
+    private void decodeImages(){
+        images = new ArrayList<>();
+        for(RecordFrame rf: rfs){
+            images.add(Bitmap.createScaledBitmap ( rf.getFrame(), bitmapWidth, bitmapHeight, true));
+        }
+    }
+
     class ImageGridAdapter extends BaseAdapter {
         private AppCompatActivity superActivity;
-        private int width;
-        private int height;
-        private Bitmap markedOverlay;
+//        private Bitmap markedOverlay;
 
         private ImageGridAdapter(AppCompatActivity superActivity){
             super();
             this.superActivity = superActivity;
-            double div = 2.5;
-            this.width = (int) (1280/div);
-            this.height = (int) (720/div);
-            markedOverlay = makeTransparent(BitmapFactory.decodeResource(superActivity.getResources(),R.drawable.img_overlay),170);
+//            markedOverlay = makeTransparent(BitmapFactory.decodeResource(superActivity.getResources(),R.drawable.img_overlay),170);
             Log.d(this.getClass().getName(),"init success");
         }
 
         public Bitmap makeTransparent(Bitmap src, int value) {
-            int width = src.getWidth();
-            int height = src.getHeight();
-            Bitmap transBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+//            int width = src.getWidth();
+//            int height = src.getHeight();
+            Bitmap transBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(transBitmap);
             canvas.drawARGB(0, 0, 0, 0);
             // config paint
@@ -139,7 +145,7 @@ public class ShowFramesActivity extends AppCompatActivity {
             if (convertView == null) {
                 // if it's not recycled, initialize some attributes
                 imageView = new ImageView(superActivity);
-                imageView.setLayoutParams(new GridView.LayoutParams(width,height));
+                imageView.setLayoutParams(new GridView.LayoutParams(bitmapWidth,bitmapHeight));
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 int pad = 10;
                 imageView.setPadding(pad, pad, pad, pad);
@@ -147,10 +153,18 @@ public class ShowFramesActivity extends AppCompatActivity {
                 imageView = (ImageView) convertView;
             }
 
+            imageView.setImageBitmap(images.get(position));
             if(selected.contains(position)){
-                imageView.setImageBitmap(overlay(rfs.get(position).getFrame(),markedOverlay));
+                imageView.setColorFilter( 0x6f000000, PorterDuff.Mode.SRC_OVER );
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//                    imageView.setImageBitmap(images.get(position));
+////                imageView.setForegroundTintMode(PorterDuff.Mode.DARKEN);
+////                    imageView.setImageTintMode(PorterDuff.Mode.DARKEN);
+//                } else {
+//                    imageView.setImageBitmap(overlay(images.get(position), markedOverlay));
+//                }
             } else {
-                imageView.setImageBitmap(rfs.get(position).getFrame());
+                imageView.clearColorFilter();
             }
             return imageView;
         }
