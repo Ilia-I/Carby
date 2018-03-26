@@ -91,10 +91,10 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         }
 
         Imgproc.rectangle(mRgba, p1, p2, boxColor, 3, Imgproc.LINE_AA,0);
-        Imgproc.circle(mRgba, p1, 20, boxColor, 3);
-        Imgproc.circle(mRgba, new Point(p2.x, p1.y), 20, boxColor, 3);
-        Imgproc.circle(mRgba, new Point(p1.x, p2.y), 20, boxColor, 3);
-        Imgproc.circle(mRgba, p2, 20, boxColor, 3);
+        Imgproc.circle(mRgba, p1, 20, boxColor, 30);
+        Imgproc.circle(mRgba, new Point(p2.x, p1.y), 20, boxColor, 30);
+        Imgproc.circle(mRgba, new Point(p1.x, p2.y), 20, boxColor, 30);
+        Imgproc.circle(mRgba, p2, 20, boxColor, 30);
         return mRgba;
     }
 
@@ -142,9 +142,6 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         touchX = touchX <= 0 ? 0 : touchX;
         touchY= touchY >= 720 ? 720 : touchY;
         touchY = touchY <= 0 ? 0 : touchY;
-
-//        Log.e(TAG, "pointX, pointY: " + p1.x + ", " + p1.y);
-//        Log.e(TAG, "touchX, touchY: " + touchX + ", " + touchY);
 
         Corner c = getCornerTouch(touchX, touchY);
         if(c == null)

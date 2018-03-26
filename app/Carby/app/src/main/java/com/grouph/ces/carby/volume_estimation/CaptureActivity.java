@@ -174,7 +174,7 @@ public final class CaptureActivity extends AppCompatActivity {
 
                         Utils.bitmapToMat(selectedImage, mat);
                         if (userSelectedImageBitmapList == null) {
-                            userSelectedImageBitmapList = new ArrayList<Mat>();
+                            userSelectedImageBitmapList = new ArrayList<>();
                             Toast.makeText(this, "1st image chosen", Toast.LENGTH_LONG).show();
                         }
                         userSelectedImageBitmapList.add(mat);
@@ -213,13 +213,13 @@ public final class CaptureActivity extends AppCompatActivity {
     }
 
     private void addImage(String name){
-        RecordFrame rf = new RecordFrame(preferences,name);
+        RecordFrame rf = new RecordFrame(preferences, name);
         Mat mat = new Mat();
         Utils.bitmapToMat(rf.getFrame(), mat);
         imageProcessor.addImage(mat, rf.getBoundingBox());
     }
 
-    private void startProcessor(){
+    private void startProcessor() {
         mOpenCvCameraView.disableView();
         imageProcessor.processImages();
     }

@@ -49,9 +49,6 @@ public class FindPoundTask extends AsyncTask<Mat, Void, FindPoundTask.Result> {
         List<Mat> gray0Channel = new ArrayList<>();
         gray0Channel.add(gray0);
 
-        double minArea = 16000/(scalingFactor*scalingFactor);
-        double maxArea = 80000/(scalingFactor*scalingFactor);
-
         for (int c = 0; c < 3; c++) {
             int ch[] = { c, 0 };
 

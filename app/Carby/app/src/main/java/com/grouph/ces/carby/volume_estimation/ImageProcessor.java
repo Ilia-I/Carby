@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Environment;
 
+import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
 import com.grouph.ces.carby.volume_estimation.ImageTasks.FindPoundTask;
 import com.grouph.ces.carby.volume_estimation.ImageTasks.GrabCutTask;
 
@@ -66,8 +67,6 @@ public class ImageProcessor {
     }
 
     private void saveImages() {
-
-
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
         File dir = new File(Environment.getExternalStorageDirectory() + "/Carby/" + timeStamp);
         if(!dir.exists())
@@ -75,8 +74,6 @@ public class ImageProcessor {
 
         File top = new File(dir, "top.png");
         File side = new File(dir, "side.png");
-        File topReference = new File(dir, "topRef.png");
-        File sideReference =  new File(dir, "sideRef.png");
 
         FileOutputStream fOut;
         try {
@@ -90,18 +87,6 @@ public class ImageProcessor {
                 fOut = new FileOutputStream(side);
                 sideOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
                 fOut.flush();
-            }
-
-            if(refObj1 != null) {
-                fOut = new FileOutputStream(topReference);
-                refObj1.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-                fOut.flush();
-            }
-
-            if(refObj2 != null) {
-                fOut = new FileOutputStream(sideReference);
-                refObj2.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-                fOut.close();
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -143,20 +128,12 @@ public class ImageProcessor {
             // Do grab cut
             // Feature matching
             // ...
-
             AsyncTask grabCutTop = new GrabCutTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topDownIn, boundingBox1);
             AsyncTask grabCutSide = new GrabCutTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, sideIn, boundingBox2);
-            AsyncTask refDetectTop = new FindPoundTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topDownIn);
-            AsyncTask refDetectSide = new FindPoundTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, sideIn);
 
             try {
-                FindPoundTask.Result r1 = (FindPoundTask.Result) refDetectTop.get();
-                FindPoundTask.Result r2 = (FindPoundTask.Result) refDetectSide.get();
-
                 topDownOut = algorithms.matToBitmap((Mat) grabCutTop.get());
                 sideOut = algorithms.matToBitmap((Mat) grabCutSide.get());
-                refObj1 = algorithms.matToBitmap(r1.refObject);
-                refObj2 = algorithms.matToBitmap(r2.refObject);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
