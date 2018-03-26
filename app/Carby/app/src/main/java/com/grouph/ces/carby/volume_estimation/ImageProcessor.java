@@ -66,8 +66,6 @@ public class ImageProcessor {
     }
 
     private void saveImages() {
-
-
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
         File dir = new File(Environment.getExternalStorageDirectory() + "/Carby/" + timeStamp);
         if(!dir.exists())
@@ -150,13 +148,13 @@ public class ImageProcessor {
             AsyncTask refDetectSide = new FindPoundTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, sideIn);
 
             try {
-                FindPoundTask.Result r1 = (FindPoundTask.Result) refDetectTop.get();
-                FindPoundTask.Result r2 = (FindPoundTask.Result) refDetectSide.get();
+//                FindPoundTask.Result r1 = (FindPoundTask.Result) refDetectTop.get();
+//                FindPoundTask.Result r2 = (FindPoundTask.Result) refDetectSide.get();
 
                 topDownOut = algorithms.matToBitmap((Mat) grabCutTop.get());
                 sideOut = algorithms.matToBitmap((Mat) grabCutSide.get());
-                refObj1 = algorithms.matToBitmap(r1.refObject);
-                refObj2 = algorithms.matToBitmap(r2.refObject);
+//                refObj1 = algorithms.matToBitmap(r1.refObject);
+//                refObj2 = algorithms.matToBitmap(r2.refObject);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {

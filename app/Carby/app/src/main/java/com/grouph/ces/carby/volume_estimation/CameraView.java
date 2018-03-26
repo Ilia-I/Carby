@@ -79,11 +79,10 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         orignalFrame = inputFrame.rgba().clone();
         mRgba = inputFrame.rgba();
 
-        FindPoundTask.Result result;
         try {
-            result = new FindPoundTask().execute(mRgba).get();
-            mRgba = result.refObject;
-            refObjectDetected = result.detected;
+            double result = new FindPoundTask().execute(mRgba).get();
+            if(result >= 0)
+                Log.e(TAG, "onCameraFrame: " + result);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
