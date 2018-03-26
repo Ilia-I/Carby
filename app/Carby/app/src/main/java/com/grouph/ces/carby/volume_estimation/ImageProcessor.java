@@ -6,7 +6,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.util.Log;
 
+import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
 import com.grouph.ces.carby.volume_estimation.ImageTasks.FindPoundTask;
 import com.grouph.ces.carby.volume_estimation.ImageTasks.GrabCutTask;
 
@@ -30,14 +32,11 @@ public class ImageProcessor {
 
     private Context context;
 
-    private Mat topDownIn = null;
-    private Mat sideIn = null;
-    private org.opencv.core.Rect boundingBox1;
-    private org.opencv.core.Rect boundingBox2;
+    private Frame topDown;
+    private Frame side;
+
     private Bitmap topDownOut;
     private Bitmap sideOut;
-    private Bitmap refObj1;
-    private Bitmap refObj2;
 
     private ProcessingAlgorithms algorithms;
 
@@ -46,18 +45,11 @@ public class ImageProcessor {
         this.algorithms = new ProcessingAlgorithms(context);
     }
 
-    public ProcessingAlgorithms getAlgorithms() {
-        return algorithms;
-    }
-
-    public void addImage(Mat image, org.opencv.core.Rect boundingBox) {
-        if(topDownIn == null) {
-            topDownIn = image.clone();
-            boundingBox1 = boundingBox;
-        }
-        else if (sideIn == null) {
-            sideIn = image.clone();
-            boundingBox2 = boundingBox;
+    public void addImage(Frame frame) {
+        if(topDown == null)
+            topDown = frame;
+        else if (side == null) {
+            side = frame;
         }
     }
 
@@ -73,8 +65,6 @@ public class ImageProcessor {
 
         File top = new File(dir, "top.png");
         File side = new File(dir, "side.png");
-        File topReference = new File(dir, "topRef.png");
-        File sideReference =  new File(dir, "sideRef.png");
 
         FileOutputStream fOut;
         try {
@@ -83,23 +73,10 @@ public class ImageProcessor {
                 topDownOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);//PNG does not compress as it is a lossless format
                 fOut.flush();
             }
-
             if(sideOut != null) {
                 fOut = new FileOutputStream(side);
                 sideOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
                 fOut.flush();
-            }
-
-            if(refObj1 != null) {
-                fOut = new FileOutputStream(topReference);
-                refObj1.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-                fOut.flush();
-            }
-
-            if(refObj2 != null) {
-                fOut = new FileOutputStream(sideReference);
-                refObj2.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-                fOut.close();
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -141,20 +118,12 @@ public class ImageProcessor {
             // Do grab cut
             // Feature matching
             // ...
-
-            AsyncTask grabCutTop = new GrabCutTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topDownIn, boundingBox1);
-            AsyncTask grabCutSide = new GrabCutTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, sideIn, boundingBox2);
-            AsyncTask refDetectTop = new FindPoundTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topDownIn);
-            AsyncTask refDetectSide = new FindPoundTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, sideIn);
+            AsyncTask grabCutTop = new GrabCutTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topDown.getImage(), topDown.getBoundingBox());
+            AsyncTask grabCutSide = new GrabCutTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, side.getImage(), side.getBoundingBox());
 
             try {
-//                FindPoundTask.Result r1 = (FindPoundTask.Result) refDetectTop.get();
-//                FindPoundTask.Result r2 = (FindPoundTask.Result) refDetectSide.get();
-
                 topDownOut = algorithms.matToBitmap((Mat) grabCutTop.get());
                 sideOut = algorithms.matToBitmap((Mat) grabCutSide.get());
-//                refObj1 = algorithms.matToBitmap(r1.refObject);
-//                refObj2 = algorithms.matToBitmap(r2.refObject);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
