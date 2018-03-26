@@ -81,7 +81,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
             e.printStackTrace();
         }
 
-        frame.setBoundingBox(getBoundingBox());
+        frame.setBoundingBox(new Rect(p1, p2));
         frame.setImage(originalImage);
         frame.setPixelsPerCm(result);
 
