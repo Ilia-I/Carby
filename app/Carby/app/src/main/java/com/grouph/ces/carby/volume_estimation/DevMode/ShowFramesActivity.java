@@ -49,7 +49,7 @@ public class ShowFramesActivity extends AppCompatActivity {
         for(RecordFrame rf:rfs){
             Log.d(this.getClass().getName(),"rf:"+rf.getFileName());
             if(rf.getBoundingBox()==null) Log.d(this.getClass().getName(),"bounding box null");
-            if(rf.getFrame()==null) Log.d(this.getClass().getName(),"mat null");
+            if(rf.getImage()==null) Log.d(this.getClass().getName(),"mat null");
         }
         gridview.setAdapter(new ImageGridAdapter(this));
 
@@ -148,9 +148,9 @@ public class ShowFramesActivity extends AppCompatActivity {
             }
 
             if(selected.contains(position)){
-                imageView.setImageBitmap(overlay(rfs.get(position).getFrame(),markedOverlay));
+                imageView.setImageBitmap(overlay(rfs.get(position).getImage(),markedOverlay));
             } else {
-                imageView.setImageBitmap(rfs.get(position).getFrame());
+                imageView.setImageBitmap(rfs.get(position).getImage());
             }
             return imageView;
         }

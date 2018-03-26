@@ -42,19 +42,12 @@ public class IntegralApproximation {
     private Mat top = new Mat();
     private Mat side = new Mat();
 
-    private List<RecordFrame> rfs;
-    private Context context;
+    public IntegralApproximation() {}
 
-    public IntegralApproximation(Context context) {
-        this.context = context;
-    }
-
-    public IntegralApproximation(Mat top, Mat side, Context context) {
+    public IntegralApproximation(Mat top, Mat side) {
         this.top = top;
         this.side = side;
-        this.context = context;
     }
-
 
     public void loadTestMats() {
         File dir = new File(Environment.getExternalStorageDirectory() + "/Carby/test/");

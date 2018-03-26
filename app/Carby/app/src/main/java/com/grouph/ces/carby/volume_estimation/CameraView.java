@@ -25,24 +25,16 @@ import java.util.concurrent.ExecutionException;
 public class CameraView extends JavaCameraView implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
 
     private static final String TAG = "myCameraView";
+    private enum Corner { TP_LEFT, TP_RIGHT, BTM_LEFT, BTM_RIGHT }
 
-    private int boxSize = 300;
     private Point p1;
     private Point p2;
     private Scalar boxColor = new Scalar(255, 255,0);
     private Mat mRgba;
-    private Mat orignalFrame;
-
-    private boolean refObjectDetected = false;
-
-    private enum Corner { TP_LEFT, TP_RIGHT, BTM_LEFT, BTM_RIGHT }
+    private Frame frame;
 
     public CameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    public boolean isRefObjectDetected() {
-        return refObjectDetected;
     }
 
     public void setResolution(int width, int height) {
@@ -70,25 +62,28 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         mCamera.setPreviewCallback(this);
     }
 
-    public Mat getFrame() {
-        return orignalFrame;
+    public Frame getFrame() {
+        return frame;
     }
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        orignalFrame = inputFrame.rgba().clone();
         mRgba = inputFrame.rgba();
+        Mat originalImage = mRgba.clone();
 
-        FindPoundTask.Result result;
+        double result = -1;
+
         try {
             result = new FindPoundTask().execute(mRgba).get();
-            mRgba = result.refObject;
-            refObjectDetected = result.detected;
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
+
+        frame.setBoundingBox(getBoundingBox());
+        frame.setImage(originalImage);
+        frame.setPixelsPerCm(result);
 
         Imgproc.rectangle(mRgba, p1, p2, boxColor, 3, Imgproc.LINE_AA,0);
         Imgproc.circle(mRgba, p1, 20, boxColor, 30);
@@ -101,7 +96,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     @Override
     public void onCameraViewStarted(int width, int height) {
         mRgba = new Mat(height,width, CvType.CV_8UC4);
-
+        frame = new Frame();
         setResolution(1280,720);
 
         initBoundingBox();
@@ -117,8 +112,9 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     }
 
     private void initBoundingBox() {
-        p1 = new Point((mRgba.size().width-boxSize)/2,(mRgba.size().height-boxSize)/2);
-        p2 = new Point((mRgba.size().width+boxSize)/2, (mRgba.size().height+boxSize)/2);
+        final int BOX_SIZE = 300;
+        p1 = new Point((mRgba.size().width - BOX_SIZE)/2,(mRgba.size().height - BOX_SIZE)/2);
+        p2 = new Point((mRgba.size().width + BOX_SIZE)/2, (mRgba.size().height + BOX_SIZE)/2);
         boxColor = new Scalar(255, 255,0);
     }
 

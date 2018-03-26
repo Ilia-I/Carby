@@ -83,7 +83,8 @@ public final class CaptureActivity extends AppCompatActivity {
         refObjectToast = Toast.makeText(this, "No reference object detected", Toast.LENGTH_SHORT);
         FloatingActionButton captureButton = findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
-            if(mOpenCvCameraView.isRefObjectDetected())
+            Frame captured = mOpenCvCameraView.getFrame();
+            if(captured.getPixelsPerCm() >= 0)
                 this.takePicture();
             else
                 refObjectToast.show();
@@ -180,8 +181,6 @@ public final class CaptureActivity extends AppCompatActivity {
                         userSelectedImageBitmapList.add(mat);
                         if (userSelectedImageBitmapList.size() == 2) {
                             Toast.makeText(this, "2nd image chosen", Toast.LENGTH_LONG).show();
-                            imageProcessor.addImage(userSelectedImageBitmapList.get(0), mOpenCvCameraView.getBoundingBox());
-                            imageProcessor.addImage(userSelectedImageBitmapList.get(1), mOpenCvCameraView.getBoundingBox());
                             mOpenCvCameraView.disableView();
                             imageProcessor.processImages();
                             userSelectedImageBitmapList = null;
@@ -215,8 +214,8 @@ public final class CaptureActivity extends AppCompatActivity {
     private void addImage(String name){
         RecordFrame rf = new RecordFrame(preferences, name);
         Mat mat = new Mat();
-        Utils.bitmapToMat(rf.getFrame(), mat);
-        imageProcessor.addImage(mat, rf.getBoundingBox());
+        Utils.bitmapToMat(rf.getImage(), mat);
+        imageProcessor.addImage(new Frame(mat, rf.getPixelsPerCm(), rf.getBoundingBox()));
     }
 
     private void startProcessor() {
@@ -261,11 +260,13 @@ public final class CaptureActivity extends AppCompatActivity {
     }
 
     public void takePicture() {
-        imageProcessor.addImage(mOpenCvCameraView.getFrame(), mOpenCvCameraView.getBoundingBox());
+        Frame frame = mOpenCvCameraView.getFrame();
+
+        imageProcessor.addImage(frame);
 
         //save img if dev mode
         if (preferences.getBoolean(getResources().getString(R.string.key_dev_mode),false)) {
-            RecordFrame rf = new RecordFrame(mOpenCvCameraView.getFrame(), mOpenCvCameraView.getBoundingBox());
+            RecordFrame rf = new RecordFrame(frame);
             rf.saveObj(preferences);
 //            Log.d(this.getClass().getName(),"compare:"+rf.equals(new RecordFrame(preferences,rf.getFileName())));
         }

@@ -17,27 +17,18 @@ import java.util.List;
  * Created by matthewball on 23/03/2018.
  */
 
-public class FindPoundTask extends AsyncTask<Mat, Void, FindPoundTask.Result> {
+public class FindPoundTask extends AsyncTask<Mat, Void, Double> {
 
     private static String TAG = "FindPoundTask";
-
-    public class Result {
-        public boolean detected = false;
-        public Mat refObject;
-
-        public Result(boolean detected, Mat refObject) {
-            this.detected = detected;
-            this.refObject = refObject;
-        }
-    }
+    private static double poundRadius = 2.323/2;
 
     @Override
-    protected Result doInBackground(Mat... mats) {
-        int scalingFactor =4;
+    protected Double doInBackground(Mat... mats) {
+        final double scalingFactor = 2.5;
+
         Mat src = mats[0];
-        Mat output = src.clone();
         Mat blurred = new Mat();
-        Imgproc.resize(src,blurred, new org.opencv.core.Size(src.width()/scalingFactor,src.height()/scalingFactor));
+        Imgproc.resize(src, blurred, new org.opencv.core.Size(src.width()/scalingFactor,src.height()/scalingFactor));
 
         Imgproc.medianBlur(blurred, blurred, 5);
 
@@ -53,10 +44,10 @@ public class FindPoundTask extends AsyncTask<Mat, Void, FindPoundTask.Result> {
             int ch[] = { c, 0 };
 
             Core.mixChannels(blurredChannel, gray0Channel, new MatOfInt(ch));
-            Imgproc.HoughCircles(gray0,circles, Imgproc.HOUGH_GRADIENT,2,500/scalingFactor,200,50,20/scalingFactor,100/scalingFactor);
+            Imgproc.HoughCircles(gray0,circles, Imgproc.HOUGH_GRADIENT,2, 500/scalingFactor,200,50, (int) (20/scalingFactor), (int) (100/scalingFactor));
             double x = 0.0;
             double y = 0.0;
-            int r = 0;
+            double r = 0.0;
 
             if (circles.rows()>0)
             {
@@ -64,17 +55,17 @@ public class FindPoundTask extends AsyncTask<Mat, Void, FindPoundTask.Result> {
                 for(int j = 0 ; j < data.length ; j++){
                     x = data[0]*scalingFactor;
                     y = data[1]*scalingFactor;
-                    r = (int) data[2]*scalingFactor;
+                    r = data[2]*scalingFactor;
                 }
                 Point center = new Point(x,y);
                 // circle center
-                Imgproc.circle( output, center, 3, new Scalar(0,255,0), -1);
+                Imgproc.circle(mats[0], center, 3, new Scalar(0,255,0), -1);
                 // circle outline
-                Imgproc.circle( output, center, r, new Scalar(255,0,0), 3);
-                return new Result(true, output);
+                Imgproc.circle(mats[0], center, (int) r, new Scalar(255,0,0), 3);
+                return r / poundRadius;
             }
         }
-        return new Result(false, mats[0]);
+        return -1.0;
     }
 
 }
