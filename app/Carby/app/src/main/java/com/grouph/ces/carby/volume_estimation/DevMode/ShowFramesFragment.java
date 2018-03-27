@@ -5,10 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -41,7 +39,7 @@ import java.util.List;
 
 /**
  * Created by Martin Peev on 25.03.2018 г..
- * Version: 1.0
+ * Version: 1.1
  */
 
 public class ShowFramesFragment extends Fragment {
@@ -59,21 +57,10 @@ public class ShowFramesFragment extends Fragment {
         return inflater.inflate(R.layout.dev_img_selector, container, false);
     }
 
-    private void setViewLayout(int id){
-        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(id, null);
-        if(getView()==null) Log.e(this.getClass().getName(),"null view");
-        ViewGroup rootView = (ViewGroup) getView();
-        if(rootView != null) {
-            rootView.removeAllViews();
-            rootView.addView(view);
-        }
-    }
-
     @Override
     public void onActivityCreated(Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
-//        setViewLayout(R.layout.dev_img_selector);
+        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         setHasOptionsMenu(true);
         getRecordFrames();
         decodeImages();
@@ -119,7 +106,6 @@ public class ShowFramesFragment extends Fragment {
 
     class ImageGridAdapter extends BaseAdapter {
         private Context context;
-//        private Bitmap markedOverlay;
 
         private ImageGridAdapter(Context context){
             super();
@@ -127,26 +113,26 @@ public class ShowFramesFragment extends Fragment {
 //            markedOverlay = makeTransparent(BitmapFactory.decodeResource(superActivity.getResources(),R.drawable.img_overlay),170);
         }
 
-        public Bitmap makeTransparent(Bitmap src, int value) {
-//            int width = src.getWidth();
-//            int height = src.getHeight();
-            Bitmap transBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(transBitmap);
-            canvas.drawARGB(0, 0, 0, 0);
-            // config paint
-            final Paint paint = new Paint();
-            paint.setAlpha(value);
-            canvas.drawBitmap(src, 0, 0, paint);
-            return transBitmap;
-        }
-
-        private Bitmap overlay(Bitmap bmp1, Bitmap bmp2) {
-            Bitmap bmOverlay = Bitmap.createBitmap(bmp1.getWidth(), bmp1.getHeight(), bmp1.getConfig());
-            Canvas canvas = new Canvas(bmOverlay);
-            canvas.drawBitmap(bmp1, new Matrix(), null);
-            canvas.drawBitmap(bmp2, new Matrix(), null);
-            return bmOverlay;
-        }
+//        public Bitmap makeTransparent(Bitmap src, int value) {
+////            int width = src.getWidth();
+////            int height = src.getHeight();
+//            Bitmap transBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+//            Canvas canvas = new Canvas(transBitmap);
+//            canvas.drawARGB(0, 0, 0, 0);
+//            // config paint
+//            final Paint paint = new Paint();
+//            paint.setAlpha(value);
+//            canvas.drawBitmap(src, 0, 0, paint);
+//            return transBitmap;
+//        }
+//
+//        private Bitmap overlay(Bitmap bmp1, Bitmap bmp2) {
+//            Bitmap bmOverlay = Bitmap.createBitmap(bmp1.getWidth(), bmp1.getHeight(), bmp1.getConfig());
+//            Canvas canvas = new Canvas(bmOverlay);
+//            canvas.drawBitmap(bmp1, new Matrix(), null);
+//            canvas.drawBitmap(bmp2, new Matrix(), null);
+//            return bmOverlay;
+//        }
 
         @Override
         public int getCount() {
@@ -199,9 +185,6 @@ public class ShowFramesFragment extends Fragment {
 
             case R.id.action_accept:
                 if(selected.size()==2) {
-//                    Bundle bundle = new Bundle();
-//                    bundle.putString(getResources().getString(R.string.rf1), rfs.get(selected.get(0)).getFileName());
-//                    bundle.putString(getResources().getString(R.string.rf2), rfs.get(selected.get(1)).getFileName());
                     VolEstActivity activity = ((VolEstActivity)getActivity());
                     ImageProcessor imageProcessor = new ImageProcessor(activity);
                     imageProcessor.addImage(generateFrame(rfs.get(selected.get(0))));
