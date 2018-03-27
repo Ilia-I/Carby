@@ -53,7 +53,7 @@
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".volume_estimation.CaptureActivity"
+            android:name=".volume_estimation.VolEstActivity"
             android:label="@string/app_name"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="landscape">
@@ -105,7 +105,7 @@
         <activity
             android:name=".volume_estimation.DevMode.ShowFramesActivity"
             android:label="@string/app_name"
-            android:parentActivityName=".volume_estimation.CaptureActivity">
+            android:parentActivityName=".volume_estimation.VolEstActivity">
             <intent-filter>
                 <action android:name=".ShowFramesActivity" />
                 <category android:name="android.intent.category.DEFAULT" />

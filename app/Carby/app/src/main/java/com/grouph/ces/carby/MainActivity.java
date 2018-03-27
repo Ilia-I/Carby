@@ -9,7 +9,8 @@ import android.widget.FrameLayout;
 
 import com.grouph.ces.carby.barcodescanner.BarcodeCaptureActivity;
 import com.grouph.ces.carby.ocr.OcrCaptureActivity;
-import com.grouph.ces.carby.volume_estimation.CaptureActivity;
+import com.grouph.ces.carby.volume_estimation.CaptureFragment;
+import com.grouph.ces.carby.volume_estimation.VolEstActivity;
 
 public class MainActivity extends BaseActivity implements OnClickListener {
 
@@ -43,7 +44,7 @@ public class MainActivity extends BaseActivity implements OnClickListener {
             Intent ocr = new Intent(this, OcrCaptureActivity.class);
             startActivity(ocr);
         } else if (id == R.id.colored_bar3) {
-            Intent volume = new Intent(this, CaptureActivity.class);
+            Intent volume = new Intent(this, VolEstActivity.class);
             startActivity(volume);
         }
     }

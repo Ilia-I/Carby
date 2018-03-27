@@ -2,6 +2,7 @@ package com.grouph.ces.carby.volume_estimation;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -9,14 +10,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.grouph.ces.carby.R;
@@ -29,18 +30,15 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
+import static android.app.Activity.RESULT_OK;
 
 
-public final class CaptureActivity extends AppCompatActivity {
+public final class CaptureFragment extends Fragment {
 
     private static String TAG = "VolumeCapture";
 
@@ -60,28 +58,36 @@ public final class CaptureActivity extends AppCompatActivity {
     private SharedPreferences preferences;
     private Toast refObjectToast;
 
-    @Override
-    public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        setContentView(R.layout.vol_capture);
+    private VolEstActivity activityRef;
 
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.vol_capture, container, false);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        activityRef = (VolEstActivity) getActivity();
         // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
-        int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+        int rc = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA);
 
-        mOpenCvCameraView = findViewById(R.id.camera_preview);
+        mOpenCvCameraView = getView().findViewById(R.id.camera_preview);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(mOpenCvCameraView);
         mOpenCvCameraView.setOnTouchListener(mOpenCvCameraView);
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
         if (rc == PackageManager.PERMISSION_GRANTED)
             mOpenCvCameraView.enableView();
         else
             requestPermissions();
 
-        refObjectToast = Toast.makeText(this, "No reference object detected", Toast.LENGTH_SHORT);
-        FloatingActionButton captureButton = findViewById(R.id.btn_capture);
+        refObjectToast = Toast.makeText(getActivity(), "No reference object detected", Toast.LENGTH_SHORT);
+        FloatingActionButton captureButton = getView().findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
             Frame captured = mOpenCvCameraView.getFrame();
             if(captured.getPixelsPerCm() >= 0)
@@ -90,20 +96,20 @@ public final class CaptureActivity extends AppCompatActivity {
                 refObjectToast.show();
         });
 
-        FloatingActionButton searchGallery = findViewById(R.id.search_gallery);
+        FloatingActionButton searchGallery = getView().findViewById(R.id.search_gallery);
         searchGallery.setOnClickListener((view)-> {
             openGallery();
         });
 
-        FloatingActionButton resetButton = findViewById(R.id.btn_reset);
+        FloatingActionButton resetButton = getView().findViewById(R.id.btn_reset);
         resetButton.setOnClickListener((view) -> {
             imagesTaken = 0;
         });
 
-        Toast.makeText(this, "Drag the corners to fit the image", Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), "Drag the corners to fit the image", Toast.LENGTH_LONG).show();
     }
 
-    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(getContext()) {
         @Override
         public void onManagerConnected(int status) {
             switch (status) {
@@ -139,12 +145,12 @@ public final class CaptureActivity extends AppCompatActivity {
         super.onResume();
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, mLoaderCallback);
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, getActivity(), mLoaderCallback);
         } else {
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
-        imageProcessor = new ImageProcessor(this);
+        imageProcessor = new ImageProcessor(getActivity());
         mOpenCvCameraView.enableView();
 
         imagesTaken = 0;
@@ -156,12 +162,12 @@ public final class CaptureActivity extends AppCompatActivity {
 //                        android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
 //        startActivityForResult(gallery, PICK_IMAGE);
 
-        Intent rfGallery = new Intent(this, ShowFramesActivity.class);
+        Intent rfGallery = new Intent(getActivity(), ShowFramesActivity.class);
         startActivityForResult(rfGallery,DEV_IMG);
     }
 
     @Override
-    protected void onActivityResult(int reqCode, int resultCode, Intent data) {
+    public void onActivityResult(int reqCode, int resultCode, Intent data) {
         super.onActivityResult(reqCode, resultCode, data);
 
         if (resultCode == RESULT_OK) {
@@ -169,18 +175,18 @@ public final class CaptureActivity extends AppCompatActivity {
                 case PICK_IMAGE:
                     try {
                         final Uri imageUri = data.getData();
-                        final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+                        final InputStream imageStream = getActivity().getContentResolver().openInputStream(imageUri);
                         final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
                         final Mat mat = new Mat();
 
                         Utils.bitmapToMat(selectedImage, mat);
                         if (userSelectedImageBitmapList == null) {
                             userSelectedImageBitmapList = new ArrayList<>();
-                            Toast.makeText(this, "1st image chosen", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), "1st image chosen", Toast.LENGTH_LONG).show();
                         }
                         userSelectedImageBitmapList.add(mat);
                         if (userSelectedImageBitmapList.size() == 2) {
-                            Toast.makeText(this, "2nd image chosen", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), "2nd image chosen", Toast.LENGTH_LONG).show();
                             mOpenCvCameraView.disableView();
                             imageProcessor.processImages();
                             userSelectedImageBitmapList = null;
@@ -197,7 +203,7 @@ public final class CaptureActivity extends AppCompatActivity {
 
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
-                        Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), "Something went wrong", Toast.LENGTH_LONG).show();
                     }
                     break;
                 case DEV_IMG:
@@ -205,10 +211,10 @@ public final class CaptureActivity extends AppCompatActivity {
                     addImage(data.getStringExtra(getResources().getString(R.string.rf2)));
                     startProcessor();
                     break;
-                default:Toast.makeText(this, "You haven't picked Image",Toast.LENGTH_LONG).show();
+                default:Toast.makeText(getActivity(), "You haven't picked Image",Toast.LENGTH_LONG).show();
             }
         } else
-            Toast.makeText(this, "You haven't picked Image",Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), "You haven't picked Image",Toast.LENGTH_LONG).show();
     }
 
     private void addImage(String name){
@@ -230,25 +236,25 @@ public final class CaptureActivity extends AppCompatActivity {
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
                 Manifest.permission.CAMERA)) {
-            ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM);
+            ActivityCompat.requestPermissions(getActivity(), permissions, RC_HANDLE_CAMERA_PERM);
             return;
         }
 
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
                 Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_READ_PERM);
+            ActivityCompat.requestPermissions(getActivity(), permissions, RC_HANDLE_READ_PERM);
             return;
         }
 
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_WRITE_PERM);
+            ActivityCompat.requestPermissions(getActivity(), permissions, RC_HANDLE_WRITE_PERM);
             return;
         }
 
-        final Activity thisActivity = this;
+        final Activity thisActivity = getActivity();
 
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
@@ -272,9 +278,9 @@ public final class CaptureActivity extends AppCompatActivity {
         }
 
         if(++imagesTaken == 1)
-            Toast.makeText(this, "Captured 1st image", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Captured 1st image", Toast.LENGTH_SHORT).show();
         else {
-            Toast.makeText(this, "Captured 2nd image", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Captured 2nd image", Toast.LENGTH_SHORT).show();
             startProcessor();
 
         }
