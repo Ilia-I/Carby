@@ -88,7 +88,7 @@ public class ShowFramesActivity extends AppCompatActivity {
     private void decodeImages(){
         images = new ArrayList<>();
         for(RecordFrame rf: rfs){
-            images.add(Bitmap.createScaledBitmap ( rf.getFrame(), bitmapWidth, bitmapHeight, true));
+            images.add(Bitmap.createScaledBitmap ( rf.getImage(), bitmapWidth, bitmapHeight, true));
         }
     }
 
@@ -216,7 +216,6 @@ public class ShowFramesActivity extends AppCompatActivity {
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
-
         }
     }
 
