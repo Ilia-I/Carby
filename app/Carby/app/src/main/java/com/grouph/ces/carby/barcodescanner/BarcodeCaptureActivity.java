@@ -33,6 +33,7 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.util.DisplayMetrics;
@@ -534,8 +535,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
             });
             builder.setNegativeButton(R.string.cancel, (DialogInterface dialog, int id) -> {
                 // Lazy restart of scan on Cancel
-                Intent intent = new Intent (context, BarcodeCaptureActivity.class);
-                startActivity(intent);
+                startActivity(getIntent());
                 dialog.dismiss();
             });
             builder.setCancelable(false);
@@ -544,5 +544,13 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
             dialog.setCanceledOnTouchOutside(false);
             dialog.show();
         });
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+        NavUtils.navigateUpFromSameTask(this);
+
     }
 }
