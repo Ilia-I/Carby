@@ -1,6 +1,5 @@
 package com.grouph.ces.carby.volume_estimation.DevMode;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,9 +12,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -31,6 +28,12 @@ import android.widget.Toast;
 
 import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.preferences.SettingsActivity;
+import com.grouph.ces.carby.volume_estimation.Frame;
+import com.grouph.ces.carby.volume_estimation.ImageProcessor;
+import com.grouph.ces.carby.volume_estimation.VolEstActivity;
+
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -196,11 +199,14 @@ public class ShowFramesFragment extends Fragment {
 
             case R.id.action_accept:
                 if(selected.size()==2) {
-//                    Intent returnIntent = new Intent();
-//                    returnIntent.putExtra(getResources().getString(R.string.rf1), rfs.get(selected.get(0)).getFileName());
-//                    returnIntent.putExtra(getResources().getString(R.string.rf2), rfs.get(selected.get(1)).getFileName());
-//                    setResult(Activity.RESULT_OK, returnIntent);
-//                    finish();
+//                    Bundle bundle = new Bundle();
+//                    bundle.putString(getResources().getString(R.string.rf1), rfs.get(selected.get(0)).getFileName());
+//                    bundle.putString(getResources().getString(R.string.rf2), rfs.get(selected.get(1)).getFileName());
+                    VolEstActivity activity = ((VolEstActivity)getActivity());
+                    ImageProcessor imageProcessor = new ImageProcessor(activity);
+                    imageProcessor.addImage(generateFrame(rfs.get(selected.get(0))));
+                    imageProcessor.addImage(generateFrame(rfs.get(selected.get(1))));
+                    imageProcessor.processImages();
                 } else {
                     Toast.makeText(getActivity(), "Please select two images!", Toast.LENGTH_SHORT).show();
                 }
@@ -238,6 +244,12 @@ public class ShowFramesFragment extends Fragment {
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private Frame generateFrame(RecordFrame rf) {
+        Mat mat = new Mat();
+        Utils.bitmapToMat(rf.getImage(), mat);
+        return new Frame(mat, rf.getPixelsPerCm(), rf.getBoundingBox());
     }
 
     @Override

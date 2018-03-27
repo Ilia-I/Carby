@@ -11,37 +11,38 @@ import com.grouph.ces.carby.volume_estimation.DevMode.ShowFramesFragment;
 
 /**
  * Created by Martin Peev on 27.03.2018 г..
- * Version: 0.4
+ * Version: 0.6
  */
 
 public class VolEstActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setFragmentCapture(new Bundle());
+        setFragment(new CaptureFragment(),new Bundle(),"");
     }
 
     public void setFragmentCapture(Bundle bundle){
         Log.d(this.getClass().getName(),"setFragmentCapture");
-        setFragment(new CaptureFragment(),bundle);
+        setFragment(new CaptureFragment(),bundle, "capture_fragment");
     }
 
     public void setFragmentShowFrames(Bundle bundle){
         Log.d(this.getClass().getName(),"setFragmentShowFrames");
-        setFragment(new ShowFramesFragment(),bundle);
+        setFragment(new ShowFramesFragment(),bundle, "show_frames_fragment");
     }
 
     public void setFragmentResults(Bundle bundle){
         Log.d(this.getClass().getName(),"setFragmentResults");
-        setFragment(new ResultsFragment(),bundle);
+        setFragment(new ResultsFragment(),bundle, "results_fragment");
     }
 
-    private void setFragment(Fragment fragment, Bundle bundle){
+    private void setFragment(Fragment fragment, Bundle bundle, String backstackKey){
         FragmentManager fm = getFragmentManager();
         if (fm != null) {
             fragment.setArguments(bundle);
             FragmentTransaction ft = fm.beginTransaction();
             ft.replace(android.R.id.content, fragment);
+            if(!backstackKey.isEmpty())ft.addToBackStack(backstackKey);
             ft.commit();
         }
     }
