@@ -39,8 +39,8 @@ public class IntegralApproximation {
 
     private Context context;
 
-    private Frame top;
-    private Frame side;
+    private Frame top = null;
+    private Frame side = null;
 
     public IntegralApproximation(Context c) {
         this.context = c;
@@ -54,22 +54,26 @@ public class IntegralApproximation {
     public void loadTestMats() {
         SharedPreferences prefs = android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(context);
         for(String name : RecordFrame.recordedFrameNames(prefs)) {
-            if(name.equalsIgnoreCase("testTop")) {
+            Log.d(TAG, "name: " + name);
+            if(name.equalsIgnoreCase("takePicture_testTop")) {
                 RecordFrame topRf = new RecordFrame(prefs, name);
                 Mat image = new Mat();
                 Utils.bitmapToMat(topRf.getImage(), image);
                 this.top = new Frame(image, topRf.getPixelsPerCm(), topRf.getBoundingBox());
-                Log.d(TAG, "Top image loaded: \n" + top.toString());
-                break;
             }
-            if(name.equalsIgnoreCase("testSide")) {
+            if(name.equalsIgnoreCase("takePicture_testSide")) {
                 RecordFrame sideRf = new RecordFrame(prefs, name);
                 Mat image = new Mat();
                 Utils.bitmapToMat(sideRf.getImage(), image);
-                this.top = new Frame(image, sideRf.getPixelsPerCm(), sideRf.getBoundingBox());
-                Log.d(TAG, "Side image loaded: \n" + side.toString());
-                break;
+                this.side = new Frame(image, sideRf.getPixelsPerCm(), sideRf.getBoundingBox());
             }
+        }
+
+        if(top == null || side == null)
+            Log.e(TAG, "Error loading test Mats");
+        else {
+            Log.d(TAG, "\n Top image loaded: \n" + top.toString());
+            Log.d(TAG, "\nSide image loaded: \n" + side.toString());
         }
     }
 

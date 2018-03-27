@@ -83,9 +83,9 @@ public final class CaptureActivity extends AppCompatActivity {
         refObjectToast = Toast.makeText(this, "No reference object detected", Toast.LENGTH_SHORT);
         FloatingActionButton captureButton = findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
-            Frame captured = mOpenCvCameraView.getFrame();
-            if(captured.getPixelsPerCm() >= 0)
-                this.takePicture();
+            Frame frame = mOpenCvCameraView.getFrame();
+            if(frame.getPixelsPerCm() > 0)
+                this.captureFrame(frame);
             else
                 refObjectToast.show();
         });
@@ -259,9 +259,7 @@ public final class CaptureActivity extends AppCompatActivity {
         };
     }
 
-    public void takePicture() {
-        Frame frame = mOpenCvCameraView.getFrame();
-
+    public void captureFrame(Frame frame) {
         imageProcessor.addImage(frame);
 
         //save img if dev mode
@@ -273,10 +271,9 @@ public final class CaptureActivity extends AppCompatActivity {
 
         if(++imagesTaken == 1)
             Toast.makeText(this, "Captured 1st image", Toast.LENGTH_SHORT).show();
-        else {
+        else if (imagesTaken == 2){
             Toast.makeText(this, "Captured 2nd image", Toast.LENGTH_SHORT).show();
             startProcessor();
-
         }
     }
 

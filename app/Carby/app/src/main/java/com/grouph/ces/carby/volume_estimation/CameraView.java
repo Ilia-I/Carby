@@ -80,9 +80,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
             e.printStackTrace();
         }
 
-        frame.setBoundingBox(new Rect(p1, p2));
-        frame.setImage(originalImage);
-        frame.setPixelsPerCm(result);
+        frame = new Frame(originalImage, result, new Rect(p1, p2));
 
         Imgproc.rectangle(mRgba, p1, p2, boxColor, 3, Imgproc.LINE_AA,0);
         Imgproc.circle(mRgba, p1, 5, boxColor, 34);
@@ -96,9 +94,9 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     public void onCameraViewStarted(int width, int height) {
         mRgba = new Mat(height,width, CvType.CV_8UC4);
         frame = new Frame();
-        setResolution(1280,720);
 
-        initBoundingBox();
+        this.setResolution(1280,720);
+        this.initBoundingBox();
     }
 
     @Override

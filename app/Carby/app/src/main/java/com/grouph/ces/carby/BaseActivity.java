@@ -41,10 +41,10 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-//        if (!OpenCVLoader.initDebug()) {
-//        }
-//        IntegralApproximation a = new IntegralApproximation();
-//        a.loadTestMats();
+        if (!OpenCVLoader.initDebug()) {
+        }
+        IntegralApproximation a = new IntegralApproximation(this);
+        a.loadTestMats();
     }
 
     @Override
