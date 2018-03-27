@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -43,9 +44,6 @@ public class IntegralApproximation {
     private double sideWidth;
     private double sideHeight;
 
-
-    private double length;
-    private double height;
 
     public IntegralApproximation(Context c) {
         this.context = c;
@@ -70,7 +68,7 @@ public class IntegralApproximation {
         }
 
         Rect rect = Imgproc.boundingRect(maxContour);
-        Imgproc.rectangle(input, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(255, 255, 255), 3);
+//        Imgproc.rectangle(input, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(255, 255, 255), 3);
 
         return rect;
     }
@@ -82,6 +80,39 @@ public class IntegralApproximation {
         new Mat(topMat, topRect).copyTo(topMat);
         new Mat(sideMat, sideRect).copyTo(sideMat);
     }
+
+    private int volume() {
+        Mat topMat = top.getImage();
+
+        int vol = 0;
+        for(int i = 0; i < topMat.width(); i++)
+            vol += volOfColumn(i);
+
+        return vol;
+    }
+
+    private int volOfColumn(int col) {
+        Mat topMat = top.getImage();
+        int vol = 0;
+
+        Mat topColumn = topMat.col(col);
+        Mat sideColumn = side.getImage().col(col);
+        int length = 0;
+        int depth = 0;
+        for(int i = 0; i < topColumn.height(); i++)
+            if(topColumn.get(i,0)[0] == 255.0)
+                length++;
+
+        for(int i = 0; i < sideColumn.height(); i++)
+            if(sideColumn.get(i,0)[0] == 255.0)
+                depth++;
+
+        vol += length * depth;
+
+        return vol;
+    }
+
+
 
     private void scaleSmallerMat() {
         double scaleWidth = 0;
@@ -99,11 +130,7 @@ public class IntegralApproximation {
             smallerMat = top.getImage();
         }
 
-        Log.e(TAG, "scaleSmallerMat: " + scaleWidth + " " + scaleHeight);
-
         Imgproc.resize(smallerMat, smallerMat, new Size(scaleWidth, scaleHeight));
-        Log.e(TAG, "top: " + top.getImage().toString());
-        Log.e(TAG, "side: " + side.getImage().toString());
     }
 
     public void performApproximation() {
@@ -118,8 +145,8 @@ public class IntegralApproximation {
         cropWithBoundingBoxes(topDimensions, sideDimensions);
         scaleSmallerMat();
 
-        Log.e(TAG, "Top width: " + topWidth);
-        Log.e(TAG, "Side width: " + sideWidth);
+        Log.e(TAG, "performApproximation: " + side.getPixelsPerCm());
+        Log.e(TAG, "vol of pixels: " + volume() / Math.pow(side.getPixelsPerCm(), 3) + " cm3");
     }
 
     public void loadTestMats() {
