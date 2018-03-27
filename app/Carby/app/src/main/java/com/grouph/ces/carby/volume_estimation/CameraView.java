@@ -24,8 +24,9 @@ import java.util.concurrent.ExecutionException;
 public class CameraView extends JavaCameraView implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
 
     private static final String TAG = "myCameraView";
-    private enum Corner { TP_LEFT, TP_RIGHT, BTM_LEFT, BTM_RIGHT }
+    private enum Corner { TP_LEFT, TP_RIGHT, BTM_LEFT, BTM_RIGHT, CENTRE }
 
+    private Point lastTouch;
     private Point p1;
     private Point p2;
     private Scalar boxColor = new Scalar(255, 255,0);
@@ -160,12 +161,18 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
                         case BTM_RIGHT:
                             p2.x = touchX;
                             p2.y = touchY;
+//                        case CENTRE:
+//                            p1.x = touchX - lastTouch.x;
+//                            p1.y = touchY - lastTouch.y;
+//                            p2.x = touchX - lastTouch.x;
+//                            p2.y = touchY - lastTouch.y;
                     }
                 break;
             case MotionEvent.ACTION_UP:
                 boxColor = new Scalar(255, 255, 0);
                 break;
         }
+        lastTouch = new Point(touchX, touchY);
         return true;
     }
 
@@ -178,6 +185,8 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
             return Corner.BTM_LEFT;
         else if (isWithinRegion(touchX, touchY, p2))
             return Corner.BTM_RIGHT;
+//        else if (isWithinRegion(touchX, touchY, new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)))
+//            return Corner.CENTRE;
         else
             return null;
     }
