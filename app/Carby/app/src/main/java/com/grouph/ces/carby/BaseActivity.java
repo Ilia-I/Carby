@@ -45,6 +45,8 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         }
         IntegralApproximation a = new IntegralApproximation(this);
         a.loadTestMats();
+        a.performApproximation();
+        a.showResults();
     }
 
     @Override

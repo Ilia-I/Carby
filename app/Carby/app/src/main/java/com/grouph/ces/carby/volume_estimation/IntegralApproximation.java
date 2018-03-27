@@ -21,6 +21,8 @@ import org.opencv.core.Mat;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,6 +53,10 @@ public class IntegralApproximation {
         this.side = side;
     }
 
+    public void performApproximation() {
+        //
+    }
+
     public void loadTestMats() {
         SharedPreferences prefs = android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(context);
         for(String name : RecordFrame.recordedFrameNames(prefs)) {
@@ -75,6 +81,41 @@ public class IntegralApproximation {
             Log.d(TAG, "\n Top image loaded: \n" + top.toString());
             Log.d(TAG, "\nSide image loaded: \n" + side.toString());
         }
+    }
+
+    public void showResults() {
+        Intent results = new Intent(context, ResultsActivity.class);
+
+        File out1 = new File(context.getCacheDir(), "1.png");
+        File out2 = new File(context.getCacheDir(), "2.png");
+
+        try {
+            FileOutputStream fOut;
+
+            Bitmap topDownOut = ProcessingAlgorithms.matToBitmap(top.getImage());
+            if(topDownOut != null) {
+                fOut = new FileOutputStream(out1);
+                topDownOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+                fOut.flush();
+            }
+
+            Bitmap sideOut = ProcessingAlgorithms.matToBitmap(side.getImage());
+            if(sideOut != null) {
+                fOut = new FileOutputStream(out2);
+                sideOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+                fOut.flush();
+                fOut.close();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        results.putExtra("image1", out1.getAbsolutePath());
+        results.putExtra("image2", out2.getAbsolutePath());
+
+        context.startActivity(results);
     }
 
 }
