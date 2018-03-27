@@ -68,7 +68,7 @@
     <string name="rf1">rf1Name</string>
     <string name="rf2">rf2Name</string>
 
-    <!--ShowFramesActivity-->
+    ShowFramesFragmentvity-->
     <string name="dialog_title_delete_img">Delete selected images?</string>
     <string name="dialog_message_delete_img">Are you sure you wish to permanently delete the selected images?</string>
 </resources>

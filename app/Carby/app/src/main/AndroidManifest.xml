@@ -53,26 +53,18 @@
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".volume_estimation.CaptureActivity"
+            android:name=".volume_estimation.VolEstActivity"
             android:label="@string/app_name"
             android:parentActivityName=".MainActivity"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize">
             <intent-filter>
-                <action android:name=".VolumeCaptureActivity" />
+                <action android:name=".VolEstActivity" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".volume_estimation.ResultsActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name=".VolumeCaptureActivity" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".camera_calibration.CameraCalibrationActivity"
             android:label="@string/app_name"
@@ -98,16 +90,6 @@
             <intent-filter>
                 <action android:name=".NutritionResultActivity" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".volume_estimation.DevMode.ShowFramesActivity"
-            android:label="@string/app_name"
-            android:parentActivityName=".volume_estimation.CaptureActivity">
-            <intent-filter>
-                <action android:name=".ShowFramesActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
