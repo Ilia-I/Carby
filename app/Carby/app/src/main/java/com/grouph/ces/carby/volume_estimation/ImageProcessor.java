@@ -3,6 +3,7 @@ package com.grouph.ces.carby.volume_estimation;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -118,12 +119,23 @@ public class ImageProcessor {
             // Do grab cut
             // Feature matching
             // ...
+            SharedPreferences preferences = android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(context);
+
             AsyncTask grabCutTop = new GrabCutTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topDown.getImage(), topDown.getBoundingBox());
             AsyncTask grabCutSide = new GrabCutTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, side.getImage(), side.getBoundingBox());
 
             try {
                 topDownOut = algorithms.matToBitmap((Mat) grabCutTop.get());
                 sideOut = algorithms.matToBitmap((Mat) grabCutSide.get());
+
+                RecordFrame testTop = new RecordFrame("testTop",
+                        new Frame((Mat) grabCutTop.get(), topDown.getPixelsPerCm(), topDown.getBoundingBox()));
+                testTop.saveObj(preferences);
+
+                RecordFrame testSide = new RecordFrame("testSide",
+                        new Frame((Mat) grabCutSide.get(), side.getPixelsPerCm(), side.getBoundingBox()));
+                testSide.saveObj(preferences);
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
@@ -138,7 +150,6 @@ public class ImageProcessor {
             File out1 = new File(context.getCacheDir(), "1.png");
             File out2 = new File(context.getCacheDir(), "2.png");
 
-            //saveImages();
 
             try {
                 FileOutputStream fOut;

@@ -3,6 +3,8 @@ package com.grouph.ces.carby.volume_estimation;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 
+import java.util.Locale;
+
 /**
  * Created by matthewball on 26/03/2018.
  */
@@ -42,5 +44,14 @@ public class Frame {
 
     public void setBoundingBox(Rect boundingBox) {
         this.boundingBox = boundingBox;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(Locale.ENGLISH,
+                "Mat: %s, Bounding box %s, Pixel density of image: %d",
+                image,
+                boundingBox,
+                pixelsPerCm);
     }
 }

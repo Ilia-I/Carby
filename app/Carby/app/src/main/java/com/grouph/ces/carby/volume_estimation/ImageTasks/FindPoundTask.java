@@ -19,8 +19,8 @@ import java.util.List;
 
 public class FindPoundTask extends AsyncTask<Mat, Void, Double> {
 
-    private static String TAG = "FindPoundTask";
-    private static double poundRadius = 2.323/2;
+    private static final String TAG = "FindPoundTask";
+    private static final double POUND_RADIUS = 2.323/2;
 
     @Override
     protected Double doInBackground(Mat... mats) {
@@ -62,7 +62,7 @@ public class FindPoundTask extends AsyncTask<Mat, Void, Double> {
                 Imgproc.circle(mats[0], center, 3, new Scalar(0,255,0), -1);
                 // circle outline
                 Imgproc.circle(mats[0], center, (int) r, new Scalar(255,0,0), 3);
-                return r / poundRadius;
+                return r / POUND_RADIUS;
             }
         }
         return -1.0;

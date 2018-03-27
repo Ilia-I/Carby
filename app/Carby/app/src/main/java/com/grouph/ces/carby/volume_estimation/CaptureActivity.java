@@ -271,41 +271,13 @@ public final class CaptureActivity extends AppCompatActivity {
 //            Log.d(this.getClass().getName(),"compare:"+rf.equals(new RecordFrame(preferences,rf.getFileName())));
         }
 
-        if(++imagesTaken == 2) {
-            startProcessor();
-        }
-
-        if(imagesTaken == 1) {
+        if(++imagesTaken == 1)
             Toast.makeText(this, "Captured 1st image", Toast.LENGTH_SHORT).show();
-        }
-        else
+        else {
             Toast.makeText(this, "Captured 2nd image", Toast.LENGTH_SHORT).show();
+            startProcessor();
+
+        }
     }
 
-    /** Create a File for saving an image or video */
-    public static File getOutputMediaFile(int type){
-        // To be safe, you should check that the SDCard is mounted
-        // using Environment.getExternalStorageState() before doing this.
-
-        File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "Carby Images");
-
-        // Create the storage directory if it does not exist
-        if (! mediaStorageDir.exists()){
-            if (! mediaStorageDir.mkdirs()){
-                Log.d("Carby Images", "failed to create directory");
-                return null;
-            }
-        }
-
-        // Create a media file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        File mediaFile;
-        if (type == MEDIA_TYPE_IMAGE) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "IMG_"+ timeStamp + ".jpg");
-        } else {
-            return null;
-        }
-        return mediaFile;
-    }
 }
