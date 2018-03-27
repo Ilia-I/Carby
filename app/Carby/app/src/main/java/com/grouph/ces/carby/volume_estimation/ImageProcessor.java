@@ -125,8 +125,11 @@ public class ImageProcessor {
             AsyncTask grabCutSide = new GrabCutTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, side.getImage(), side.getBoundingBox());
 
             try {
-                topDownOut = algorithms.matToBitmap((Mat) grabCutTop.get());
-                sideOut = algorithms.matToBitmap((Mat) grabCutSide.get());
+                Mat grabCutTopMat = (Mat) grabCutTop.get();
+                Mat grabCutSideMat = (Mat) grabCutSide.get();
+
+                topDownOut = ProcessingAlgorithms.matToBitmap(grabCutTopMat, grabCutTopMat.width(), grabCutTopMat.height());
+                sideOut = ProcessingAlgorithms.matToBitmap(grabCutSideMat, grabCutSideMat.width(), grabCutSideMat.height());
 
                 RecordFrame testTop = new RecordFrame("testTop",
                         new Frame((Mat) grabCutTop.get(), topDown.getPixelsPerCm(), topDown.getBoundingBox()));

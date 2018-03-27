@@ -4,31 +4,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.Environment;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
-import com.grouph.ces.carby.volume_estimation.DevMode.ShowFramesActivity;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-
-import static android.app.Activity.RESULT_OK;
 
 /**
  * Created by matthewball on 22/03/2018.
@@ -44,17 +38,88 @@ public class IntegralApproximation {
     private Frame top = null;
     private Frame side = null;
 
+    private double topWidth;
+    private double topHeight;
+    private double sideWidth;
+    private double sideHeight;
+
+
+    private double length;
+    private double height;
+
     public IntegralApproximation(Context c) {
         this.context = c;
+        loadTestMats();
     }
 
-    public IntegralApproximation(Frame top, Frame side) {
-        this.top = top;
-        this.side = side;
+    private Rect calculate2dDimensions(Mat input) {
+        Imgproc.cvtColor(input, input, Imgproc.COLOR_BGR2GRAY);
+
+        List<MatOfPoint> contours = new ArrayList<>();
+        Imgproc.findContours(input, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.RETR_TREE);
+
+        double maxArea = 0;
+        MatOfPoint maxContour = new MatOfPoint();
+
+        for(MatOfPoint c : contours) {
+            double contourArea = Imgproc.contourArea(c);
+            if(contourArea > maxArea) {
+                maxArea = contourArea;
+                maxContour = c;
+            }
+        }
+
+        Rect rect = Imgproc.boundingRect(maxContour);
+        Imgproc.rectangle(input, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(255, 255, 255), 3);
+
+        return rect;
+    }
+
+    private void cropWithBoundingBoxes(Rect topRect, Rect sideRect) {
+        Mat topMat = top.getImage();
+        Mat sideMat = side.getImage();
+
+        new Mat(topMat, topRect).copyTo(topMat);
+        new Mat(sideMat, sideRect).copyTo(sideMat);
+    }
+
+    private void scaleSmallerMat() {
+        double scaleWidth = 0;
+        double scaleHeight = 0;
+        Mat smallerMat;
+
+        if(topWidth > sideWidth) {
+            scaleWidth = topWidth;
+            scaleHeight = topWidth / sideWidth * sideHeight;
+            smallerMat = side.getImage();
+        }
+        else {
+            scaleWidth = sideWidth;
+            scaleHeight = sideWidth / topWidth * topHeight;
+            smallerMat = top.getImage();
+        }
+
+        Log.e(TAG, "scaleSmallerMat: " + scaleWidth + " " + scaleHeight);
+
+        Imgproc.resize(smallerMat, smallerMat, new Size(scaleWidth, scaleHeight));
+        Log.e(TAG, "top: " + top.getImage().toString());
+        Log.e(TAG, "side: " + side.getImage().toString());
     }
 
     public void performApproximation() {
-        //
+        Rect topDimensions = calculate2dDimensions(top.getImage());
+        Rect sideDimensions = calculate2dDimensions(side.getImage());
+
+        topWidth = topDimensions.width;
+        topHeight = topDimensions.height;
+        sideWidth = sideDimensions.width;
+        sideHeight = sideDimensions.height;
+
+        cropWithBoundingBoxes(topDimensions, sideDimensions);
+        scaleSmallerMat();
+
+        Log.e(TAG, "Top width: " + topWidth);
+        Log.e(TAG, "Side width: " + sideWidth);
     }
 
     public void loadTestMats() {
@@ -92,14 +157,14 @@ public class IntegralApproximation {
         try {
             FileOutputStream fOut;
 
-            Bitmap topDownOut = ProcessingAlgorithms.matToBitmap(top.getImage());
+            Bitmap topDownOut = ProcessingAlgorithms.matToBitmap(top.getImage(), top.getImage().width(), top.getImage().height());
             if(topDownOut != null) {
                 fOut = new FileOutputStream(out1);
                 topDownOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
                 fOut.flush();
             }
 
-            Bitmap sideOut = ProcessingAlgorithms.matToBitmap(side.getImage());
+            Bitmap sideOut = ProcessingAlgorithms.matToBitmap(side.getImage(), side.getImage().width(), side.getImage().height());
             if(sideOut != null) {
                 fOut = new FileOutputStream(out2);
                 sideOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
