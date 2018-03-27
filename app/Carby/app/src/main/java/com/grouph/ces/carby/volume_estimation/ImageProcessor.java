@@ -6,11 +6,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
+import android.support.v7.preference.PreferenceManager;
 
 import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
-import com.grouph.ces.carby.volume_estimation.ImageTasks.FindPoundTask;
 import com.grouph.ces.carby.volume_estimation.ImageTasks.GrabCutTask;
 
 import org.opencv.core.Mat;
@@ -31,7 +31,7 @@ public class ImageProcessor {
 
     private static String TAG = "ImageProcessor";
 
-    private Context context;
+    private VolEstActivity activity;
 
     private Frame topDown;
     private Frame side;
@@ -41,9 +41,9 @@ public class ImageProcessor {
 
     private ProcessingAlgorithms algorithms;
 
-    public ImageProcessor(Context context) {
-        this.context = context;
-        this.algorithms = new ProcessingAlgorithms(context);
+    public ImageProcessor(VolEstActivity activity) {
+        this.activity = activity;
+        this.algorithms = new ProcessingAlgorithms(activity);
     }
 
     public void addImage(Frame frame) {
@@ -89,7 +89,7 @@ public class ImageProcessor {
 
     private class ProcessImageTask extends AsyncTask<Void, Void, Void> {
 
-        private ProgressDialog dialog = new ProgressDialog(context);
+        private ProgressDialog dialog = new ProgressDialog(activity);
 
         @Override
         protected void onPreExecute() {
@@ -119,7 +119,7 @@ public class ImageProcessor {
             // Do grab cut
             // Feature matching
             // ...
-            SharedPreferences preferences = android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
 
             AsyncTask grabCutTop = new GrabCutTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topDown.getImage(), topDown.getBoundingBox());
             AsyncTask grabCutSide = new GrabCutTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, side.getImage(), side.getBoundingBox());
@@ -128,6 +128,7 @@ public class ImageProcessor {
                 topDownOut = algorithms.matToBitmap((Mat) grabCutTop.get());
                 sideOut = algorithms.matToBitmap((Mat) grabCutSide.get());
 
+                //TODO implement types
                 RecordFrame testTop = new RecordFrame("testTop",
                         new Frame((Mat) grabCutTop.get(), topDown.getPixelsPerCm(), topDown.getBoundingBox()));
                 testTop.saveObj(preferences);
@@ -145,11 +146,8 @@ public class ImageProcessor {
 
 
         public void showResults() {
-            Intent results = new Intent(context, ResultsActivity.class);
-
-            File out1 = new File(context.getCacheDir(), "1.png");
-            File out2 = new File(context.getCacheDir(), "2.png");
-
+            File out1 = new File(activity.getCacheDir(), "1.png");
+            File out2 = new File(activity.getCacheDir(), "2.png");
 
             try {
                 FileOutputStream fOut;
@@ -172,10 +170,11 @@ public class ImageProcessor {
                 e.printStackTrace();
             }
 
-            results.putExtra("image1", out1.getAbsolutePath());
-            results.putExtra("image2", out2.getAbsolutePath());
+            Bundle bundle = new Bundle();
+            bundle.putString("image1", out1.getAbsolutePath());
+            bundle.putString("image2", out2.getAbsolutePath());
 
-            context.startActivity(results);
+            activity.setFragmentResults(bundle);
         }
 
     }

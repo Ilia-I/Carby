@@ -149,7 +149,7 @@ public final class CaptureFragment extends Fragment {
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
-        imageProcessor = new ImageProcessor(getActivity());
+        imageProcessor = new ImageProcessor(activityRef);
         mOpenCvCameraView.enableView();
 
         imagesTaken = 0;
@@ -163,7 +163,7 @@ public final class CaptureFragment extends Fragment {
 
 //        Intent rfGallery = new Intent(getActivity(), ShowFramesFragment.class);
 //        startActivityForResult(rfGallery,DEV_IMG);
-        activityRef.setFragmentShowFrames();
+        activityRef.setFragmentShowFrames(new Bundle());
     }
 
     @Override
@@ -274,7 +274,6 @@ public final class CaptureFragment extends Fragment {
         if (preferences.getBoolean(getResources().getString(R.string.key_dev_mode),false)) {
             RecordFrame rf = new RecordFrame(frame);
             rf.saveObj(preferences);
-//            Log.d(this.getClass().getName(),"compare:"+rf.equals(new RecordFrame(preferences,rf.getFileName())));
         }
 
         if(++imagesTaken == 1)
@@ -282,7 +281,6 @@ public final class CaptureFragment extends Fragment {
         else {
             Toast.makeText(getActivity(), "Captured 2nd image", Toast.LENGTH_SHORT).show();
             startProcessor();
-
         }
     }
 
