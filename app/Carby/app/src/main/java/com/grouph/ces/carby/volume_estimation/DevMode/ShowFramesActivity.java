@@ -33,14 +33,13 @@ import java.util.List;
 
 /**
  * Created by Martin Peev on 25.03.2018 г..
- * Version: 0.7
+ * Version: 0.8
  */
 
 public class ShowFramesActivity extends AppCompatActivity {
     private List<RecordFrame> rfs;
     private List<Bitmap> images;
     private List<Integer> selected;
-    private GridView gridview;
     private ImageGridAdapter iga;
 
     private final double downscaleFactor = 2.5;
@@ -55,7 +54,7 @@ public class ShowFramesActivity extends AppCompatActivity {
         decodeImages();
         selected = new ArrayList<>();
 
-        gridview = findViewById(R.id.gridview);
+        GridView gridview = findViewById(R.id.gridview);
         iga = new ImageGridAdapter(this);
         gridview.setAdapter(iga);
         gridview.setOnItemClickListener((AdapterView<?> parent, View v, int position, long id) -> mark(position));
@@ -63,7 +62,7 @@ public class ShowFramesActivity extends AppCompatActivity {
 
     private void mark(int position) {
         Log.d(this.getClass().getName(), "Mark image "+rfs.get(position).getFileName()+" at " + position);
-        int idx = selected.indexOf(new Integer(position));
+        int idx = selected.indexOf(Integer.valueOf(position));
         if(idx>=0){
             selected.remove(idx);
         } else if(selected.size()>=2){
@@ -127,7 +126,7 @@ public class ShowFramesActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return rfs.size();
+            return images.size();
         }
 
         @Override
@@ -157,13 +156,6 @@ public class ShowFramesActivity extends AppCompatActivity {
             imageView.setImageBitmap(images.get(position));
             if(selected.contains(position)){
                 imageView.setColorFilter( 0x6f000000, PorterDuff.Mode.SRC_OVER );
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//                    imageView.setImageBitmap(images.get(position));
-////                imageView.setForegroundTintMode(PorterDuff.Mode.DARKEN);
-////                    imageView.setImageTintMode(PorterDuff.Mode.DARKEN);
-//                } else {
-//                    imageView.setImageBitmap(overlay(images.get(position), markedOverlay));
-//                }
             } else {
                 imageView.clearColorFilter();
             }
@@ -204,14 +196,12 @@ public class ShowFramesActivity extends AppCompatActivity {
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
                     for(int k=selected.size()-1;k>=0;k--){
                         Integer i = selected.get(k);
-                        RecordFrame rf = rfs.get(i);
-                        rf.delete(preferences);
-                        rfs.remove(i);
-                        images.remove(i);
+                        rfs.get(i).delete(preferences);
+                        rfs.remove(i.intValue());
+                        images.remove(i.intValue());
                     }
                     selected = new ArrayList<>();
-                    iga.notifyDataSetInvalidated();
-                    gridview.invalidateViews();
+                    iga.notifyDataSetChanged();
                     dialog.dismiss();
                 });
                 builder.setNegativeButton(R.string.cancel, (DialogInterface dialog, int id) -> {
