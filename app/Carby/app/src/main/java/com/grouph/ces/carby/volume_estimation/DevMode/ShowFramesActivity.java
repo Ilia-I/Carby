@@ -1,15 +1,18 @@
 package com.grouph.ces.carby.volume_estimation.DevMode;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,35 +33,36 @@ import java.util.List;
 
 /**
  * Created by Martin Peev on 25.03.2018 г..
- * Version: 0.5
+ * Version: 0.8
  */
 
 public class ShowFramesActivity extends AppCompatActivity {
     private List<RecordFrame> rfs;
+    private List<Bitmap> images;
     private List<Integer> selected;
-    private GridView gridview;
+    private ImageGridAdapter iga;
+
+    private final double downscaleFactor = 2.5;
+    private final int bitmapHeight = (int) (720/downscaleFactor);
+    private final int bitmapWidth = (int) (1280/downscaleFactor);
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dev_img_selector);
         getRecordFrames();
+        decodeImages();
         selected = new ArrayList<>();
 
-        gridview = findViewById(R.id.gridview);
-        for(RecordFrame rf:rfs){
-            Log.d(this.getClass().getName(),"rf:"+rf.getFileName());
-            if(rf.getBoundingBox()==null) Log.d(this.getClass().getName(),"bounding box null");
-            if(rf.getImage()==null) Log.d(this.getClass().getName(),"mat null");
-        }
-        gridview.setAdapter(new ImageGridAdapter(this));
-
+        GridView gridview = findViewById(R.id.gridview);
+        iga = new ImageGridAdapter(this);
+        gridview.setAdapter(iga);
         gridview.setOnItemClickListener((AdapterView<?> parent, View v, int position, long id) -> mark(position));
     }
 
     private void mark(int position) {
         Log.d(this.getClass().getName(), "Mark image "+rfs.get(position).getFileName()+" at " + position);
-        int idx = selected.indexOf(new Integer(position));
+        int idx = selected.indexOf(Integer.valueOf(position));
         if(idx>=0){
             selected.remove(idx);
         } else if(selected.size()>=2){
@@ -66,7 +70,7 @@ public class ShowFramesActivity extends AppCompatActivity {
         } else {
             selected.add(position);
         }
-        gridview.invalidateViews();
+        iga.notifyDataSetInvalidated();
     }
 
     private void getRecordFrames() {
@@ -81,26 +85,28 @@ public class ShowFramesActivity extends AppCompatActivity {
                 ((RecordFrame)softDrinkOne).getFileName().compareTo(((RecordFrame)softDrinkTwo).getFileName()));
     }
 
+    private void decodeImages(){
+        images = new ArrayList<>();
+        for(RecordFrame rf: rfs){
+            images.add(Bitmap.createScaledBitmap ( rf.getImage(), bitmapWidth, bitmapHeight, true));
+        }
+    }
+
     class ImageGridAdapter extends BaseAdapter {
         private AppCompatActivity superActivity;
-        private int width;
-        private int height;
-        private Bitmap markedOverlay;
+//        private Bitmap markedOverlay;
 
         private ImageGridAdapter(AppCompatActivity superActivity){
             super();
             this.superActivity = superActivity;
-            double div = 2.5;
-            this.width = (int) (1280/div);
-            this.height = (int) (720/div);
-            markedOverlay = makeTransparent(BitmapFactory.decodeResource(superActivity.getResources(),R.drawable.img_overlay),170);
+//            markedOverlay = makeTransparent(BitmapFactory.decodeResource(superActivity.getResources(),R.drawable.img_overlay),170);
             Log.d(this.getClass().getName(),"init success");
         }
 
         public Bitmap makeTransparent(Bitmap src, int value) {
-            int width = src.getWidth();
-            int height = src.getHeight();
-            Bitmap transBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+//            int width = src.getWidth();
+//            int height = src.getHeight();
+            Bitmap transBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(transBitmap);
             canvas.drawARGB(0, 0, 0, 0);
             // config paint
@@ -120,7 +126,7 @@ public class ShowFramesActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return rfs.size();
+            return images.size();
         }
 
         @Override
@@ -139,7 +145,7 @@ public class ShowFramesActivity extends AppCompatActivity {
             if (convertView == null) {
                 // if it's not recycled, initialize some attributes
                 imageView = new ImageView(superActivity);
-                imageView.setLayoutParams(new GridView.LayoutParams(width,height));
+                imageView.setLayoutParams(new GridView.LayoutParams(bitmapWidth,bitmapHeight));
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 int pad = 10;
                 imageView.setPadding(pad, pad, pad, pad);
@@ -147,10 +153,11 @@ public class ShowFramesActivity extends AppCompatActivity {
                 imageView = (ImageView) convertView;
             }
 
+            imageView.setImageBitmap(images.get(position));
             if(selected.contains(position)){
-                imageView.setImageBitmap(overlay(rfs.get(position).getImage(),markedOverlay));
+                imageView.setColorFilter( 0x6f000000, PorterDuff.Mode.SRC_OVER );
             } else {
-                imageView.setImageBitmap(rfs.get(position).getImage());
+                imageView.clearColorFilter();
             }
             return imageView;
         }
@@ -178,6 +185,33 @@ public class ShowFramesActivity extends AppCompatActivity {
                 }
                 return true;
 
+            case R.id.action_delete:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+                builder.setMessage(R.string.dialog_message_delete_img);
+                builder.setTitle(R.string.dialog_title_delete_img);
+
+                builder.setPositiveButton(R.string.ok, (DialogInterface dialog, int id) -> {
+                    Collections.sort(selected, (Integer o1, Integer o2) -> Integer.compare(o1,o2));
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+                    for(int k=selected.size()-1;k>=0;k--){
+                        Integer i = selected.get(k);
+                        rfs.get(i).delete(preferences);
+                        rfs.remove(i.intValue());
+                        images.remove(i.intValue());
+                    }
+                    selected = new ArrayList<>();
+                    iga.notifyDataSetChanged();
+                    dialog.dismiss();
+                });
+                builder.setNegativeButton(R.string.cancel, (DialogInterface dialog, int id) -> {
+                    dialog.dismiss();
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.show();
+                return true;
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
