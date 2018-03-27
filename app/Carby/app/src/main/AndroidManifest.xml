@@ -58,7 +58,7 @@
             android:parentActivityName=".MainActivity"
             android:screenOrientation="landscape">
             <intent-filter>
-                <action android:name=".VolumeCaptureActivity" />
+                <action android:name=".VolEstActivity" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -68,7 +68,7 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name=".VolumeCaptureActivity" />
+                <action android:name=".VolEstActivity" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -98,16 +98,6 @@
             <intent-filter>
                 <action android:name=".NutritionResultActivity" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".volume_estimation.DevMode.ShowFramesActivity"
-            android:label="@string/app_name"
-            android:parentActivityName=".volume_estimation.VolEstActivity">
-            <intent-filter>
-                <action android:name=".ShowFramesActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

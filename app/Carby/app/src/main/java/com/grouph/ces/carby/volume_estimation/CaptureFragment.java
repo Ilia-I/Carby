@@ -22,7 +22,7 @@ import android.widget.Toast;
 
 import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
-import com.grouph.ces.carby.volume_estimation.DevMode.ShowFramesActivity;
+import com.grouph.ces.carby.volume_estimation.DevMode.ShowFramesFragment;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -62,8 +62,7 @@ public final class CaptureFragment extends Fragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.vol_capture, container, false);
     }
 
@@ -162,8 +161,9 @@ public final class CaptureFragment extends Fragment {
 //                        android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
 //        startActivityForResult(gallery, PICK_IMAGE);
 
-        Intent rfGallery = new Intent(getActivity(), ShowFramesActivity.class);
-        startActivityForResult(rfGallery,DEV_IMG);
+//        Intent rfGallery = new Intent(getActivity(), ShowFramesFragment.class);
+//        startActivityForResult(rfGallery,DEV_IMG);
+        activityRef.setFragmentShowFrames();
     }
 
     @Override

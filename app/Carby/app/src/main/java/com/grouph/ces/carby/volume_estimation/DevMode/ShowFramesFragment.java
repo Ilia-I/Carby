@@ -1,6 +1,8 @@
 package com.grouph.ces.carby.volume_estimation.DevMode;
 
 import android.app.Activity;
+import android.app.Fragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,8 +15,11 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,10 +38,10 @@ import java.util.List;
 
 /**
  * Created by Martin Peev on 25.03.2018 г..
- * Version: 0.8
+ * Version: 1.0
  */
 
-public class ShowFramesActivity extends AppCompatActivity {
+public class ShowFramesFragment extends Fragment {
     private List<RecordFrame> rfs;
     private List<Bitmap> images;
     private List<Integer> selected;
@@ -47,15 +52,32 @@ public class ShowFramesActivity extends AppCompatActivity {
     private final int bitmapWidth = (int) (1280/downscaleFactor);
 
     @Override
-    public void onCreate(Bundle savedInstanceState){
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.dev_img_selector);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.dev_img_selector, container, false);
+    }
+
+    private void setViewLayout(int id){
+        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(id, null);
+        if(getView()==null) Log.e(this.getClass().getName(),"null view");
+        ViewGroup rootView = (ViewGroup) getView();
+        if(rootView != null) {
+            rootView.removeAllViews();
+            rootView.addView(view);
+        }
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState){
+        super.onActivityCreated(savedInstanceState);
+//        setViewLayout(R.layout.dev_img_selector);
+        setHasOptionsMenu(true);
         getRecordFrames();
         decodeImages();
         selected = new ArrayList<>();
 
-        GridView gridview = findViewById(R.id.gridview);
-        iga = new ImageGridAdapter(this);
+        GridView gridview = getView().findViewById(R.id.gridview);
+        iga = new ImageGridAdapter(getActivity());
         gridview.setAdapter(iga);
         gridview.setOnItemClickListener((AdapterView<?> parent, View v, int position, long id) -> mark(position));
     }
@@ -66,7 +88,7 @@ public class ShowFramesActivity extends AppCompatActivity {
         if(idx>=0){
             selected.remove(idx);
         } else if(selected.size()>=2){
-            Toast.makeText(this, "Maximum number of images marked", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Maximum number of images marked", Toast.LENGTH_SHORT).show();
         } else {
             selected.add(position);
         }
@@ -75,7 +97,7 @@ public class ShowFramesActivity extends AppCompatActivity {
 
     private void getRecordFrames() {
         rfs = new ArrayList<>();
-        SharedPreferences preferences = android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences preferences = android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(getActivity());
         for(String name: RecordFrame.recordedFrameNames(preferences)){
             Log.d(this.getClass().getName(),"load "+name);
             rfs.add(new RecordFrame(preferences,name));
@@ -93,14 +115,13 @@ public class ShowFramesActivity extends AppCompatActivity {
     }
 
     class ImageGridAdapter extends BaseAdapter {
-        private AppCompatActivity superActivity;
+        private Context context;
 //        private Bitmap markedOverlay;
 
-        private ImageGridAdapter(AppCompatActivity superActivity){
+        private ImageGridAdapter(Context context){
             super();
-            this.superActivity = superActivity;
+            this.context = context;
 //            markedOverlay = makeTransparent(BitmapFactory.decodeResource(superActivity.getResources(),R.drawable.img_overlay),170);
-            Log.d(this.getClass().getName(),"init success");
         }
 
         public Bitmap makeTransparent(Bitmap src, int value) {
@@ -144,7 +165,7 @@ public class ShowFramesActivity extends AppCompatActivity {
             ImageView imageView;
             if (convertView == null) {
                 // if it's not recycled, initialize some attributes
-                imageView = new ImageView(superActivity);
+                imageView = new ImageView(context);
                 imageView.setLayoutParams(new GridView.LayoutParams(bitmapWidth,bitmapHeight));
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 int pad = 10;
@@ -169,31 +190,31 @@ public class ShowFramesActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_settings:
-                Intent intent = new Intent(this,SettingsActivity.class);
+                Intent intent = new Intent(getActivity(),SettingsActivity.class);
                 startActivity(intent);
                 return true;
 
             case R.id.action_accept:
                 if(selected.size()==2) {
-                    Intent returnIntent = new Intent();
-                    returnIntent.putExtra(getResources().getString(R.string.rf1), rfs.get(selected.get(0)).getFileName());
-                    returnIntent.putExtra(getResources().getString(R.string.rf2), rfs.get(selected.get(1)).getFileName());
-                    setResult(Activity.RESULT_OK, returnIntent);
-                    finish();
+//                    Intent returnIntent = new Intent();
+//                    returnIntent.putExtra(getResources().getString(R.string.rf1), rfs.get(selected.get(0)).getFileName());
+//                    returnIntent.putExtra(getResources().getString(R.string.rf2), rfs.get(selected.get(1)).getFileName());
+//                    setResult(Activity.RESULT_OK, returnIntent);
+//                    finish();
                 } else {
-                    Toast.makeText(this, "Please select two images!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Please select two images!", Toast.LENGTH_SHORT).show();
                 }
                 return true;
 
             case R.id.action_delete:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
                 builder.setMessage(R.string.dialog_message_delete_img);
                 builder.setTitle(R.string.dialog_title_delete_img);
 
                 builder.setPositiveButton(R.string.ok, (DialogInterface dialog, int id) -> {
                     Collections.sort(selected, (Integer o1, Integer o2) -> Integer.compare(o1,o2));
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
                     for(int k=selected.size()-1;k>=0;k--){
                         Integer i = selected.get(k);
                         rfs.get(i).delete(preferences);
@@ -220,9 +241,8 @@ public class ShowFramesActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.img_selector, menu);
-        return true;
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.img_selector, menu);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 }
