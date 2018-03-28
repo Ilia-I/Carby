@@ -467,18 +467,18 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         //do something with barcode data returned
 
         progressCard.setVisibility(View.VISIBLE);
-        INutritionTable nutritionTable = getNutritionTable(barcode);
+        NutritionDataDB dataDB = getNutritionTable(barcode);
 
-        if (nutritionTable!=null){
+        if (dataDB!=null){
             //progressCard.setVisibility(View.GONE);
-            sendToNutritionResult(nutritionTable);
+            sendToNutritionResult(dataDB.getNt(),dataDB.getKey());
         }else{
             //progressCard.setVisibility(View.GONE);
             startOCR(barcode.displayValue);
         }
     }
 
-    private INutritionTable getNutritionTable(Barcode barcode) {
+    private NutritionDataDB getNutritionTable(Barcode barcode) {
         if(barcode.valueFormat==Barcode.PRODUCT){
             Log.d(this.getClass().getName(),"Barcode: " + barcode.displayValue);
             INutritionTable result = null;
@@ -489,7 +489,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
                 result = data.getNt();
                 if (result != null) {
                     Log.d("OcrDetectorProcessor", "Loaded Table:\n" + result);
-                    return result;
+                    return data;
                 }
             }
 
@@ -503,17 +503,20 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
                 e.printStackTrace();
             }
             if(result!=null){
-                return result;
+                data = new NutritionDataDB(barcode.displayValue,result);
+                db.nutritionDataDao().insertAll(data);
+                return data;
             }
         }
         return null;
     }
 
-    private void sendToNutritionResult(INutritionTable result) {
+    private void sendToNutritionResult(INutritionTable result,int key) {
         JSONObject jsonNutritionTable = result.toJasonObject();
 
         Intent intent = new Intent(this, NutritionResultActivity.class);
         intent.putExtra("jsonNutritionTable", jsonNutritionTable.toString());
+        intent.putExtra("id",key);
         startActivity(intent);
     }
 

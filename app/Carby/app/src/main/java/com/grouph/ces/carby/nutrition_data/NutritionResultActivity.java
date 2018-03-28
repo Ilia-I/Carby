@@ -1,19 +1,33 @@
 package com.grouph.ces.carby.nutrition_data;
 
+import android.arch.persistence.room.Room;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.grouph.ces.carby.R;
+import com.grouph.ces.carby.database.AppDatabase;
+import com.grouph.ces.carby.database.ConsumptionDB;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NutritionResultActivity extends AppCompatActivity {
 
     Bundle extras;
     INutritionTable nutritionTable;
+    List<RadioButton> rBtns;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +36,8 @@ public class NutritionResultActivity extends AppCompatActivity {
         extras = getIntent().getExtras();
         nutritionTable = new NutritionTable();
 
+        initConsumption();
+        
         if(extras!=null){
             try {
                 JSONObject jsonNutritionTable = new JSONObject(extras.getString("jsonNutritionTable"));
@@ -91,6 +107,74 @@ public class NutritionResultActivity extends AppCompatActivity {
 
             if(nutritionTable.getComponentValue("Salt") !=null){
                 mSaltVal.setText(Double.toString(nutritionTable.getComponentValue("Salt")) + nutritionTable.getSaltUnit());
+            }
+        }
+    }
+
+    private void initConsumption() {
+        rBtns = new ArrayList<>();
+        rBtns.add(findViewById(R.id.radioButton100));
+        rBtns.add(findViewById(R.id.radioButton150));
+        rBtns.add(findViewById(R.id.radioButton200));
+        rBtns.add(findViewById(R.id.radioButton250));
+        rBtns.add(findViewById(R.id.radioButton300));
+        rBtns.add(findViewById(R.id.radioButton400));
+        rBtns.add(findViewById(R.id.radioButton500));
+        rBtns.add(findViewById(R.id.radioButton600));
+        rBtns.add(findViewById(R.id.radioButtonCustom));
+        for(RadioButton rb:rBtns){
+            rb.setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) -> check(rb));
+        }
+
+        Button addConsumed = findViewById(R.id.add_btn);
+        addConsumed.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(this.getClass().getName(),"add");
+                if(extras!=null){
+                    int id = extras.getInt("id",-1);
+                    if(id>=0){
+                        AppDatabase db = Room.databaseBuilder(getApplicationContext() ,AppDatabase.class,"myDB").allowMainThreadQueries().build();
+                        int quantity = getQuantity();
+                        if(quantity>0) {
+                            db.consumptionDataDao().insert(new ConsumptionDB(id, quantity));
+                            addConsumed.setEnabled(false);
+                        }
+                    }
+                } else {
+                    Log.d(this.getClass().getName(),"no valid id");
+                    addConsumed.setEnabled(false);
+                }
+            }
+        });
+    }
+
+    private int getQuantity(){
+        for(RadioButton rb: rBtns){
+            if(rb.isChecked()){
+                String content = rb.getText().toString().replaceAll("[^\\d.]", "");
+                if(content.length()>0) {
+                    return Integer.parseInt(content);
+                } else {
+                    try {
+                        return Integer.parseInt(((EditText) findViewById(R.id.userValue)).getText().toString());
+                    } catch (NumberFormatException e){
+                        Toast.makeText(this, "Invalid number!", Toast.LENGTH_SHORT).show();
+                        return 0;
+                    }
+                }
+            }
+        }
+        return 0;
+    }
+
+    private void check(RadioButton rb) {
+        if(rb.isChecked()) {
+            Log.d(this.getClass().getName(), "check:" + rb.getText());
+            for (RadioButton r : rBtns) {
+                if (!r.equals(rb)) {
+                    r.setChecked(false);
+                }
             }
         }
     }
