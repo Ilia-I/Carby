@@ -46,6 +46,7 @@ public class IntegralApproximation {
         loadTestMats();
     }
 
+    //returns a rect with bounding box dimensions
     private Rect calculate2dDimensions(Mat input) {
         Imgproc.cvtColor(input, input, Imgproc.COLOR_BGR2GRAY);
 
@@ -138,20 +139,22 @@ public class IntegralApproximation {
         sideWidth = sideDimensions.width;
         sideHeight = sideDimensions.height;
 
-        boolean topLarger = topWidth > sideWidth;
-
         cropWithBoundingBoxes(topDimensions, sideDimensions);
         scaleSmallerMat();
+        Log.e(TAG, "top width "+topWidth + " side width "+sideWidth);
+        Log.e(TAG, "top dimensions: " + top.getImage().height() + "x" + top.getImage().width());
+        Log.e(TAG, "side dimensions: " + side.getImage().height() + "x" + side.getImage().width());
+        Log.e(TAG, "pixels to cm: " + Math.cbrt(pixToCmVal()));
+        Log.e(TAG, "Predicted Volume: " + volume() / pixToCmVal() + " cm3");
+    }
 
-        if(topLarger) {
-            double pixelsPerCm = top.getReferenceObjectSize() / POUND_RADIUS;
-            Log.e(TAG, "performApproximation: " + pixelsPerCm);
-            Log.e(TAG, "vol of pixels: " + volume() / Math.pow(pixelsPerCm, 3) + " cm3");
-        } else {
-            double pixelsPerCm = side.getReferenceObjectSize() / POUND_RADIUS;
-            Log.e(TAG, "performApproximation: " + pixelsPerCm);
-            Log.e(TAG, "vol of pixels: " + volume() / Math.pow(pixelsPerCm, 3) + " cm3");
-        }
+    private double pixToCmVal(){
+        double val = 0;
+        if(topWidth > sideWidth)
+            val = Math.pow(top.getReferenceObjectSize() / POUND_RADIUS,3);
+        else
+            val = Math.pow(side.getReferenceObjectSize() / POUND_RADIUS,3);
+        return val;
     }
 
     public void loadTestMats() {
