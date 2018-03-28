@@ -27,7 +27,7 @@ import java.util.Map;
 public class RecordFrame {
     private static final String prefix = "takePicture_";
     private String fileName;
-    private double pixelsPerCm;
+    private double pixelsPerCm = -1.0;
     private Rect boundingBox;
     private String encodedImg;
 
@@ -63,6 +63,7 @@ public class RecordFrame {
         RecordFrame obj = gson.fromJson(json, RecordFrame.class);
         this.encodedImg = obj.getEncodedImg();
         this.boundingBox = obj.getBoundingBox();
+        this.pixelsPerCm = obj.getPixelsPerCm();
         return true;
     }
 

@@ -49,7 +49,7 @@ public class Frame {
     @Override
     public String toString() {
         return String.format(Locale.ENGLISH,
-                "Mat: %s, Bounding box %s, Pixel density of image: %d",
+                "Mat: %s\nBounding box %s\nPixel density of image: %f",
                 image,
                 boundingBox,
                 pixelsPerCm);

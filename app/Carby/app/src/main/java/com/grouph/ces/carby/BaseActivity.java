@@ -43,8 +43,9 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
 
 //        if (!OpenCVLoader.initDebug()) {
 //        }
-//        IntegralApproximation a = new IntegralApproximation();
-//        a.loadTestMats();
+//        IntegralApproximation a = new IntegralApproximation(this);
+//        a.performApproximation();
+//        a.showResults();
     }
 
     @Override

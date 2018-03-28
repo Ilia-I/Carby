@@ -91,9 +91,9 @@ public final class CaptureFragment extends Fragment {
         refObjectToast = Toast.makeText(getActivity(), "No reference object detected", Toast.LENGTH_SHORT);
         FloatingActionButton captureButton = getView().findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
-            Frame captured = mOpenCvCameraView.getFrame();
-            if(captured.getPixelsPerCm() >= 0)
-                this.takePicture();
+            Frame frame = mOpenCvCameraView.getFrame();
+            if(frame.getPixelsPerCm() > 0)
+                this.captureFrame(frame);
             else
                 refObjectToast.show();
         });
@@ -268,9 +268,7 @@ public final class CaptureFragment extends Fragment {
         };
     }
 
-    public void takePicture() {
-        Frame frame = mOpenCvCameraView.getFrame();
-
+    public void captureFrame(Frame frame) {
         imageProcessor.addImage(frame);
 
         //save img if dev mode

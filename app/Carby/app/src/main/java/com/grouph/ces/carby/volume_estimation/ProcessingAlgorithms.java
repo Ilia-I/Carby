@@ -30,8 +30,8 @@ public class ProcessingAlgorithms {
     }
 
 
-    public Bitmap matToBitmap(Mat input) {
-        Imgproc.resize(input, input, new Size(1280, 720));
+    public static Bitmap matToBitmap(Mat input, int width, int height) {
+        Imgproc.resize(input, input, new Size(width, height));
 
         Bitmap bitmap = Bitmap.createBitmap(input.cols(), input.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(input, bitmap);

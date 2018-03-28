@@ -75,14 +75,15 @@ public class GrabCutTask extends AsyncTask<Object, Void, Mat> {
         background.setTo(vals, mask);
         Core.add(background, foreground, dst, mask);
 
-        firstMask.release();
+        Imgproc.resize(firstMask, firstMask, origImage.size());
+
+        //firstMask.release();
         source.release();
         bgModel.release();
         fgModel.release();
         vals.release();
-//        dst=featureDetect(dst);
 
-        return dst;
+        return firstMask;
     }
 
     private Mat performScaling(Mat input){
