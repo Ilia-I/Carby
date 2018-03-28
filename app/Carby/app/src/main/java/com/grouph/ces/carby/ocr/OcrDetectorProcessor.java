@@ -95,16 +95,17 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
             Log.d(this.getClass().getName(),"LineCorrector:"+lineCollector.size());
             INutritionTable nt = tableMatcher(errorCorrectNums());
             Log.v("OcrDetectorProcessor","NutritionTable:\n"+nt);
-            if(barcode!=null)   record(barcode,nt);
+            int key = record(barcode,nt);
             scanComplete = false;
             Log.d(this.getClass().getName(),"exec time:"+(System.currentTimeMillis() - startTime)+"ms");
-            showResult(nt);
+            showResult(nt,key);
         }
     }
 
-    private void showResult(INutritionTable nt) {
+    private void showResult(INutritionTable nt,int key) {
         Intent result = new Intent(context, NutritionResultActivity.class);
         result.putExtra("jsonNutritionTable",nt.toJasonObject().toString());
+        result.putExtra("id",key);
         context.startActivity(result);
     }
 
@@ -227,10 +228,15 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
      * @param barcode - barcode identifier for the nutrition table
      * @param nt - nutrition table to store
      */
-    private void record(String barcode, INutritionTable nt) {
+    private int record(String barcode, INutritionTable nt) {
         AppDatabase db = Room.databaseBuilder(context ,AppDatabase.class,"myDB").allowMainThreadQueries().build();
-        db.nutritionDataDao().insertAll(new NutritionDataDB(barcode,nt));
+        if(barcode==null){
+            barcode = "";
+        }
+        NutritionDataDB nd = new NutritionDataDB(barcode,nt);
+        db.nutritionDataDao().insertAll(nd);
         Log.d(this.getClass().getName(),"Barcode: "+barcode+"\nLoaded Table:\n"+db.nutritionDataDao().findByBarcode(barcode).getNt());
+        return nd.getKey();
     }
 
     @Override
