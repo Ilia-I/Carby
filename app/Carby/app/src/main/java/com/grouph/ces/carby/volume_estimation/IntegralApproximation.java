@@ -13,9 +13,7 @@ import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import java.io.File;
@@ -23,7 +21,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -51,6 +48,7 @@ public class IntegralApproximation {
         loadTestMats();
     }
 
+    //returns a rect with bounding box dimensions
     private Rect calculate2dDimensions(Mat input) {
         Imgproc.cvtColor(input, input, Imgproc.COLOR_BGR2GRAY);
 
@@ -143,22 +141,23 @@ public class IntegralApproximation {
         sideWidth = sideDimensions.width;
         sideHeight = sideDimensions.height;
 
-        boolean topLarger = false;
-        if(topWidth > sideWidth)
-            topLarger = true;
-        else
-            topLarger = false;
-
         cropWithBoundingBoxes(topDimensions, sideDimensions);
         scaleSmallerMat();
+        Log.e(TAG, "top width "+topWidth + " side width "+sideWidth);
+        Log.e(TAG, "top dimensions: " + top.getImage().height() + "x" + top.getImage().width());
+        Log.e(TAG, "side dimensions: " + side.getImage().height() + "x" + side.getImage().width());
+        Log.e(TAG, "pixels to cm: " + Math.cbrt(pixToCmVal()));
+        Log.e(TAG, "Predicted Volume: " + volume() / pixToCmVal() + " cm3");
 
-        if(topLarger) {
-            Log.e(TAG, "performApproximation: " + top.getPixelsPerCm());
-            Log.e(TAG, "vol of pixels: " + volume() / Math.pow(top.getPixelsPerCm(), 3) + " cm3");
-        } else {
-            Log.e(TAG, "performApproximation: " + side.getPixelsPerCm());
-            Log.e(TAG, "vol of pixels: " + volume() / Math.pow(side.getPixelsPerCm(), 3) + " cm3");
-        }
+    }
+
+    private double pixToCmVal(){
+        double val = 0;
+        if(topWidth > sideWidth)
+            val = Math.pow(top.getPixelsPerCm(),3);
+        else
+            val = Math.pow(side.getPixelsPerCm(),3);
+        return val;
     }
 
     public void loadTestMats() {

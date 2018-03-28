@@ -41,6 +41,7 @@ public class ImageProcessor {
 
     private ProcessingAlgorithms algorithms;
 
+
     public ImageProcessor(VolEstActivity activity) {
         this.activity = activity;
         this.algorithms = new ProcessingAlgorithms(activity);

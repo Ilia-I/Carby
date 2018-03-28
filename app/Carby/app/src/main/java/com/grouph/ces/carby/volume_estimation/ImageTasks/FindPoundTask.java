@@ -9,8 +9,6 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfInt;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgproc.CLAHE;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
@@ -24,10 +22,12 @@ public class FindPoundTask extends AsyncTask<Mat, Void, Double> {
 
     private static final String TAG = "FindPoundTask";
     private static final double POUND_RADIUS = 1.42;
+    private final int scalingFactor = 2;
+
 
     @Override
     protected Double doInBackground(Mat... mats) {
-        final int scalingFactor = 2;
+
 
         Mat src = mats[0];
         Mat blurred = new Mat();
@@ -76,6 +76,7 @@ public class FindPoundTask extends AsyncTask<Mat, Void, Double> {
                 return r / POUND_RADIUS;
             }
         }
+
         return -1.0;
     }
 
