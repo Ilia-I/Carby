@@ -20,7 +20,7 @@ public class VolEstActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setFragment(new CaptureFragment(),new Bundle(),"");
+        setFragment(new CaptureFragment(),new Bundle(),"");
         performTestCalculation();
     }
 
@@ -54,6 +54,6 @@ public class VolEstActivity extends AppCompatActivity{
         if (!OpenCVLoader.initDebug()) {}
         IntegralApproximation a = new IntegralApproximation(this);
         a.performApproximation();
-        a.showResults();
+//        a.showResults();
     }
 }
