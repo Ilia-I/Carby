@@ -62,53 +62,57 @@ public class NutritionResultActivity extends AppCompatActivity {
             TextView mSaltVal = findViewById(R.id.salt_val);
 
             if(nutritionTable.getComponentValue("Energy") !=null){
-                mEnergyVal.setText(Double.toString(nutritionTable.getComponentValue("Energy")) + nutritionTable.getEnergyUnit());
+                mEnergyVal.setText(formatDouble(nutritionTable.getComponentValue("Energy")) + nutritionTable.getEnergyUnit());
             }
 
             if(nutritionTable.getComponentValue("Fat") !=null){
-                mFatVal.setText(Double.toString(nutritionTable.getComponentValue("Fat")) + nutritionTable.getFatsUnit());
+                mFatVal.setText(formatDouble(nutritionTable.getComponentValue("Fat")) + nutritionTable.getFatsUnit());
             }
 
             if(nutritionTable.getComponentValue("mono-unsaturates") !=null){
-                mMonoUnsat.setText(Double.toString(nutritionTable.getComponentValue("mono-unsaturates")) + nutritionTable.getFatsUnit());
+                mMonoUnsat.setText(formatDouble(nutritionTable.getComponentValue("mono-unsaturates")) + nutritionTable.getFatsUnit());
             }
 
             if(nutritionTable.getComponentValue("polyunsaturates") !=null){
-                mPolyUnsat.setText(Double.toString(nutritionTable.getComponentValue("polyunsaturates")) + nutritionTable.getFatsUnit());
+                mPolyUnsat.setText(formatDouble(nutritionTable.getComponentValue("polyunsaturates")) + nutritionTable.getFatsUnit());
             }
 
             if(nutritionTable.getComponentValue("saturates") !=null){
-                mSaturatedVal.setText(Double.toString(nutritionTable.getComponentValue("saturates")) + nutritionTable.getFatsUnit());
+                mSaturatedVal.setText(formatDouble(nutritionTable.getComponentValue("saturates")) + nutritionTable.getFatsUnit());
             }
 
             if(nutritionTable.getComponentValue("Carbohydrate") !=null){
-                mCarbVal.setText(Double.toString(nutritionTable.getComponentValue("Carbohydrate")) + nutritionTable.getCarbohydratesUnit());
+                mCarbVal.setText(formatDouble(nutritionTable.getComponentValue("Carbohydrate")) + nutritionTable.getCarbohydratesUnit());
             }
 
             if(nutritionTable.getComponentValue("sugars") !=null){
-                mCarbSugarsVal.setText(Double.toString(nutritionTable.getComponentValue("sugars")) + nutritionTable.getCarbohydratesUnit());
+                mCarbSugarsVal.setText(formatDouble(nutritionTable.getComponentValue("sugars")) + nutritionTable.getCarbohydratesUnit());
             }
 
             if(nutritionTable.getComponentValue("polyols") !=null){
-                mCarbPolyolsVal.setText(Double.toString(nutritionTable.getComponentValue("polyols")) + nutritionTable.getCarbohydratesUnit());
+                mCarbPolyolsVal.setText(formatDouble(nutritionTable.getComponentValue("polyols")) + nutritionTable.getCarbohydratesUnit());
             }
 
             if(nutritionTable.getComponentValue("starch") !=null){
-                mCarbStarchVal.setText(Double.toString(nutritionTable.getComponentValue("starch")) + nutritionTable.getCarbohydratesUnit());
+                mCarbStarchVal.setText(formatDouble(nutritionTable.getComponentValue("starch")) + nutritionTable.getCarbohydratesUnit());
             }
 
             if(nutritionTable.getComponentValue("Fibre") !=null){
-                mFibreVal.setText(Double.toString(nutritionTable.getComponentValue("Fibre")) + nutritionTable.getFibreUnit());
+                mFibreVal.setText(formatDouble(nutritionTable.getComponentValue("Fibre")) + nutritionTable.getFibreUnit());
             }
 
             if(nutritionTable.getComponentValue("Protein") !=null){
-                mProteinVal.setText(Double.toString(nutritionTable.getComponentValue("Protein")) + nutritionTable.getProteinUnit());
+                mProteinVal.setText(formatDouble(nutritionTable.getComponentValue("Protein")) + nutritionTable.getProteinUnit());
             }
 
             if(nutritionTable.getComponentValue("Salt") !=null){
-                mSaltVal.setText(Double.toString(nutritionTable.getComponentValue("Salt")) + nutritionTable.getSaltUnit());
+                mSaltVal.setText(formatDouble(nutritionTable.getComponentValue("Salt")) + nutritionTable.getSaltUnit());
             }
         }
+    }
+
+    private String formatDouble(double val){
+        return String.format("%.1f", val);
     }
 
     private void initConsumption() {
@@ -137,6 +141,8 @@ public class NutritionResultActivity extends AppCompatActivity {
                         AppDatabase db = Room.databaseBuilder(getApplicationContext() ,AppDatabase.class,"myDB").allowMainThreadQueries().build();
                         int quantity = getQuantity();
                         if(quantity>0) {
+                            Log.d(this.getClass().getName(),"id:"+id);
+                            Log.d(this.getClass().getName(),"quantity:"+quantity);
                             db.consumptionDataDao().insert(new ConsumptionDB(id, quantity));
                             addConsumed.setEnabled(false);
                         }
