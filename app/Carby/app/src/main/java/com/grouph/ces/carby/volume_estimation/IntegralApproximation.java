@@ -143,11 +143,22 @@ public class IntegralApproximation {
         sideWidth = sideDimensions.width;
         sideHeight = sideDimensions.height;
 
+        boolean topLarger = false;
+        if(topWidth > sideWidth)
+            topLarger = true;
+        else
+            topLarger = false;
+
         cropWithBoundingBoxes(topDimensions, sideDimensions);
         scaleSmallerMat();
 
-        Log.e(TAG, "performApproximation: " + side.getPixelsPerCm());
-        Log.e(TAG, "vol of pixels: " + volume() / Math.pow(side.getPixelsPerCm(), 3) + " cm3");
+        if(topLarger) {
+            Log.e(TAG, "performApproximation: " + top.getPixelsPerCm());
+            Log.e(TAG, "vol of pixels: " + volume() / Math.pow(top.getPixelsPerCm(), 3) + " cm3");
+        } else {
+            Log.e(TAG, "performApproximation: " + side.getPixelsPerCm());
+            Log.e(TAG, "vol of pixels: " + volume() / Math.pow(side.getPixelsPerCm(), 3) + " cm3");
+        }
     }
 
     public void loadTestMats() {
