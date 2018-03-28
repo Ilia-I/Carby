@@ -12,13 +12,13 @@ import java.util.Locale;
 public class Frame {
     private Mat image = new Mat();
     private Rect boundingBox = new Rect();
-    private double pixelsPerCm = -1.0;
+    private double referenceObjectSize = -1.0;
 
     public Frame() {}
 
-    public Frame(Mat image, double pixelsPerCm, Rect boundingBox) {
+    public Frame(Mat image, double size, Rect boundingBox) {
         this.image = image.clone();
-        this.pixelsPerCm = pixelsPerCm;
+        this.referenceObjectSize = size;
         this.boundingBox = boundingBox;
     }
 
@@ -26,8 +26,8 @@ public class Frame {
         return image;
     }
 
-    public double getPixelsPerCm() {
-        return pixelsPerCm;
+    public double getReferenceObjectSize() {
+        return referenceObjectSize;
     }
 
     public Rect getBoundingBox() {
@@ -38,12 +38,12 @@ public class Frame {
         this.image = image;
     }
 
-    public void setPixelsPerCm(double pixelsPerCm) {
-        this.pixelsPerCm = pixelsPerCm;
-    }
-
     public void setBoundingBox(Rect boundingBox) {
         this.boundingBox = boundingBox;
+    }
+
+    public void setReferenceObjectSize(double referenceObjectSize) {
+        this.referenceObjectSize = referenceObjectSize;
     }
 
     @Override
@@ -52,6 +52,6 @@ public class Frame {
                 "Mat: %s\nBounding box %s\nPixel density of image: %f",
                 image,
                 boundingBox,
-                pixelsPerCm);
+                referenceObjectSize);
     }
 }

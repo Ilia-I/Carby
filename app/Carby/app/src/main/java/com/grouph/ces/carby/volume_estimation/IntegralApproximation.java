@@ -1,8 +1,6 @@
 package com.grouph.ces.carby.volume_estimation;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -13,9 +11,7 @@ import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import java.io.File;
@@ -23,7 +19,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -33,7 +28,7 @@ import java.util.List;
 public class IntegralApproximation {
 
     private static final String TAG = "IntegralApproximation";
-    private static final int NUM_PARTS = 10;
+    private static final double POUND_RADIUS = 1.42;
 
     private VolEstActivity activity;
 
@@ -143,21 +138,19 @@ public class IntegralApproximation {
         sideWidth = sideDimensions.width;
         sideHeight = sideDimensions.height;
 
-        boolean topLarger = false;
-        if(topWidth > sideWidth)
-            topLarger = true;
-        else
-            topLarger = false;
+        boolean topLarger = topWidth > sideWidth;
 
         cropWithBoundingBoxes(topDimensions, sideDimensions);
         scaleSmallerMat();
 
         if(topLarger) {
-            Log.e(TAG, "performApproximation: " + top.getPixelsPerCm());
-            Log.e(TAG, "vol of pixels: " + volume() / Math.pow(top.getPixelsPerCm(), 3) + " cm3");
+            double pixelsPerCm = top.getReferenceObjectSize() / POUND_RADIUS;
+            Log.e(TAG, "performApproximation: " + pixelsPerCm);
+            Log.e(TAG, "vol of pixels: " + volume() / Math.pow(pixelsPerCm, 3) + " cm3");
         } else {
-            Log.e(TAG, "performApproximation: " + side.getPixelsPerCm());
-            Log.e(TAG, "vol of pixels: " + volume() / Math.pow(side.getPixelsPerCm(), 3) + " cm3");
+            double pixelsPerCm = side.getReferenceObjectSize() / POUND_RADIUS;
+            Log.e(TAG, "performApproximation: " + pixelsPerCm);
+            Log.e(TAG, "vol of pixels: " + volume() / Math.pow(pixelsPerCm, 3) + " cm3");
         }
     }
 

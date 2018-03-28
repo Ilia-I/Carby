@@ -1,8 +1,6 @@
 package com.grouph.ces.carby.volume_estimation;
 
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
@@ -133,11 +131,11 @@ public class ImageProcessor {
 
                 //TODO implement types
                 RecordFrame testTop = new RecordFrame("testTop",
-                        new Frame((Mat) grabCutTop.get(), topDown.getPixelsPerCm(), topDown.getBoundingBox()));
+                        new Frame((Mat) grabCutTop.get(), topDown.getReferenceObjectSize(), topDown.getBoundingBox()));
                 testTop.saveObj(preferences);
 
                 RecordFrame testSide = new RecordFrame("testSide",
-                        new Frame((Mat) grabCutSide.get(), side.getPixelsPerCm(), side.getBoundingBox()));
+                        new Frame((Mat) grabCutSide.get(), side.getReferenceObjectSize(), side.getBoundingBox()));
                 testSide.saveObj(preferences);
 
             } catch (InterruptedException e) {

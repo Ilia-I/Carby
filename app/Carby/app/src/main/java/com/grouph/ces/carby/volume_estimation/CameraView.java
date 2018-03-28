@@ -2,36 +2,28 @@ package com.grouph.ces.carby.volume_estimation;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.JavaCameraView;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
+import org.opencv.core.Size;
 
 import android.content.Context;
 import android.hardware.Camera;
-import android.hardware.Camera.Size;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.grouph.ces.carby.volume_estimation.ImageTasks.FindPoundTask;
-
-import java.util.concurrent.ExecutionException;
-
 public class CameraView extends JavaCameraView implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
 
     private static final String TAG = "myCameraView";
-    private enum Corner { TP_LEFT, TP_RIGHT, BTM_LEFT, BTM_RIGHT, CENTRE }
+    private static final Size FRAME_SIZE = new Size(1280,720);
 
-    private Point lastTouch;
-    private Point p1;
-    private Point p2;
-    private Scalar boxColor = new Scalar(255, 255,0);
-    private Mat mRgba;
+    private enum Corner { TP_LEFT, TP_RIGHT, BTM_LEFT, BTM_RIGHT, CENTRE }
+    private Point p1, p2;
     private Frame frame;
+    private OnCameraFrameRenderer frameRenderer;
 
     public CameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -45,76 +37,37 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         mMaxWidth = width;
         connectCamera(getWidth(), getHeight());
 
-        Camera.Parameters params = mCamera.getParameters();
-        Size pictureSize = params.getSupportedPictureSizes().get(0);
-        for(Size s : params.getSupportedPictureSizes())
-            if(s.width == width && s.height == height) {
-                pictureSize = s;
-                break;
-            }
-        params.setPictureSize(pictureSize.width, pictureSize.height);
-        mCamera.setParameters(params);
-
-        Log.e(TAG, "getResolution: PICTURE SIZE" + mCamera.getParameters().getPictureSize().width + " x " + mCamera.getParameters().getPictureSize().height);
-        Log.e(TAG, "getResolution: PREVIEW SIZE" + mCamera.getParameters().getPreviewSize().width +
-                " x " + mCamera.getParameters().getPreviewSize().height);
-
         mCamera.setPreviewCallback(this);
-    }
-
-    public Frame getFrame() {
-        return frame;
     }
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        mRgba = inputFrame.rgba();
-        Mat originalImage = mRgba.clone();
+        double poundRadius = frameRenderer.findPound(inputFrame);
+        frame = new Frame(inputFrame.rgba().clone(), poundRadius, new Rect(p1, p2));
 
-        double result = -1;
+        return frameRenderer.render(inputFrame);
+    }
 
-        try {
-            result = new FindPoundTask().execute(mRgba).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-
-        frame = new Frame(originalImage, result, new Rect(p1, p2));
-
-        Imgproc.rectangle(mRgba, p1, p2, boxColor, 3, Imgproc.LINE_AA,0);
-        Imgproc.circle(mRgba, p1, 5, boxColor, 34);
-        Imgproc.circle(mRgba, new Point(p2.x, p1.y), 5, boxColor, 34);
-        Imgproc.circle(mRgba, new Point(p1.x, p2.y), 5, boxColor, 34);
-        Imgproc.circle(mRgba, p2, 5, boxColor, 34);
-        return mRgba;
+    public Frame getFrame() {
+        return frame ;
     }
 
     @Override
     public void onCameraViewStarted(int width, int height) {
-        mRgba = new Mat(height,width, CvType.CV_8UC4);
-        frame = new Frame();
-
         this.setResolution(1280,720);
-        this.initBoundingBox();
+
+        // Initialise bounding box
+        final int BOX_SIZE = 300;
+        p1 = new Point((FRAME_SIZE.width - BOX_SIZE)/2,(FRAME_SIZE.height - BOX_SIZE)/2);
+        p2 = new Point((FRAME_SIZE.width + BOX_SIZE)/2, (FRAME_SIZE.height + BOX_SIZE)/2);
+
+        frame = new Frame();
+        frameRenderer = new OnCameraFrameRenderer();
+        frameRenderer.updateBoundingBox(p1, p2);
     }
 
     @Override
-    public void onCameraViewStopped() {
-        mRgba.release();
-    }
-
-    public Rect getBoundingBox() {
-        return new Rect(p1,p2);
-    }
-
-    private void initBoundingBox() {
-        final int BOX_SIZE = 300;
-        p1 = new Point((mRgba.size().width - BOX_SIZE)/2,(mRgba.size().height - BOX_SIZE)/2);
-        p2 = new Point((mRgba.size().width + BOX_SIZE)/2, (mRgba.size().height + BOX_SIZE)/2);
-        boxColor = new Scalar(255, 255,0);
-    }
+    public void onCameraViewStopped() {}
 
     private int[] toPreviewCoordinates(CameraView view, MotionEvent e) {
         float pixelRatio = view.getHeight() / 720f;
@@ -143,7 +96,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
         switch (motionEvent.getAction()) {
             case MotionEvent.ACTION_MOVE:
-                boxColor = new Scalar(255,0,0);
+                frameRenderer.setBoundingBoxColour(new Scalar(255,0,0));
                 if(c != null)
                     switch (c) {
                         case TP_LEFT:
@@ -167,12 +120,13 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 //                            p2.x = touchX - lastTouch.x;
 //                            p2.y = touchY - lastTouch.y;
                     }
+                    frameRenderer.updateBoundingBox(p1, p2);
                 break;
             case MotionEvent.ACTION_UP:
-                boxColor = new Scalar(255, 255, 0);
+                frameRenderer.setBoundingBoxColour(new Scalar(255,255,0));
                 break;
         }
-        lastTouch = new Point(touchX, touchY);
+//        lastTouch = new Point(touchX, touchY);
         return true;
     }
 
@@ -201,5 +155,6 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
         return false;
     }
+
 
 }

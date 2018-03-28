@@ -1,16 +1,12 @@
 package com.grouph.ces.carby.volume_estimation.ImageTasks;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfInt;
 import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgproc.CLAHE;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
@@ -20,13 +16,22 @@ import java.util.List;
  * Created by matthewball on 23/03/2018.
  */
 
-public class FindPoundTask extends AsyncTask<Mat, Void, Double> {
+public class FindPoundTask extends AsyncTask<Mat, Void, FindPoundTask.Result> {
 
     private static final String TAG = "FindPoundTask";
-    private static final double POUND_RADIUS = 1.42;
+
+    public class Result {
+        public Point center;
+        public double radius;
+
+        public Result(Point p, double r) {
+            this.center = p;
+            this.radius = r;
+        }
+    }
 
     @Override
-    protected Double doInBackground(Mat... mats) {
+    protected Result doInBackground(Mat... mats) {
         final int scalingFactor = 2;
 
         Mat src = mats[0];
@@ -68,15 +73,12 @@ public class FindPoundTask extends AsyncTask<Mat, Void, Double> {
                     r = data[2]*scalingFactor;
                 }
                 Point center = new Point(x,y);
-                // circle center
-                Imgproc.circle(src, center, 3, new Scalar(0,255,0), -1);
-                // circle outline
-                Imgproc.circle(src, center, (int) r, new Scalar(255,0,0), 3);
-                Log.e(TAG, "radius: " +r/POUND_RADIUS);
-                return r / POUND_RADIUS;
+
+//                Log.e(TAG, "radius: " +r/POUND_RADIUS);
+                return new Result(center, r);
             }
         }
-        return -1.0;
+        return new Result(new Point(), -1.0);
     }
 
 }

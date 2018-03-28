@@ -23,7 +23,6 @@ import android.widget.Toast;
 
 import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
-import com.grouph.ces.carby.volume_estimation.DevMode.ShowFramesFragment;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -92,7 +91,7 @@ public final class CaptureFragment extends Fragment {
         FloatingActionButton captureButton = getView().findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
             Frame frame = mOpenCvCameraView.getFrame();
-            if(frame.getPixelsPerCm() > 0)
+            if(frame.getReferenceObjectSize() > 0)
                 this.captureFrame(frame);
             else
                 refObjectToast.show();
