@@ -130,23 +130,21 @@ public class IntegralApproximation {
     }
 
     public void performApproximation() {
-        if(top != null && side != null) {
-            Rect topDimensions = calculate2dDimensions(top.getImage());
-            Rect sideDimensions = calculate2dDimensions(side.getImage());
+        Rect topDimensions = calculate2dDimensions(top.getImage());
+        Rect sideDimensions = calculate2dDimensions(side.getImage());
 
-            topWidth = topDimensions.width;
-            topHeight = topDimensions.height;
-            sideWidth = sideDimensions.width;
-            sideHeight = sideDimensions.height;
+        topWidth = topDimensions.width;
+        topHeight = topDimensions.height;
+        sideWidth = sideDimensions.width;
+        sideHeight = sideDimensions.height;
 
-            cropWithBoundingBoxes(topDimensions, sideDimensions);
-            scaleSmallerMat();
-            Log.e(TAG, "top width " + topWidth + " side width " + sideWidth);
-            Log.e(TAG, "top dimensions: " + top.getImage().height() + "x" + top.getImage().width());
-            Log.e(TAG, "side dimensions: " + side.getImage().height() + "x" + side.getImage().width());
-            Log.e(TAG, "pixels to cm: " + Math.cbrt(pixToCmVal()));
-            Log.e(TAG, "Predicted Volume: " + volume() / pixToCmVal() + " cm3");
-        }
+        cropWithBoundingBoxes(topDimensions, sideDimensions);
+        scaleSmallerMat();
+        Log.e(TAG, "top width " + topWidth + " side width " + sideWidth);
+        Log.e(TAG, "top dimensions: " + top.getImage().height() + "x" + top.getImage().width());
+        Log.e(TAG, "side dimensions: " + side.getImage().height() + "x" + side.getImage().width());
+        Log.e(TAG, "pixels to cm: " + Math.cbrt(pixToCmVal()));
+        Log.e(TAG, "Predicted Volume: " + volume() / pixToCmVal() + " cm3");
     }
 
     private double pixToCmVal(){

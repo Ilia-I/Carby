@@ -39,7 +39,6 @@ public class FindPoundTask extends AsyncTask<Mat, Void, FindPoundTask.Result> {
         Imgproc.resize(src, blurred, new org.opencv.core.Size(src.width()/scalingFactor,src.height()/scalingFactor));
         Imgproc.cvtColor(blurred,blurred, Imgproc.COLOR_RGB2HSV);
 
-
         Imgproc.medianBlur(blurred, blurred, 5);
         //Mat colourMask= new Mat();
         //Core.inRange(blurred,new Scalar(10,50,50),new Scalar(45,255,255),colourMask);

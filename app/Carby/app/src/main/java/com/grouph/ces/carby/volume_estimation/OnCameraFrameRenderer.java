@@ -52,24 +52,22 @@ public class OnCameraFrameRenderer {
         boxColor = s;
     }
 
-    public Mat render(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        Mat mRGBA = inputFrame.rgba();
-
+    public Mat render(Mat inputFrame) {
         if(circleRadius != -1.0) {
             // circle center
-            Imgproc.circle(mRGBA, circleCenter, 3, new Scalar(0, 255, 0), -1);
+            Imgproc.circle(inputFrame, circleCenter, 3, new Scalar(0, 255, 0), -1);
             // circle outline
-            Imgproc.circle(mRGBA, circleCenter, (int) circleRadius, new Scalar(255, 0, 0), 3);
+            Imgproc.circle(inputFrame, circleCenter, (int) circleRadius, new Scalar(255, 0, 0), 3);
         }
 
         // Draw bounding box
-        Imgproc.rectangle(mRGBA, p1, p2, boxColor, 3, Imgproc.LINE_AA,0);
-        Imgproc.circle(mRGBA, p1, 5, boxColor, 34);
-        Imgproc.circle(mRGBA, new Point(p2.x, p1.y), 5, boxColor, 34);
-        Imgproc.circle(mRGBA, new Point(p1.x, p2.y), 5, boxColor, 34);
-        Imgproc.circle(mRGBA, p2, 5, boxColor, 34);
+        Imgproc.rectangle(inputFrame, p1, p2, boxColor, 3, Imgproc.LINE_AA,0);
+        Imgproc.circle(inputFrame, p1, 5, boxColor, 34);
+        Imgproc.circle(inputFrame, new Point(p2.x, p1.y), 5, boxColor, 34);
+        Imgproc.circle(inputFrame, new Point(p1.x, p2.y), 5, boxColor, 34);
+        Imgproc.circle(inputFrame, p2, 5, boxColor, 34);
 
-        return mRGBA;
+        return inputFrame;
     }
 
 }

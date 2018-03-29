@@ -2,8 +2,10 @@ package com.grouph.ces.carby.volume_estimation;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.JavaCameraView;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 
@@ -23,6 +25,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     private Point p1, p2;
     private Frame frame;
     private OnCameraFrameRenderer frameRenderer;
+    private Mat mRgba;
 
     public CameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -44,6 +47,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     }
 
     public Frame getFrame() {
+        frame.setBoundingBox(new Rect(p1, p2));
         return frame ;
     }
 
@@ -59,6 +63,22 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         frame = new Frame();
         frameRenderer = new OnCameraFrameRenderer();
         frameRenderer.updateBoundingBox(p1, p2);
+
+        mRgba = new Mat(720,1280, CvType.CV_8UC4);
+    }
+
+    @Override
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        mRgba = inputFrame.rgba();
+        
+        double poundRadius = frameRenderer.findPound(inputFrame);
+
+        Mat frameImage = frame.getImage();
+        mRgba.copyTo(frameImage);
+        frame.setBoundingBox(new Rect(p1, p2));
+        frame.setReferenceObjectSize(poundRadius);
+
+        return frameRenderer.render(mRgba);
     }
 
     @Override
@@ -76,9 +96,9 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
-        int[] coords = toPreviewCoordinates((CameraView) view, motionEvent);
-        int touchX = coords[0];
-        int touchY = coords[1];
+        int[] coordinates = toPreviewCoordinates((CameraView) view, motionEvent);
+        int touchX = coordinates[0];
+        int touchY = coordinates[1];
 
         touchX = touchX >= 1280 ? 1280 : touchX;
         touchX = touchX <= 0 ? 0 : touchX;

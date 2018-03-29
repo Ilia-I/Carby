@@ -17,7 +17,7 @@ public class Frame {
     public Frame() {}
 
     public Frame(Mat image, double size, Rect boundingBox) {
-        this.image = image.clone();
+        this.image = image;
         this.referenceObjectSize = size;
         this.boundingBox = boundingBox;
     }
