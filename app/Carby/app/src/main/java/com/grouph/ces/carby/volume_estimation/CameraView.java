@@ -39,7 +39,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         double poundRadius = frameRenderer.findPound(inputFrame);
-        frame = new Frame(inputFrame.rgba().clone(), poundRadius, new Rect(p1, p2));
+        //frame = new Frame(inputFrame.rgba().clone(), poundRadius, new Rect(p1, p2));
 
         return frameRenderer.render(inputFrame);
     }
@@ -110,11 +110,12 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
                         case BTM_RIGHT:
                             p2.x = touchX;
                             p2.y = touchY;
-//                        case CENTRE:
-//                            p1.x = touchX + (p2.x - p1.x)/2;
-//                            p1.y = touchY + (p2.y - p1.y)/2;
-//                            p2.x = touchX - (p2.x - p1.x)/2;
-//                            p2.y = touchY - (p2.y - p1.y)/2;
+                        case CENTRE:
+                            Point temp=p1.clone();
+                            p1.x = touchX - (p2.x - p1.x)/2;
+                            p1.y = touchY - (p2.y - p1.y)/2;
+                            p2.x = touchX + (p2.x - temp.x)/2;
+                            p2.y = touchY + (p2.y - temp.y)/2;
                     }
                     frameRenderer.updateBoundingBox(p1, p2);
                 break;
@@ -122,7 +123,6 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
                 frameRenderer.setBoundingBoxColour(new Scalar(255,255,0));
                 break;
         }
-//        lastTouch = new Point(touchX, touchY);
         return true;
     }
 
