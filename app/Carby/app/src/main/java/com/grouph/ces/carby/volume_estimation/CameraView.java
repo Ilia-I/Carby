@@ -61,16 +61,13 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        mRgba = inputFrame.rgba();
-        
-        double poundRadius = frameRenderer.findPound(inputFrame);
-
+        Mat mRGBA = inputFrame.rgba();
         Mat frameImage = frame.getImage();
-        mRgba.copyTo(frameImage);
+        mRGBA.copyTo(frameImage);
         frame.setBoundingBox(new Rect(p1, p2));
-        frame.setReferenceObjectSize(poundRadius);
+        frame.setReferenceObjectSize(frameRenderer.findPound(mRGBA));
 
-        return frameRenderer.render(mRgba);
+        return frameRenderer.render(mRGBA);
     }
 
     @Override

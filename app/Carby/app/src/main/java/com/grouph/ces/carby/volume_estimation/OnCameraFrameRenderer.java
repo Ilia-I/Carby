@@ -30,9 +30,9 @@ public class OnCameraFrameRenderer {
 
     public OnCameraFrameRenderer() {}
 
-    public double findPound(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+    public double findPound(Mat inputFrame) {
         try {
-            FindPoundTask.Result result = new FindPoundTask().execute(inputFrame.rgba()).get();
+            FindPoundTask.Result result = new FindPoundTask().execute(inputFrame).get();
             circleCenter = result.center;
             circleRadius = result.radius;
         } catch (InterruptedException e) {
