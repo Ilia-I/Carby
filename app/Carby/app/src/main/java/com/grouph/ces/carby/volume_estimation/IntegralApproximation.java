@@ -43,7 +43,6 @@ public class IntegralApproximation {
 
     public IntegralApproximation(Activity activity) {
         this.activity = (VolEstActivity) activity;
-        loadTestMats();
     }
 
     //returns a rect with bounding box dimensions
@@ -131,21 +130,23 @@ public class IntegralApproximation {
     }
 
     public void performApproximation() {
-        Rect topDimensions = calculate2dDimensions(top.getImage());
-        Rect sideDimensions = calculate2dDimensions(side.getImage());
+        if(top != null && side != null) {
+            Rect topDimensions = calculate2dDimensions(top.getImage());
+            Rect sideDimensions = calculate2dDimensions(side.getImage());
 
-        topWidth = topDimensions.width;
-        topHeight = topDimensions.height;
-        sideWidth = sideDimensions.width;
-        sideHeight = sideDimensions.height;
+            topWidth = topDimensions.width;
+            topHeight = topDimensions.height;
+            sideWidth = sideDimensions.width;
+            sideHeight = sideDimensions.height;
 
-        cropWithBoundingBoxes(topDimensions, sideDimensions);
-        scaleSmallerMat();
-        Log.e(TAG, "top width "+topWidth + " side width "+sideWidth);
-        Log.e(TAG, "top dimensions: " + top.getImage().height() + "x" + top.getImage().width());
-        Log.e(TAG, "side dimensions: " + side.getImage().height() + "x" + side.getImage().width());
-        Log.e(TAG, "pixels to cm: " + Math.cbrt(pixToCmVal()));
-        Log.e(TAG, "Predicted Volume: " + volume() / pixToCmVal() + " cm3");
+            cropWithBoundingBoxes(topDimensions, sideDimensions);
+            scaleSmallerMat();
+            Log.e(TAG, "top width " + topWidth + " side width " + sideWidth);
+            Log.e(TAG, "top dimensions: " + top.getImage().height() + "x" + top.getImage().width());
+            Log.e(TAG, "side dimensions: " + side.getImage().height() + "x" + side.getImage().width());
+            Log.e(TAG, "pixels to cm: " + Math.cbrt(pixToCmVal()));
+            Log.e(TAG, "Predicted Volume: " + volume() / pixToCmVal() + " cm3");
+        }
     }
 
     private double pixToCmVal(){
@@ -157,7 +158,7 @@ public class IntegralApproximation {
         return val;
     }
 
-    public void loadTestMats() {
+    public boolean loadTestMats() {
         SharedPreferences prefs = android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(activity);
         for(String name : RecordFrame.recordedFrameNames(prefs)) {
             Log.d(TAG, "name: " + name);
@@ -175,11 +176,14 @@ public class IntegralApproximation {
             }
         }
 
-        if(top == null || side == null)
+        if(top == null || side == null) {
             Log.e(TAG, "Error loading test Mats");
+            return false;
+        }
         else {
             Log.d(TAG, "\n Top image loaded: \n" + top.toString());
             Log.d(TAG, "\nSide image loaded: \n" + side.toString());
+            return true;
         }
     }
 

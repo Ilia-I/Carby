@@ -30,14 +30,10 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     }
 
     public void setResolution(int width, int height) {
-        mCamera.setPreviewCallback(null);
-
         disconnectCamera();
         mMaxHeight = height;
         mMaxWidth = width;
         connectCamera(getWidth(), getHeight());
-
-        mCamera.setPreviewCallback(this);
     }
 
     @Override
