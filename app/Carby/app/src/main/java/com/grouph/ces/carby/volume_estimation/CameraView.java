@@ -4,7 +4,6 @@ import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.JavaCameraView;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 
@@ -110,12 +109,19 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
                         case BTM_RIGHT:
                             p2.x = touchX;
                             p2.y = touchY;
+                            return true;
                         case CENTRE:
-                            Point temp=p1.clone();
-                            p1.x = touchX - (p2.x - p1.x)/2;
-                            p1.y = touchY - (p2.y - p1.y)/2;
-                            p2.x = touchX + (p2.x - temp.x)/2;
-                            p2.y = touchY + (p2.y - temp.y)/2;
+                            double xDist = (p2.x-p1.x)/2;
+                            double yDist = (p2.y-p1.y)/2;
+                            touchX = touchX >= 1280-(int)xDist ? 1280-(int)xDist : touchX;
+                            touchX = touchX <= 0+(int)xDist ? 0+(int)xDist: touchX;
+                            touchY= touchY >= 720-(int)yDist  ? 720-(int)yDist: touchY;
+                            touchY = touchY <= 0+(int)yDist ? 0+(int)yDist: touchY;
+
+                            p1.x = touchX - xDist;
+                            p1.y = touchY - yDist;
+                            p2.x = touchX + xDist;
+                            p2.y = touchY + yDist;
                     }
                     frameRenderer.updateBoundingBox(p1, p2);
                 break;
