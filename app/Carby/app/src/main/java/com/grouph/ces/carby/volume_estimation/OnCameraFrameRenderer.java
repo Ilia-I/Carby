@@ -25,8 +25,14 @@ public class OnCameraFrameRenderer {
     private Scalar boxColor = new Scalar(255, 255,0);
     private Point p1 = new Point();
     private Point p2 = new Point();
-    private Point circleCenter = new Point();
+
+    private Point circleCenter;
     private double circleRadius = -1.0;
+
+    private Point prevCenter;
+    private double prevRadius = -1.0;
+
+    private int frameResetCount = 0;
 
     public OnCameraFrameRenderer() {}
 
@@ -58,6 +64,19 @@ public class OnCameraFrameRenderer {
             Imgproc.circle(inputFrame, circleCenter, 3, new Scalar(0, 255, 0), -1);
             // circle outline
             Imgproc.circle(inputFrame, circleCenter, (int) circleRadius, new Scalar(255, 0, 0), 3);
+
+            prevCenter = circleCenter;
+            prevRadius = circleRadius;
+            
+            frameResetCount = 0;
+        } else {
+            if(prevRadius != -1.0 && frameResetCount < 10) {
+                // circle center
+                Imgproc.circle(inputFrame, prevCenter, 3, new Scalar(0, 255, 0), -1);
+                // circle outline
+                Imgproc.circle(inputFrame, prevCenter, (int) prevRadius, new Scalar(255, 0, 0), 3);
+            }
+            frameResetCount++;
         }
 
         // Draw bounding box
