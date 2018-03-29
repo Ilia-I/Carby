@@ -5,9 +5,6 @@ import org.opencv.core.Rect;
 
 import java.util.Locale;
 
-/**
- * Created by matthewball on 26/03/2018.
- */
 
 public class Frame {
     private Mat image = new Mat();

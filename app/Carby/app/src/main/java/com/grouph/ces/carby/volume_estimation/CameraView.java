@@ -25,7 +25,6 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     private Point p1, p2;
     private Frame frame;
     private OnCameraFrameRenderer frameRenderer;
-    private Mat mRgba;
 
     public CameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -55,8 +54,6 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         frame = new Frame();
         frameRenderer = new OnCameraFrameRenderer();
         frameRenderer.updateBoundingBox(p1, p2);
-
-        mRgba = new Mat(720,1280, CvType.CV_8UC4);
     }
 
     @Override

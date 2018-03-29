@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.preference.PreferenceManager;
@@ -87,14 +88,27 @@ public final class CaptureFragment extends Fragment {
         else
             requestPermissions();
 
-        refObjectToast = Toast.makeText(getActivity(), "No reference object detected", Toast.LENGTH_SHORT);
         FloatingActionButton captureButton = getView().findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
-            Frame frame = mOpenCvCameraView.getFrame();
-            if(frame.getReferenceObjectSize() > 0)
-                this.captureFrame(frame);
-            else
-                refObjectToast.show();
+            Toast.makeText(getActivity(), "Capturing image", Toast.LENGTH_SHORT).show();
+            
+            Handler handler = new Handler();
+            Runnable checkForReferenceObject = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Frame frame = mOpenCvCameraView.getFrame();
+                        if (frame.getReferenceObjectSize() > 0)
+                            captureFrame(frame);
+                        else {
+                            handler.postDelayed(this, 50);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            checkForReferenceObject.run();
         });
 
         FloatingActionButton searchGallery = getView().findViewById(R.id.search_gallery);
