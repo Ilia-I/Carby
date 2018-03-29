@@ -9,6 +9,8 @@ import android.util.Log;
 
 import com.grouph.ces.carby.volume_estimation.DevMode.ShowFramesFragment;
 
+import org.opencv.android.OpenCVLoader;
+
 /**
  * Created by Martin Peev on 27.03.2018 г..
  * Version: 0.6
@@ -19,6 +21,7 @@ public class VolEstActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setFragment(new CaptureFragment(),new Bundle(),"");
+//        performTestCalculation();
     }
 
     public void setFragmentCapture(Bundle bundle){
@@ -44,6 +47,15 @@ public class VolEstActivity extends AppCompatActivity{
             ft.replace(android.R.id.content, fragment);
             if(!backstackKey.isEmpty())ft.addToBackStack(backstackKey);
             ft.commit();
+        }
+    }
+
+    public void performTestCalculation() {
+        if (!OpenCVLoader.initDebug()) {}
+        IntegralApproximation a = new IntegralApproximation(this);
+        if(a.loadTestMats()) {
+            a.performApproximation();
+            a.showResults();
         }
     }
 }

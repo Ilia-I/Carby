@@ -1,23 +1,15 @@
 package com.grouph.ces.carby.volume_estimation.ImageTasks;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfInt;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by matthewball on 23/03/2018.
@@ -34,10 +26,10 @@ public class GrabCutTask extends AsyncTask<Object, Void, Mat> {
         Mat inputMat = (Mat) params[0];
         Rect boundingBox = (Rect) params[1];
 
-        Mat origImage = performScaling(inputMat);
+        Mat scaledImg = performScaling(inputMat);
 
         // Initialise models, masks, foreground and background
-        Mat background = new Mat(origImage.size(), CvType.CV_8UC3, white);
+        Mat background = new Mat(scaledImg.size(), CvType.CV_8UC3, white);
         Mat firstMask = new Mat();
         Mat bgModel = new Mat();
         Mat fgModel = new Mat();
@@ -55,17 +47,17 @@ public class GrabCutTask extends AsyncTask<Object, Void, Mat> {
         p2.y = p2.y / scalingFactor;
         Rect rect = new Rect(p1, p2);
 
-        Imgproc.grabCut(origImage, firstMask, rect, bgModel, fgModel,
+        Imgproc.grabCut(scaledImg, firstMask, rect, bgModel, fgModel,
                 10, Imgproc.GC_INIT_WITH_RECT);
 
         Core.compare(firstMask, source, firstMask, Core.CMP_EQ);
-        Mat foreground = new Mat(origImage.size(), CvType.CV_8UC3, white);
-        origImage.copyTo(foreground, firstMask);
+        Mat foreground = new Mat(scaledImg.size(), CvType.CV_8UC3, white);
+        scaledImg.copyTo(foreground, firstMask);
 
         Mat vals = new Mat(1, 1, CvType.CV_8UC3, new Scalar(0.0));
         Mat tmp = new Mat();
 
-        Imgproc.resize(background, tmp, origImage.size());
+        Imgproc.resize(background, tmp, scaledImg.size());
         background = tmp;
 
         mask = grayImg(foreground);
@@ -75,7 +67,7 @@ public class GrabCutTask extends AsyncTask<Object, Void, Mat> {
         background.setTo(vals, mask);
         Core.add(background, foreground, dst, mask);
 
-        Imgproc.resize(firstMask, firstMask, origImage.size());
+        Imgproc.resize(firstMask, firstMask, inputMat.size());
 
         //firstMask.release();
         source.release();

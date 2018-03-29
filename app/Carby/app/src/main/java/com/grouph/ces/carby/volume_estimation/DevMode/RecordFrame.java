@@ -44,7 +44,7 @@ public class RecordFrame {
         this.fileName = namePrefix(fileName);
         this.encodedImg = getStringFromBitmap(matToBitmap(frame.getImage()));
         this.boundingBox = frame.getBoundingBox();
-        this.pixelsPerCm = frame.getPixelsPerCm();
+        this.pixelsPerCm = frame.getReferenceObjectSize();
     }
 
     public void saveObj(SharedPreferences preferences){

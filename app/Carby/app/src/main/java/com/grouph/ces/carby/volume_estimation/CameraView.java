@@ -7,114 +7,68 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
+import org.opencv.core.Size;
 
 import android.content.Context;
 import android.hardware.Camera;
-import android.hardware.Camera.Size;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.grouph.ces.carby.volume_estimation.ImageTasks.FindPoundTask;
-
-import java.util.concurrent.ExecutionException;
-
 public class CameraView extends JavaCameraView implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
 
     private static final String TAG = "myCameraView";
-    private enum Corner { TP_LEFT, TP_RIGHT, BTM_LEFT, BTM_RIGHT, CENTRE }
+    private static final Size FRAME_SIZE = new Size(1280,720);
 
-    private Point lastTouch;
-    private Point p1;
-    private Point p2;
-    private Scalar boxColor = new Scalar(255, 255,0);
-    private Mat mRgba;
+    private enum Corner { TP_LEFT, TP_RIGHT, BTM_LEFT, BTM_RIGHT, CENTRE }
+    private Point p1, p2;
     private Frame frame;
+    private OnCameraFrameRenderer frameRenderer;
 
     public CameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
     public void setResolution(int width, int height) {
-        mCamera.setPreviewCallback(null);
-
         disconnectCamera();
         mMaxHeight = height;
         mMaxWidth = width;
         connectCamera(getWidth(), getHeight());
-
-        Camera.Parameters params = mCamera.getParameters();
-        Size pictureSize = params.getSupportedPictureSizes().get(0);
-        for(Size s : params.getSupportedPictureSizes())
-            if(s.width == width && s.height == height) {
-                pictureSize = s;
-                break;
-            }
-        params.setPictureSize(pictureSize.width, pictureSize.height);
-        mCamera.setParameters(params);
-
-        Log.e(TAG, "getResolution: PICTURE SIZE" + mCamera.getParameters().getPictureSize().width + " x " + mCamera.getParameters().getPictureSize().height);
-        Log.e(TAG, "getResolution: PREVIEW SIZE" + mCamera.getParameters().getPreviewSize().width +
-                " x " + mCamera.getParameters().getPreviewSize().height);
-
-        mCamera.setPreviewCallback(this);
     }
 
     public Frame getFrame() {
-        return frame;
-    }
-
-    @Override
-    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        mRgba = inputFrame.rgba();
-        Mat originalImage = mRgba.clone();
-
-        double result = -1;
-
-        try {
-            result = new FindPoundTask().execute(mRgba).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-
-        frame = new Frame(originalImage, result, new Rect(p1, p2));
-
-        Imgproc.rectangle(mRgba, p1, p2, boxColor, 3, Imgproc.LINE_AA,0);
-        Imgproc.circle(mRgba, p1, 5, boxColor, 34);
-        Imgproc.circle(mRgba, new Point(p2.x, p1.y), 5, boxColor, 34);
-        Imgproc.circle(mRgba, new Point(p1.x, p2.y), 5, boxColor, 34);
-        Imgproc.circle(mRgba, p2, 5, boxColor, 34);
-        return mRgba;
+        return frame ;
     }
 
     @Override
     public void onCameraViewStarted(int width, int height) {
-        mRgba = new Mat(height,width, CvType.CV_8UC4);
-        frame = new Frame();
-
         this.setResolution(1280,720);
-        this.initBoundingBox();
+
+        // Initialise bounding box
+        final int BOX_SIZE = 300;
+        p1 = new Point((FRAME_SIZE.width - BOX_SIZE)/2,(FRAME_SIZE.height - BOX_SIZE)/2);
+        p2 = new Point((FRAME_SIZE.width + BOX_SIZE)/2, (FRAME_SIZE.height + BOX_SIZE)/2);
+
+        frame = new Frame();
+        frameRenderer = new OnCameraFrameRenderer();
+        frameRenderer.updateBoundingBox(p1, p2);
     }
 
     @Override
-    public void onCameraViewStopped() {
-        mRgba.release();
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        Mat mRGBA = inputFrame.rgba();
+        frame = new Frame();
+        Mat frameImage = frame.getImage();
+        mRGBA.copyTo(frameImage);
+        frame.setBoundingBox(new Rect(p1, p2));
+        frame.setReferenceObjectSize(frameRenderer.findPound(mRGBA));
+
+        return frameRenderer.render(mRGBA);
     }
 
-    public Rect getBoundingBox() {
-        return new Rect(p1,p2);
-    }
-
-    private void initBoundingBox() {
-        final int BOX_SIZE = 300;
-        p1 = new Point((mRgba.size().width - BOX_SIZE)/2,(mRgba.size().height - BOX_SIZE)/2);
-        p2 = new Point((mRgba.size().width + BOX_SIZE)/2, (mRgba.size().height + BOX_SIZE)/2);
-        boxColor = new Scalar(255, 255,0);
-    }
+    @Override
+    public void onCameraViewStopped() {}
 
     private int[] toPreviewCoordinates(CameraView view, MotionEvent e) {
         float pixelRatio = view.getHeight() / 720f;
@@ -128,9 +82,9 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
-        int[] coords = toPreviewCoordinates((CameraView) view, motionEvent);
-        int touchX = coords[0];
-        int touchY = coords[1];
+        int[] coordinates = toPreviewCoordinates((CameraView) view, motionEvent);
+        int touchX = coordinates[0];
+        int touchY = coordinates[1];
 
         touchX = touchX >= 1280 ? 1280 : touchX;
         touchX = touchX <= 0 ? 0 : touchX;
@@ -143,7 +97,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
         switch (motionEvent.getAction()) {
             case MotionEvent.ACTION_MOVE:
-                boxColor = new Scalar(255,0,0);
+                frameRenderer.setBoundingBoxColour(new Scalar(255,0,0));
                 if(c != null)
                     switch (c) {
                         case TP_LEFT:
@@ -161,18 +115,26 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
                         case BTM_RIGHT:
                             p2.x = touchX;
                             p2.y = touchY;
-//                        case CENTRE:
-//                            p1.x = touchX - lastTouch.x;
-//                            p1.y = touchY - lastTouch.y;
-//                            p2.x = touchX - lastTouch.x;
-//                            p2.y = touchY - lastTouch.y;
+                            return true;
+                        case CENTRE:
+                            double xDist = (p2.x-p1.x)/2;
+                            double yDist = (p2.y-p1.y)/2;
+                            touchX = touchX >= 1280-(int)xDist ? 1280-(int)xDist : touchX;
+                            touchX = touchX <= 0+(int)xDist ? 0+(int)xDist: touchX;
+                            touchY= touchY >= 720-(int)yDist  ? 720-(int)yDist: touchY;
+                            touchY = touchY <= 0+(int)yDist ? 0+(int)yDist: touchY;
+
+                            p1.x = touchX - xDist;
+                            p1.y = touchY - yDist;
+                            p2.x = touchX + xDist;
+                            p2.y = touchY + yDist;
                     }
+                    frameRenderer.updateBoundingBox(p1, p2);
                 break;
             case MotionEvent.ACTION_UP:
-                boxColor = new Scalar(255, 255, 0);
+                frameRenderer.setBoundingBoxColour(new Scalar(255,255,0));
                 break;
         }
-        lastTouch = new Point(touchX, touchY);
         return true;
     }
 
@@ -185,8 +147,8 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
             return Corner.BTM_LEFT;
         else if (isWithinRegion(touchX, touchY, p2))
             return Corner.BTM_RIGHT;
-//        else if (isWithinRegion(touchX, touchY, new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)))
-//            return Corner.CENTRE;
+        else if (isWithinRegion(touchX, touchY, new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)))
+            return Corner.CENTRE;
         else
             return null;
     }
@@ -201,5 +163,6 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
         return false;
     }
+
 
 }

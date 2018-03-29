@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.preference.PreferenceManager;
@@ -23,7 +24,6 @@ import android.widget.Toast;
 
 import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
-import com.grouph.ces.carby.volume_estimation.DevMode.ShowFramesFragment;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -57,7 +57,7 @@ public final class CaptureFragment extends Fragment {
 
     private int imagesTaken = 0;
     private SharedPreferences preferences;
-    private Toast refObjectToast;
+    private Toast toast;
 
     private VolEstActivity activityRef;
 
@@ -88,14 +88,29 @@ public final class CaptureFragment extends Fragment {
         else
             requestPermissions();
 
-        refObjectToast = Toast.makeText(getActivity(), "No reference object detected", Toast.LENGTH_SHORT);
+
         FloatingActionButton captureButton = getView().findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
-            Frame frame = mOpenCvCameraView.getFrame();
-            if(frame.getPixelsPerCm() > 0)
-                this.captureFrame(frame);
-            else
-                refObjectToast.show();
+            toast = Toast.makeText(getActivity(), "Capturing image", Toast.LENGTH_SHORT);
+            toast.show();
+
+            Handler handler = new Handler();
+            Runnable checkForReferenceObject = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Frame frame = mOpenCvCameraView.getFrame();
+                        if (frame.getReferenceObjectSize() > 0)
+                            captureFrame(frame);
+                        else {
+                            handler.postDelayed(this, 50);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            checkForReferenceObject.run();
         });
 
         FloatingActionButton searchGallery = getView().findViewById(R.id.search_gallery);
@@ -108,7 +123,7 @@ public final class CaptureFragment extends Fragment {
             imagesTaken = 0;
         });
 
-        Toast.makeText(getActivity(), "Drag the corners to fit the image", Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), "Drag the corners to fit the image", Toast.LENGTH_SHORT).show();
     }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(getContext()) {
@@ -272,15 +287,18 @@ public final class CaptureFragment extends Fragment {
         imageProcessor.addImage(frame);
 
         //save img if dev mode
-        if (preferences.getBoolean(getResources().getString(R.string.key_dev_mode),false)) {
+        if (preferences.getBoolean(getResources().getString(R.string.key_dev_mode), false)) {
             RecordFrame rf = new RecordFrame(frame);
             rf.saveObj(preferences);
         }
 
-        if(++imagesTaken == 1)
-            Toast.makeText(getActivity(), "Captured 1st image", Toast.LENGTH_SHORT).show();
+        if (++imagesTaken == 1) {
+            toast.setText("Captured 1st image");
+            toast.show();
+        }
         else {
-            Toast.makeText(getActivity(), "Captured 2nd image", Toast.LENGTH_SHORT).show();
+            toast.setText("Captured 2nd image");
+            toast.show();
             startProcessor();
         }
     }
