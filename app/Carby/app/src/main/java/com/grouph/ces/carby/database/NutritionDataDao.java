@@ -26,6 +26,9 @@ public interface NutritionDataDao {
     @Query("SELECT * FROM NutritionData WHERE name = :name LIMIT 1")
     NutritionDataDB findByName(String name);
 
+    @Query("SELECT * FROM NutritionData WHERE key = :key LIMIT 1")
+    NutritionDataDB findByID(int key);
+
     @Query("UPDATE NutritionData SET nutritionTable = :nt WHERE barcode = :barcode")
     void update(String barcode, INutritionTable nt);
 

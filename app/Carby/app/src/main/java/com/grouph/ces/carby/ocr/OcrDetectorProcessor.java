@@ -295,11 +295,6 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         return dataLines;
     }
 
-    private INutritionTable tableMatcher(List<String> dataLines) {
-        //split in columns
-        return toTable(dataLines);
-    }
-
     /**
      * Perform error correction on provided collection
      * @param dataLines - Note, this will be changed using the algorithm
@@ -311,14 +306,15 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
         //find all correct lines and move them to the result list
         for(String str: dataLines){
-            if(str.contains("per")){
+            if(str.contains("per")||str.contains("Per")){
+                str = str.toLowerCase();
                 Log.d(this.getClass().getName(),"errorCorrection() -> per line:"+str);
                 result.add(str);
             } else {
                 for (int i = 0; i < contents.size(); i++) {
                     if (str.contains(contents.get(i))) {
                         Log.d(this.getClass().getName(),"errorCorrection() -> correct:"+contents.get(i)+" in "+str);
-                        result.add(str);
+                        result.add(str.replaceAll("_",""));
                         contents.remove(i);
                         break;
                     }
@@ -331,7 +327,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         for(String in:dataLines){
             List<String> splitLines = lineSplitter(in);
             String comp = splitLines.get(0);
-            String rest = splitLines.get(1);
+            String rest = splitLines.get(1).replaceAll("_","");
 
             List<Double> dist = new ArrayList<>();
             for(String s: contents) {
@@ -420,7 +416,8 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         return s.matches(pattern);
     }
 
-    private INutritionTable toTable(List<String> dataLines) {
+    private INutritionTable tableMatcher(List<String> dataLines) {
+        Log.d(this.getClass().getName(),"tableMatcher()");
         int numCols = 0;
         INutritionTable nt = new NutritionTable();
         List<String> contents = nt.listOfContents();
@@ -445,7 +442,6 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                         break;
                     }
                     typicalValues = typicalValues.substring(0,tempIdx);
-
                 }while(typicalValues.contains("per"));
                 break;
             }
@@ -462,15 +458,21 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                     for(int k=1;k<numCols;k++){
                         int idx =row.lastIndexOf(" ");
                         if(idx>0) {
-                            Log.d("OcrDetectorProcessor", "remove col:" + row.substring(idx));
-                            row = row.substring(0, idx);
+                            if(!row.substring(idx).matches(".*\\d+.*")) idx = row.substring(0,idx).lastIndexOf(" ");
+                            if(idx>0) {
+                                Log.d("OcrDetectorProcessor", "remove col:" + row.substring(idx));
+                                row = row.substring(0, idx);
+                            }
                         }
                     }
                     int tempIdx = row.lastIndexOf(" ");
                     if(tempIdx>0) {
                         try {
-                            setComponent(contents.get(i), row.substring(tempIdx), nt);
-                            Log.d("OcrDetectorProcessor", "Map<" + contents.get(i) + "," + row.substring(tempIdx) + ">");
+                            if(!row.substring(tempIdx).matches(".*\\d+.*")) tempIdx = row.substring(0,tempIdx).lastIndexOf(" ");
+                            if(tempIdx>0) {
+                                setComponent(contents.get(i), row.substring(tempIdx).replace(" ",""), nt);
+                                Log.d("OcrDetectorProcessor", "Map<" + contents.get(i) + "," + row.substring(tempIdx) + ">");
+                            }
                         } catch (NumberFormatException e){
                             Log.d(this.getClass().getName(),"Column miss-match!");
                         }
@@ -492,15 +494,23 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
             //make adjustments for energy 5.5kJ/5.5kcal format
             String[] strAr = value.split("/");
             for(String val: strAr){
-                if(val.contains("kcal")){
-                    return nt.setComponent(name, Double.valueOf(val.replaceAll("[^\\.0123456789]","")));
+                if(val.contains("kcal")){//prefer kcal as no conversion is required
+                    return nt.setComponent(name, extractValue(val));
+                } else if(val.contains("kJ")||val.contains("k)")){//check for common kJ error read case k)
+                    return nt.setEnergy(extractValue(val),INutritionTable.KILOJOULES_UNIT);
                 }
             }
         } else {
             //everything else uses the same 5.5g or 5.5ml format
-            return nt.setComponent(name, Double.valueOf(value.replaceAll("[^\\.0123456789]","")));
+            return nt.setComponent(name, extractValue(value));
         }
         return false;
+    }
+
+    private double extractValue(String value){
+        if((!value.endsWith("g")) && value.endsWith("9")) value = value.substring(0,value.length()-1);
+        String temp = value.replaceAll("[^\\.0123456789]","");
+        return Double.valueOf(temp);
     }
 
     /**
@@ -513,12 +523,6 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
         //sort rows form top to bottom (needed for multi frame work)
         List<Integer> keys = new ArrayList<>(scannedData.keySet());
-//        Collections.sort(keys, new Comparator<Integer>() {
-//            @Override
-//            public int compare(Integer x1, Integer x2) {
-//                return x1 < x2 ? -1 : (x2 < x1) ? 1 : 0;
-//            }
-//        });
 
         for(Integer i: keys){
             String line = "";
