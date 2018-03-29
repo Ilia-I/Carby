@@ -45,9 +45,16 @@ public class IntegralApproximation {
         this.activity = (VolEstActivity) activity;
     }
 
+    public IntegralApproximation(Activity activity, Frame top, Frame side) {
+        this.activity = (VolEstActivity) activity;
+        this.top = top;
+        this.side = side;
+    }
+
     //returns a rect with bounding box dimensions
     private Rect calculate2dDimensions(Mat input) {
-        Imgproc.cvtColor(input, input, Imgproc.COLOR_BGR2GRAY);
+        if(input.channels() != 1)
+            Imgproc.cvtColor(input, input, Imgproc.COLOR_BGR2GRAY);
 
         List<MatOfPoint> contours = new ArrayList<>();
         Imgproc.findContours(input, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.RETR_TREE);
@@ -114,6 +121,9 @@ public class IntegralApproximation {
         double scaleWidth = 0;
         double scaleHeight = 0;
         Mat smallerMat;
+
+//        if(topWidth == sideWidth) // No resize if same size
+//            return;
 
         if(topWidth > sideWidth) {
             scaleWidth = topWidth;

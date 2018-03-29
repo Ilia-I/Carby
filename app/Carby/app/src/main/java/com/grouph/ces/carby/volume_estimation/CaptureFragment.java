@@ -57,7 +57,7 @@ public final class CaptureFragment extends Fragment {
 
     private int imagesTaken = 0;
     private SharedPreferences preferences;
-    private Toast refObjectToast;
+    private Toast toast;
 
     private VolEstActivity activityRef;
 
@@ -88,10 +88,12 @@ public final class CaptureFragment extends Fragment {
         else
             requestPermissions();
 
+
         FloatingActionButton captureButton = getView().findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
-            Toast.makeText(getActivity(), "Capturing image", Toast.LENGTH_SHORT).show();
-            
+            toast = Toast.makeText(getActivity(), "Capturing image", Toast.LENGTH_SHORT);
+            toast.show();
+
             Handler handler = new Handler();
             Runnable checkForReferenceObject = new Runnable() {
                 @Override
@@ -121,7 +123,7 @@ public final class CaptureFragment extends Fragment {
             imagesTaken = 0;
         });
 
-        Toast.makeText(getActivity(), "Drag the corners to fit the image", Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), "Drag the corners to fit the image", Toast.LENGTH_SHORT).show();
     }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(getContext()) {
@@ -285,15 +287,18 @@ public final class CaptureFragment extends Fragment {
         imageProcessor.addImage(frame);
 
         //save img if dev mode
-        if (preferences.getBoolean(getResources().getString(R.string.key_dev_mode),false)) {
+        if (preferences.getBoolean(getResources().getString(R.string.key_dev_mode), false)) {
             RecordFrame rf = new RecordFrame(frame);
             rf.saveObj(preferences);
         }
 
-        if(++imagesTaken == 1)
-            Toast.makeText(getActivity(), "Captured 1st image", Toast.LENGTH_SHORT).show();
+        if (++imagesTaken == 1) {
+            toast.setText("Captured 1st image");
+            toast.show();
+        }
         else {
-            Toast.makeText(getActivity(), "Captured 2nd image", Toast.LENGTH_SHORT).show();
+            toast.setText("Captured 2nd image");
+            toast.show();
             startProcessor();
         }
     }

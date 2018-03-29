@@ -38,7 +38,6 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     }
 
     public Frame getFrame() {
-        frame.setBoundingBox(new Rect(p1, p2));
         return frame ;
     }
 
@@ -59,6 +58,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat mRGBA = inputFrame.rgba();
+        frame = new Frame();
         Mat frameImage = frame.getImage();
         mRGBA.copyTo(frameImage);
         frame.setBoundingBox(new Rect(p1, p2));

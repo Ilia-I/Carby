@@ -21,7 +21,7 @@ public class VolEstActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setFragment(new CaptureFragment(),new Bundle(),"");
-        performTestCalculation();
+//        performTestCalculation();
     }
 
     public void setFragmentCapture(Bundle bundle){

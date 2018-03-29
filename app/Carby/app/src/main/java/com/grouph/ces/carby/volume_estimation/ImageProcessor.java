@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.preference.PreferenceManager;
+import android.util.Log;
 
 import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
 import com.grouph.ces.carby.volume_estimation.ImageTasks.GrabCutTask;
@@ -37,12 +38,9 @@ public class ImageProcessor {
     private Bitmap topDownOut;
     private Bitmap sideOut;
 
-    private ProcessingAlgorithms algorithms;
-
 
     public ImageProcessor(VolEstActivity activity) {
         this.activity = activity;
-        this.algorithms = new ProcessingAlgorithms(activity);
     }
 
     public void addImage(Frame frame) {
@@ -89,6 +87,8 @@ public class ImageProcessor {
     private class ProcessImageTask extends AsyncTask<Void, Void, Void> {
 
         private ProgressDialog dialog = new ProgressDialog(activity);
+        private SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
+        private IntegralApproximation approximator;
 
         @Override
         protected void onPreExecute() {
@@ -99,7 +99,32 @@ public class ImageProcessor {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            runVolumeCapture();
+            AsyncTask<Object, Void, Mat> grabCutTop = new GrabCutTask();
+            AsyncTask<Object, Void, Mat> grabCutSide = new GrabCutTask();
+            grabCutTop.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topDown.getImage(), topDown.getBoundingBox());
+            grabCutSide.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, side.getImage(), side.getBoundingBox());
+
+            Mat grabCutTopMat = new Mat();
+            Mat grabCutSideMat = new Mat();
+            try {
+                grabCutTopMat = grabCutTop.get();
+                grabCutSideMat = grabCutSide.get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+
+            Frame topFrame = new Frame(grabCutTopMat, topDown.getReferenceObjectSize(), topDown.getBoundingBox());
+            Frame sideFrame = new Frame(grabCutSideMat, side.getReferenceObjectSize(), side.getBoundingBox());
+            approximator = new IntegralApproximation(activity, topFrame, sideFrame);
+            approximator.performApproximation();
+
+            //TODO implement types
+            RecordFrame testTop = new RecordFrame("testTop", topFrame);
+            testTop.saveObj(preferences);
+            RecordFrame testSide = new RecordFrame("testSide", sideFrame);
+            testSide.saveObj(preferences);
 
             return null;
         }
@@ -111,72 +136,40 @@ public class ImageProcessor {
             if (dialog.isShowing()) {
                 dialog.dismiss();
             }
-            showResults();
-        }
-
-        public void runVolumeCapture() {
-            // Do grab cut
-            // Feature matching
-            // ...
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
-
-            AsyncTask grabCutTop = new GrabCutTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topDown.getImage(), topDown.getBoundingBox());
-            AsyncTask grabCutSide = new GrabCutTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, side.getImage(), side.getBoundingBox());
-
-            try {
-                Mat grabCutTopMat = (Mat) grabCutTop.get();
-                Mat grabCutSideMat = (Mat) grabCutSide.get();
-
-                topDownOut = ProcessingAlgorithms.matToBitmap(grabCutTopMat, grabCutTopMat.width(), grabCutTopMat.height());
-                sideOut = ProcessingAlgorithms.matToBitmap(grabCutSideMat, grabCutSideMat.width(), grabCutSideMat.height());
-
-                //TODO implement types
-                RecordFrame testTop = new RecordFrame("testTop",
-                        new Frame((Mat) grabCutTop.get(), topDown.getReferenceObjectSize(), topDown.getBoundingBox()));
-                testTop.saveObj(preferences);
-
-                RecordFrame testSide = new RecordFrame("testSide",
-                        new Frame((Mat) grabCutSide.get(), side.getReferenceObjectSize(), side.getBoundingBox()));
-                testSide.saveObj(preferences);
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
+            approximator.showResults();
         }
 
 
-        public void showResults() {
-            File out1 = new File(activity.getCacheDir(), "1.png");
-            File out2 = new File(activity.getCacheDir(), "2.png");
-
-            try {
-                FileOutputStream fOut;
-
-                if(topDownOut != null) {
-                    fOut = new FileOutputStream(out1);
-                    topDownOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-                    fOut.flush();
-                }
-
-                if(sideOut != null) {
-                    fOut = new FileOutputStream(out2);
-                    sideOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-                    fOut.flush();
-                    fOut.close();
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            Bundle bundle = new Bundle();
-            bundle.putString("image1", out1.getAbsolutePath());
-            bundle.putString("image2", out2.getAbsolutePath());
-            activity.setFragmentResults(bundle);
-        }
+//        public void showResults() {
+//            File out1 = new File(activity.getCacheDir(), "1.png");
+//            File out2 = new File(activity.getCacheDir(), "2.png");
+//
+//            try {
+//                FileOutputStream fOut;
+//
+//                if(topDownOut != null) {
+//                    fOut = new FileOutputStream(out1);
+//                    topDownOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+//                    fOut.flush();
+//                }
+//
+//                if(sideOut != null) {
+//                    fOut = new FileOutputStream(out2);
+//                    sideOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+//                    fOut.flush();
+//                    fOut.close();
+//                }
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            Bundle bundle = new Bundle();
+//            bundle.putString("image1", out1.getAbsolutePath());
+//            bundle.putString("image2", out2.getAbsolutePath());
+//            activity.setFragmentResults(bundle);
+//        }
 
     }
 }

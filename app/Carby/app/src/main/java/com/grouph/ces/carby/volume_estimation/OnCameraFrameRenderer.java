@@ -67,7 +67,7 @@ public class OnCameraFrameRenderer {
 
             prevCenter = circleCenter;
             prevRadius = circleRadius;
-            
+
             frameResetCount = 0;
         } else {
             if(prevRadius != -1.0 && frameResetCount < 10) {
