@@ -115,10 +115,10 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
                             p2.x = touchX;
                             p2.y = touchY;
 //                        case CENTRE:
-//                            p1.x = touchX - lastTouch.x;
-//                            p1.y = touchY - lastTouch.y;
-//                            p2.x = touchX - lastTouch.x;
-//                            p2.y = touchY - lastTouch.y;
+//                            p1.x = touchX + (p2.x - p1.x)/2;
+//                            p1.y = touchY + (p2.y - p1.y)/2;
+//                            p2.x = touchX - (p2.x - p1.x)/2;
+//                            p2.y = touchY - (p2.y - p1.y)/2;
                     }
                     frameRenderer.updateBoundingBox(p1, p2);
                 break;
@@ -139,8 +139,8 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
             return Corner.BTM_LEFT;
         else if (isWithinRegion(touchX, touchY, p2))
             return Corner.BTM_RIGHT;
-//        else if (isWithinRegion(touchX, touchY, new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)))
-//            return Corner.CENTRE;
+        else if (isWithinRegion(touchX, touchY, new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)))
+            return Corner.CENTRE;
         else
             return null;
     }
