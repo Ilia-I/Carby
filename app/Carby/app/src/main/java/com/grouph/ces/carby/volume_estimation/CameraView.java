@@ -37,8 +37,12 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         connectCamera(getWidth(), getHeight());
     }
 
+    //TODO Better fix for frame/slowdown bug
     public Frame getFrame() {
-        return frame ;
+        Frame captured = new Frame(frame.getImage().clone(), frame.getReferenceObjectSize(), frame.getBoundingBox());
+        frame.getImage().release();
+        frame = new Frame();
+        return captured;
     }
 
     @Override
@@ -58,12 +62,13 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat mRGBA = inputFrame.rgba();
-        frame = new Frame();
+
         Mat frameImage = frame.getImage();
         mRGBA.copyTo(frameImage);
         frame.setBoundingBox(new Rect(p1, p2));
         frame.setReferenceObjectSize(frameRenderer.findPound(mRGBA));
 
+        System.gc();
         return frameRenderer.render(mRGBA);
     }
 
