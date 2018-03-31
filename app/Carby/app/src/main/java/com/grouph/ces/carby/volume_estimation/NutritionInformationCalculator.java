@@ -2,6 +2,7 @@ package com.grouph.ces.carby.volume_estimation;
 
 import android.content.Context;
 import android.support.annotation.IntDef;
+import android.util.Log;
 
 import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.nutrition_data.INutritionTable;
@@ -57,12 +58,14 @@ public class NutritionInformationCalculator {
 
     private void performCalculations(){
         double mass = this.volume * Double.valueOf(context.getResources().getString(foodType));
+        Log.d(this.getClass().getName(),"mass:"+mass);
+        mass=50.0;
         nutritionTable = new NutritionTable();
         //Energy (in Kcal) = 4x (Proteins and carbohydrates mass in grams) + 9 x mass of fat in grams.
-        nutritionTable.setComponent("Energy",getEnergyVal());
-        nutritionTable.setComponent("Fat",getFatVal());
-        nutritionTable.setComponent("Carbohydrate",getCarbohydrateVal());
-        nutritionTable.setComponent("Protein",getProteinVal());
+        nutritionTable.setComponent("Energy",getEnergyVal()*mass/100.0);
+        nutritionTable.setComponent("Fat",getFatVal()*mass/100.0);
+        nutritionTable.setComponent("Carbohydrate",getCarbohydrateVal()*mass/100.0);
+        nutritionTable.setComponent("Protein",getProteinVal()*mass/100.0);
     }
 
     private double getEnergyVal(){
