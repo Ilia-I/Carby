@@ -22,10 +22,8 @@ public class VolEstActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setFragment(new CaptureFragment(),new Bundle(),"");
+        setFragment(new CaptureFragment(),new Bundle(),"");
 //        performTestCalculation();
-        NutritionInformationCalculator calc = new NutritionInformationCalculator(this,100.0,NutritionInformationCalculator.FOOD_BREAD);
-        calc.show();
     }
 
     public void setFragmentCapture(Bundle bundle){

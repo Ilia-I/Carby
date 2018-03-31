@@ -43,7 +43,7 @@ public class NutritionResultActivity extends AppCompatActivity {
         } else {
             TextView per = findViewById(R.id.per);
             mass = extras.getDouble("mass");
-            per.setText("In "+formatDouble(mass)+"g");
+            per.setText("Total weight "+formatDouble(mass)+"g");
             initAlternateConsumption();
         }
         

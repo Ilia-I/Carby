@@ -10,7 +10,7 @@ import com.grouph.ces.carby.nutrition_data.INutritionTable;
 
 /**
  * Created by Martin Peev on 18.02.2018 г..
- * Version: 0.4
+ * Version: 0.5
  */
 @Entity(tableName = "NutritionData")
 @TypeConverters({NutritionTableConverter.class})
@@ -29,10 +29,11 @@ public class NutritionDataDB {
 
     @Ignore
     public NutritionDataDB(String barcode, INutritionTable nt){
-        this(null,barcode,nt);
+        this("",barcode,nt);
     }
 
     public NutritionDataDB(String name, String barcode, INutritionTable nt){
+        this.name = name;
         this.barcode = barcode;
         this.nt = nt;
     }
