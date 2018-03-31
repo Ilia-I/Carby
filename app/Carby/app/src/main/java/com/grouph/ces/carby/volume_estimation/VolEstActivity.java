@@ -24,11 +24,8 @@ public class VolEstActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
 //        setFragment(new CaptureFragment(),new Bundle(),"");
 //        performTestCalculation();
-        NutritionInformationCalculator calc = new NutritionInformationCalculator(getApplicationContext(),100.0,NutritionInformationCalculator.FOOD_BREAD);
-        Intent result = new Intent(getApplicationContext(), NutritionResultActivity.class);
-        result.putExtra("jsonNutritionTable",calc.getNutritionTable().toJasonObject().toString());
-        result.putExtra("id",0);
-        getApplicationContext().startActivity(result);
+        NutritionInformationCalculator calc = new NutritionInformationCalculator(this,100.0,NutritionInformationCalculator.FOOD_BREAD);
+        calc.show();
     }
 
     public void setFragmentCapture(Bundle bundle){

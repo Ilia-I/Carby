@@ -1,11 +1,16 @@
 package com.grouph.ces.carby.volume_estimation;
 
+import android.arch.persistence.room.Room;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.IntDef;
 import android.util.Log;
 
 import com.grouph.ces.carby.R;
+import com.grouph.ces.carby.database.AppDatabase;
+import com.grouph.ces.carby.database.NutritionDataDB;
 import com.grouph.ces.carby.nutrition_data.INutritionTable;
+import com.grouph.ces.carby.nutrition_data.NutritionResultActivity;
 import com.grouph.ces.carby.nutrition_data.NutritionTable;
 
 import java.lang.annotation.Retention;
@@ -40,6 +45,7 @@ public class NutritionInformationCalculator {
 
     private Context context;
     private double volume;
+    private double mass;
     private @FoodType int foodType;
     private INutritionTable nutritionTable;
 
@@ -57,10 +63,11 @@ public class NutritionInformationCalculator {
     }
 
     private void performCalculations(){
-        double mass = this.volume * Double.valueOf(context.getResources().getString(foodType));
+        this.mass = this.volume * Double.valueOf(context.getResources().getString(foodType));
         Log.d(this.getClass().getName(),"Calculated mass:"+mass+"g");
         nutritionTable = new NutritionTable();
-        //Energy (in Kcal) = 4x (Proteins and carbohydrates mass in grams) + 9 x mass of fat in grams.
+
+        //create a holder temporary nutrition table to display the results
         nutritionTable.setComponent("Energy",getEnergyVal()*mass/100.0);
         nutritionTable.setComponent("Fat",getFatVal()*mass/100.0);
         nutritionTable.setComponent("saturates",getSaturatesVal()*mass/100.0);
@@ -198,7 +205,53 @@ public class NutritionInformationCalculator {
         }
     }
 
-    public INutritionTable getNutritionTable(){
-        return nutritionTable;
+    public String getName(){
+        switch (foodType){
+            case FOOD_BREAD: return "FOOD_BREAD";
+            case FOOD_OATS: return "FOOD_OATS";
+            case FOOD_PASTA_BOILED: return "FOOD_PASTA_BOILED";
+            case FOOD_NOODLES_BOILED: return "FOOD_NOODLES_BOILED";
+            case FOOD_RICE_BOILED: return "FOOD_RICE_BOILED";
+            case FOOD_POTATO_BOILED: return "FOOD_POTATO_BOILED";
+            case FOOD_POTATO_SWEET: return "FOOD_POTATO_SWEET";
+            case FOOD_EGG_BOILED: return "FOOD_EGG_BOILED";
+            default:return "";
+        }
+    }
+
+    private int getID(){
+        AppDatabase db = Room.databaseBuilder(context ,AppDatabase.class,"myDB").allowMainThreadQueries().build();
+        NutritionDataDB nd = db.nutritionDataDao().findByName(getName());
+        if(nd==null){
+            return record(db).getKey();
+        } else {
+            return nd.getKey();
+        }
+    }
+
+    private NutritionDataDB record(AppDatabase db){
+        NutritionTable nt = new NutritionTable();
+        nt.setComponent("Energy",getEnergyVal());
+        nt.setComponent("Fat",getFatVal());
+        nt.setComponent("saturates",getSaturatesVal());
+        nt.setComponent("polyunsaturates",getPolyunsaturatesVal());
+        nt.setComponent("mono-unsaturates",getMonounsaturatesVal());
+        nt.setComponent("Carbohydrate",getCarbohydrateVal());
+        nt.setComponent("sugars",getSugarsVal());
+        nt.setComponent("Protein",getProteinVal());
+        nt.setComponent("Salt",getSaltVal());
+
+        NutritionDataDB nd = new NutritionDataDB(getName(),"",nt);
+        db.nutritionDataDao().insertAll(nd);
+        return nd;
+    }
+
+    public void show(){
+        Intent result = new Intent(context, NutritionResultActivity.class);
+        result.putExtra("jsonNutritionTable",nutritionTable.toJasonObject().toString());
+        result.putExtra("id",getID());
+        result.putExtra("per100g",false);
+        result.putExtra("mass",mass);
+        context.startActivity(result);
     }
 }
