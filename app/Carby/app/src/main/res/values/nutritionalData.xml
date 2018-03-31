@@ -2,43 +2,83 @@
 <resources>
     <string name="kcal_bread">266</string>
     <string name="fat_bread">3.29</string>
+    <string name="fat_saturated_bread">0.717</string>
+    <string name="fat_polysaturated_bread">1.355</string>
+    <string name="fat_monounsaturated_bread">0.681</string>
     <string name="carbs_bread">50.61</string>
+    <string name="carbs_sugar_bread">4.31</string>
     <string name="protein_bread">7.64</string>
+    <string name="salt_bread">0.9</string>
 
     <string name="kcal_oats">384</string>
     <string name="fat_oats">6.3</string>
+    <string name="fat_saturated_oats">1.11</string>
+    <string name="fat_polysaturated_oats">2.3</string>
+    <string name="fat_monounsaturated_oats">1.98</string>
     <string name="carbs_oats">67</string>
+    <string name="carbs_sugar_oats">1.45</string>
     <string name="protein_oats">16</string>
+    <string name="salt_oats">0</string>
 
     <string name="kcal_pasta_boiled">157</string>
     <string name="fat_pasta_boiled">0.92</string>
+    <string name="fat_saturated_pasta_boiled">0.175</string>
+    <string name="fat_polysaturated_pasta_boiled">0.317</string>
+    <string name="fat_monounsaturated_pasta_boiled">0.13</string>
     <string name="carbs_pasta_boiled">30.68</string>
+    <string name="carbs_sugar_pasta_boiled">0.56</string>
     <string name="protein_pasta_boiled">5.76</string>
+    <string name="salt_pasta_boiled">0.6</string>
 
     <string name="kcal_noodles_boiled">219</string>
     <string name="fat_noodles_boiled">3.3</string>
+    <string name="fat_saturated_noodles_boiled">0.668</string>
+    <string name="fat_polysaturated_noodles_boiled">0.878</string>
+    <string name="fat_monounsaturated_noodles_boiled">0.924</string>
     <string name="carbs_noodles_boiled">40.02</string>
+    <string name="carbs_sugar_noodles_boiled">0.64</string>
     <string name="protein_noodles_boiled">7.22</string>
+    <string name="salt_noodles_boiled">1</string>
 
     <string name="kcal_rice_boiled">0.73</string>
     <string name="fat_rice_boiled">0.73</string>
+    <string name="fat_saturated_rice_boiled">0.417</string>
+    <string name="fat_polysaturated_rice_boiled">0.549</string>
+    <string name="fat_monounsaturated_rice_boiled">0.578</string>
     <string name="carbs_rice_boiled">0.73</string>
+    <string name="carbs_sugar_rice_boiled">0.4</string>
     <string name="protein_rice_boiled">0.73</string>
+    <string name="salt_rice_boiled">0.6</string>
 
     <string name="kcal_potato_boiled">85</string>
     <string name="fat_potato_boiled">0.1</string>
+    <string name="fat_saturated_potato_boiled">0.026</string>
+    <string name="fat_polysaturated_potato_boiled">0.044</string>
+    <string name="fat_monounsaturated_potato_boiled">0.002</string>
     <string name="carbs_potato_boiled">19.89</string>
+    <string name="carbs_sugar_potato_boiled">0.84</string>
     <string name="protein_potato_boiled">1.7</string>
+    <string name="salt_potato_boiled">0.6</string>
 
     <string name="kcal_potato_sweet">76</string>
     <string name="fat_potato_sweet">0.14</string>
+    <string name="fat_saturated_potato_sweet">0.04</string>
+    <string name="fat_polysaturated_potato_sweet">0.079</string>
+    <string name="fat_monounsaturated_potato_sweet">0</string>
     <string name="carbs_potato_sweet">17.61</string>
+    <string name="carbs_sugar_potato_sweet">5.7</string>
     <string name="protein_potato_sweet">1.36</string>
+    <string name="salt_potato_sweet">0.6</string>
 
-    <string name="kcal_egg_boiled">0.6</string>
-    <string name="fat_egg_boiled">0.6</string>
-    <string name="carbs_egg_boiled">0.6</string>
-    <string name="protein_egg_boiled">0.6</string>
+    <string name="kcal_egg_boiled">77</string>
+    <string name="fat_egg_boiled">5.28</string>
+    <string name="fat_saturated_egg_sweet">1.627</string>
+    <string name="fat_polysaturated_egg_sweet">0.704</string>
+    <string name="fat_monounsaturated_egg_sweet">2.03</string>
+    <string name="carbs_egg_boiled">0.56</string>
+    <string name="carbs_sugar_egg_boiled">0.56</string>
+    <string name="protein_egg_boiled">6.26</string>
+    <string name="salt_egg_boiled">0.2</string>
     <!--data from https://www.fatsecret.com/-->
     <!--vlues per 100g-->
 </resources>

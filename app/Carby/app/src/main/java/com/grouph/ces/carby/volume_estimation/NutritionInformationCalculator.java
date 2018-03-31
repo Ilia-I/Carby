@@ -58,8 +58,7 @@ public class NutritionInformationCalculator {
 
     private void performCalculations(){
         double mass = this.volume * Double.valueOf(context.getResources().getString(foodType));
-        Log.d(this.getClass().getName(),"mass:"+mass);
-        mass=50.0;
+        Log.d(this.getClass().getName(),"Calculeted mass:"+mass+"g");
         nutritionTable = new NutritionTable();
         //Energy (in Kcal) = 4x (Proteins and carbohydrates mass in grams) + 9 x mass of fat in grams.
         nutritionTable.setComponent("Energy",getEnergyVal()*mass/100.0);
