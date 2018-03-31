@@ -13,7 +13,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Created by Martin Peev on 31.03.2018 г..
- * Version: 0.1
+ * Version: 0.2
  */
 
 public class NutritionInformationCalculator {
@@ -58,13 +58,18 @@ public class NutritionInformationCalculator {
 
     private void performCalculations(){
         double mass = this.volume * Double.valueOf(context.getResources().getString(foodType));
-        Log.d(this.getClass().getName(),"Calculeted mass:"+mass+"g");
+        Log.d(this.getClass().getName(),"Calculated mass:"+mass+"g");
         nutritionTable = new NutritionTable();
         //Energy (in Kcal) = 4x (Proteins and carbohydrates mass in grams) + 9 x mass of fat in grams.
         nutritionTable.setComponent("Energy",getEnergyVal()*mass/100.0);
         nutritionTable.setComponent("Fat",getFatVal()*mass/100.0);
+        nutritionTable.setComponent("saturates",getSaturatesVal()*mass/100.0);
+        nutritionTable.setComponent("polyunsaturates",getPolyunsaturatesVal()*mass/100.0);
+        nutritionTable.setComponent("mono-unsaturates",getMonounsaturatesVal()*mass/100.0);
         nutritionTable.setComponent("Carbohydrate",getCarbohydrateVal()*mass/100.0);
+        nutritionTable.setComponent("sugars",getSugarsVal()*mass/100.0);
         nutritionTable.setComponent("Protein",getProteinVal()*mass/100.0);
+        nutritionTable.setComponent("Salt",getSaltVal()*mass/100.0);
     }
 
     private double getEnergyVal(){
@@ -95,6 +100,48 @@ public class NutritionInformationCalculator {
         }
     }
 
+    private double getSaturatesVal(){
+        switch (foodType){
+            case FOOD_BREAD: return Double.valueOf(context.getResources().getString(R.string.fat_saturates_bread));
+            case FOOD_OATS: return Double.valueOf(context.getResources().getString(R.string.fat_saturates_oats));
+            case FOOD_PASTA_BOILED: return Double.valueOf(context.getResources().getString(R.string.fat_saturates_pasta_boiled));
+            case FOOD_NOODLES_BOILED: return Double.valueOf(context.getResources().getString(R.string.fat_saturates_noodles_boiled));
+            case FOOD_RICE_BOILED: return Double.valueOf(context.getResources().getString(R.string.fat_saturates_rice_boiled));
+            case FOOD_POTATO_BOILED: return Double.valueOf(context.getResources().getString(R.string.fat_saturates_potato_boiled));
+            case FOOD_POTATO_SWEET: return Double.valueOf(context.getResources().getString(R.string.fat_saturates_potato_sweet));
+            case FOOD_EGG_BOILED: return Double.valueOf(context.getResources().getString(R.string.fat_saturates_egg_boiled));
+            default:return 0;
+        }
+    }
+
+    private double getPolyunsaturatesVal(){
+        switch (foodType){
+            case FOOD_BREAD: return Double.valueOf(context.getResources().getString(R.string.fat_polyunsaturates_bread));
+            case FOOD_OATS: return Double.valueOf(context.getResources().getString(R.string.fat_polyunsaturates_oats));
+            case FOOD_PASTA_BOILED: return Double.valueOf(context.getResources().getString(R.string.fat_polyunsaturates_pasta_boiled));
+            case FOOD_NOODLES_BOILED: return Double.valueOf(context.getResources().getString(R.string.fat_polyunsaturates_noodles_boiled));
+            case FOOD_RICE_BOILED: return Double.valueOf(context.getResources().getString(R.string.fat_polyunsaturates_rice_boiled));
+            case FOOD_POTATO_BOILED: return Double.valueOf(context.getResources().getString(R.string.fat_polyunsaturates_potato_boiled));
+            case FOOD_POTATO_SWEET: return Double.valueOf(context.getResources().getString(R.string.fat_polyunsaturates_potato_sweet));
+            case FOOD_EGG_BOILED: return Double.valueOf(context.getResources().getString(R.string.fat_polyunsaturates_egg_boiled));
+            default:return 0;
+        }
+    }
+
+    private double getMonounsaturatesVal(){
+        switch (foodType){
+            case FOOD_BREAD: return Double.valueOf(context.getResources().getString(R.string.fat_monounsaturates_bread));
+            case FOOD_OATS: return Double.valueOf(context.getResources().getString(R.string.fat_monounsaturates_oats));
+            case FOOD_PASTA_BOILED: return Double.valueOf(context.getResources().getString(R.string.fat_monounsaturates_pasta_boiled));
+            case FOOD_NOODLES_BOILED: return Double.valueOf(context.getResources().getString(R.string.fat_monounsaturates_noodles_boiled));
+            case FOOD_RICE_BOILED: return Double.valueOf(context.getResources().getString(R.string.fat_monounsaturates_rice_boiled));
+            case FOOD_POTATO_BOILED: return Double.valueOf(context.getResources().getString(R.string.fat_monounsaturates_potato_boiled));
+            case FOOD_POTATO_SWEET: return Double.valueOf(context.getResources().getString(R.string.fat_monounsaturates_potato_sweet));
+            case FOOD_EGG_BOILED: return Double.valueOf(context.getResources().getString(R.string.fat_monounsaturates_egg_boiled));
+            default:return 0;
+        }
+    }
+
     private double getCarbohydrateVal(){
         switch (foodType){
             case FOOD_BREAD: return Double.valueOf(context.getResources().getString(R.string.carbs_bread));
@@ -105,6 +152,20 @@ public class NutritionInformationCalculator {
             case FOOD_POTATO_BOILED: return Double.valueOf(context.getResources().getString(R.string.carbs_potato_boiled));
             case FOOD_POTATO_SWEET: return Double.valueOf(context.getResources().getString(R.string.carbs_potato_sweet));
             case FOOD_EGG_BOILED: return Double.valueOf(context.getResources().getString(R.string.carbs_egg_boiled));
+            default:return 0;
+        }
+    }
+
+    private double getSugarsVal(){
+        switch (foodType){
+            case FOOD_BREAD: return Double.valueOf(context.getResources().getString(R.string.carbs_sugar_bread));
+            case FOOD_OATS: return Double.valueOf(context.getResources().getString(R.string.carbs_sugar_oats));
+            case FOOD_PASTA_BOILED: return Double.valueOf(context.getResources().getString(R.string.carbs_sugar_pasta_boiled));
+            case FOOD_NOODLES_BOILED: return Double.valueOf(context.getResources().getString(R.string.carbs_sugar_noodles_boiled));
+            case FOOD_RICE_BOILED: return Double.valueOf(context.getResources().getString(R.string.carbs_sugar_rice_boiled));
+            case FOOD_POTATO_BOILED: return Double.valueOf(context.getResources().getString(R.string.carbs_potato_boiled));
+            case FOOD_POTATO_SWEET: return Double.valueOf(context.getResources().getString(R.string.carbs_sugar_potato_sweet));
+            case FOOD_EGG_BOILED: return Double.valueOf(context.getResources().getString(R.string.carbs_sugar_egg_boiled));
             default:return 0;
         }
     }
@@ -125,14 +186,14 @@ public class NutritionInformationCalculator {
 
     private double getSaltVal(){
         switch (foodType){
-            case FOOD_BREAD:
-            case FOOD_OATS:
-            case FOOD_PASTA_BOILED:
-            case FOOD_NOODLES_BOILED:
-            case FOOD_RICE_BOILED:
-            case FOOD_POTATO_BOILED:
-            case FOOD_POTATO_SWEET:
-            case FOOD_EGG_BOILED:
+            case FOOD_BREAD: return Double.valueOf(context.getResources().getString(R.string.salt_bread));
+            case FOOD_OATS: return Double.valueOf(context.getResources().getString(R.string.salt_oats));
+            case FOOD_PASTA_BOILED: return Double.valueOf(context.getResources().getString(R.string.salt_pasta_boiled));
+            case FOOD_NOODLES_BOILED: return Double.valueOf(context.getResources().getString(R.string.salt_noodles_boiled));
+            case FOOD_RICE_BOILED: return Double.valueOf(context.getResources().getString(R.string.salt_rice_boiled));
+            case FOOD_POTATO_BOILED: return Double.valueOf(context.getResources().getString(R.string.salt_potato_boiled));
+            case FOOD_POTATO_SWEET: return Double.valueOf(context.getResources().getString(R.string.salt_potato_sweet));
+            case FOOD_EGG_BOILED: return Double.valueOf(context.getResources().getString(R.string.salt_egg_boiled));
             default:return 0;
         }
     }
