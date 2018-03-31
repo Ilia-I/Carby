@@ -3,13 +3,9 @@ package com.grouph.ces.carby.volume_estimation;
 import android.Manifest;
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -28,15 +24,6 @@ import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
-import org.opencv.core.Mat;
-
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import static android.app.Activity.RESULT_OK;
 
 
 public final class CaptureFragment extends Fragment {
@@ -48,12 +35,8 @@ public final class CaptureFragment extends Fragment {
     private static final int RC_HANDLE_WRITE_PERM = 3;
     private static final int RC_HANDLE_READ_PERM = 4;
 
-    private static final int PICK_IMAGE = 100;
-    private static final int DEV_IMG = 7;
-
     private CameraView mOpenCvCameraView;
     private ImageProcessor imageProcessor;
-    private List<Mat> userSelectedImageBitmapList = null;
 
     private int imagesTaken = 0;
     private SharedPreferences preferences;
@@ -174,72 +157,7 @@ public final class CaptureFragment extends Fragment {
     }
 
     private void openGallery() {
-//        Intent gallery =
-//                new Intent(Intent.ACTION_PICK,
-//                        android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-//        startActivityForResult(gallery, PICK_IMAGE);
-
-//        Intent rfGallery = new Intent(getActivity(), ShowFramesFragment.class);
-//        startActivityForResult(rfGallery,DEV_IMG);
         activityRef.setFragmentShowFrames(new Bundle());
-    }
-
-    @Override
-    public void onActivityResult(int reqCode, int resultCode, Intent data) {
-        super.onActivityResult(reqCode, resultCode, data);
-
-        if (resultCode == RESULT_OK) {
-            switch (reqCode){
-                case PICK_IMAGE:
-                    try {
-                        final Uri imageUri = data.getData();
-                        final InputStream imageStream = getActivity().getContentResolver().openInputStream(imageUri);
-                        final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                        final Mat mat = new Mat();
-
-                        Utils.bitmapToMat(selectedImage, mat);
-                        if (userSelectedImageBitmapList == null) {
-                            userSelectedImageBitmapList = new ArrayList<>();
-                            Toast.makeText(getActivity(), "1st image chosen", Toast.LENGTH_LONG).show();
-                        }
-                        userSelectedImageBitmapList.add(mat);
-                        if (userSelectedImageBitmapList.size() == 2) {
-                            Toast.makeText(getActivity(), "2nd image chosen", Toast.LENGTH_LONG).show();
-                            mOpenCvCameraView.disableView();
-                            imageProcessor.processImages();
-                            userSelectedImageBitmapList = null;
-                        }
-
-    //                try {
-    //                    File newFile = ProcessingAlgorithms.getOutputMediaFile(MEDIA_TYPE_IMAGE);
-    //                    FileOutputStream fos = new FileOutputStream(newFile);
-    //                    selectedImage.compress(Bitmap.CompressFormat.PNG, 90, fos);
-    //                    fos.close();
-    //                } catch (IOException e) {
-    //                    e.printStackTrace();
-    //                }
-
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                        Toast.makeText(getActivity(), "Something went wrong", Toast.LENGTH_LONG).show();
-                    }
-                    break;
-                case DEV_IMG:
-                    addImage(data.getStringExtra(getResources().getString(R.string.rf1)));
-                    addImage(data.getStringExtra(getResources().getString(R.string.rf2)));
-                    startProcessor();
-                    break;
-                default:Toast.makeText(getActivity(), "You haven't picked Image",Toast.LENGTH_LONG).show();
-            }
-        } else
-            Toast.makeText(getActivity(), "You haven't picked Image",Toast.LENGTH_LONG).show();
-    }
-
-    private void addImage(String name){
-        RecordFrame rf = new RecordFrame(preferences, name);
-        Mat mat = new Mat();
-        Utils.bitmapToMat(rf.getImage(), mat);
-        imageProcessor.addImage(new Frame(mat, rf.getPixelsPerCm(), rf.getBoundingBox()));
     }
 
     private void startProcessor() {

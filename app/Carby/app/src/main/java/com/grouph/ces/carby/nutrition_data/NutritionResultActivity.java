@@ -19,15 +19,17 @@ import com.grouph.ces.carby.database.ConsumptionDB;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class NutritionResultActivity extends AppCompatActivity {
 
-    Bundle extras;
-    INutritionTable nutritionTable;
-    List<RadioButton> rBtns;
+    private Bundle extras;
+    private INutritionTable nutritionTable;
+    private List<RadioButton> rBtns;
+    private Double mass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +38,14 @@ public class NutritionResultActivity extends AppCompatActivity {
         extras = getIntent().getExtras();
         nutritionTable = new NutritionTable();
 
-        initConsumption();
+        if(extras.getBoolean("per100g",true)) {
+            initConsumption();
+        } else {
+            TextView per = findViewById(R.id.per);
+            mass = extras.getDouble("mass");
+            per.setText("Total weight "+formatDouble(mass)+"g");
+            initAlternateConsumption();
+        }
         
         if(extras!=null){
             try {
@@ -113,6 +122,22 @@ public class NutritionResultActivity extends AppCompatActivity {
 
     private String formatDouble(double val){
         return String.format("%.1f", val);
+    }
+
+    private void initAlternateConsumption(){
+        findViewById(R.id.radioGroup).setVisibility(View.GONE);
+        Button addAll = findViewById(R.id.add_all_btn);
+        addAll.setVisibility(View.VISIBLE);
+        addAll.setOnClickListener((View v) -> {
+            if(extras!=null) {
+                int id = extras.getInt("id", -1);
+                if (id >= 0) {
+                    AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "myDB").allowMainThreadQueries().build();
+                    db.consumptionDataDao().insert(new ConsumptionDB(id, mass));
+                    addAll.setEnabled(false);
+                }
+            }
+        });
     }
 
     private void initConsumption() {
