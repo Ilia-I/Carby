@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kcal_bread">266</string>
+    <string name="fat_bread">3.29</string>
+    <string name="carbs_bread">50.61</string>
+    <string name="protein_bread">7.64</string>
+
+    <string name="kcal_oats">384</string>
+    <string name="fat_oats">6.3</string>
+    <string name="carbs_oats">67</string>
+    <string name="protein_oats">16</string>
+
+    <string name="kcal_pasta_boiled">157</string>
+    <string name="fat_pasta_boiled">0.92</string>
+    <string name="carbs_pasta_boiled">30.68</string>
+    <string name="protein_pasta_boiled">5.76</string>
+
+    <string name="kcal_noodles_boiled">219</string>
+    <string name="fat_noodles_boiled">3.3</string>
+    <string name="carbs_noodles_boiled">40.02</string>
+    <string name="protein_noodles_boiled">7.22</string>
+
+    <string name="kcal_rice_boiled">0.73</string>
+    <string name="fat_rice_boiled">0.73</string>
+    <string name="carbs_rice_boiled">0.73</string>
+    <string name="protein_rice_boiled">0.73</string>
+
+    <string name="kcal_potato_boiled">85</string>
+    <string name="fat_potato_boiled">0.1</string>
+    <string name="carbs_potato_boiled">19.89</string>
+    <string name="protein_potato_boiled">1.7</string>
+
+    <string name="kcal_potato_sweet">76</string>
+    <string name="fat_potato_sweet">0.14</string>
+    <string name="carbs_potato_sweet">17.61</string>
+    <string name="protein_potato_sweet">1.36</string>
+
+    <string name="kcal_egg_boiled">0.6</string>
+    <string name="fat_egg_boiled">0.6</string>
+    <string name="carbs_egg_boiled">0.6</string>
+    <string name="protein_egg_boiled">0.6</string>
+    <!--data from https://www.fatsecret.com/-->
+    <!--vlues per 100g-->
+</resources>
