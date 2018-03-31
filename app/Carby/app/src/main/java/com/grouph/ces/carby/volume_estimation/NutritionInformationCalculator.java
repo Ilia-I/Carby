@@ -18,7 +18,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Created by Martin Peev on 31.03.2018 г..
- * Version: 0.3
+ * Version: 0.4
  */
 
 public class NutritionInformationCalculator {
@@ -205,7 +205,7 @@ public class NutritionInformationCalculator {
         }
     }
 
-    public String getName(){
+    private String getName(){
         switch (foodType){
             case FOOD_BREAD: return "FOOD_BREAD";
             case FOOD_OATS: return "FOOD_OATS";
@@ -223,10 +223,8 @@ public class NutritionInformationCalculator {
         AppDatabase db = Room.databaseBuilder(context ,AppDatabase.class,"myDB").allowMainThreadQueries().build();
         NutritionDataDB nd = db.nutritionDataDao().findByName(getName());
         if(nd==null){
-            Log.d(this.getClass().getName(),"Creating New Record");
             return record(db).getKey();
         } else {
-            Log.d(this.getClass().getName(),"Found Record");
             return nd.getKey();
         }
     }
