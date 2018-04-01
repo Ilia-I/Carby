@@ -89,6 +89,7 @@ public class ImageProcessor {
         private ProgressDialog dialog = new ProgressDialog(activity);
         private SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
         private IntegralApproximation approximator;
+        private NutritionInformationCalculator calculator;
 
         @Override
         protected void onPreExecute() {
@@ -118,7 +119,9 @@ public class ImageProcessor {
             Frame topFrame = new Frame(grabCutTopMat, topDown.getReferenceObjectSize(), topDown.getBoundingBox());
             Frame sideFrame = new Frame(grabCutSideMat, side.getReferenceObjectSize(), side.getBoundingBox());
             approximator = new IntegralApproximation(activity, topFrame, sideFrame);
-            approximator.performApproximation();
+            double volume = approximator.getApproximation();
+
+            calculator = new NutritionInformationCalculator(activity, volume, NutritionInformationCalculator.FOOD_BREAD);
 
             //TODO implement types
             RecordFrame testTop = new RecordFrame("testTop", topFrame);
@@ -136,7 +139,9 @@ public class ImageProcessor {
             if (dialog.isShowing()) {
                 dialog.dismiss();
             }
-            approximator.showResults();
+            //approximator.showResults();
+            calculator.show();
+
         }
 
 

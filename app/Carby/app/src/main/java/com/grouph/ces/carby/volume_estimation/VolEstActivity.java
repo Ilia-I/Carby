@@ -56,7 +56,7 @@ public class VolEstActivity extends AppCompatActivity{
         if (!OpenCVLoader.initDebug()) {}
         IntegralApproximation a = new IntegralApproximation(this);
         if(a.loadTestMats()) {
-            a.performApproximation();
+            a.getApproximation();
             a.showResults();
         }
     }

@@ -139,7 +139,7 @@ public class IntegralApproximation {
         Imgproc.resize(smallerMat, smallerMat, new Size(scaleWidth, scaleHeight));
     }
 
-    public void performApproximation() {
+    public double getApproximation() {
         Rect topDimensions = calculate2dDimensions(top.getImage());
         Rect sideDimensions = calculate2dDimensions(side.getImage());
 
@@ -150,11 +150,15 @@ public class IntegralApproximation {
 
         cropWithBoundingBoxes(topDimensions, sideDimensions);
         scaleSmallerMat();
+
+        double vol = Math.cbrt(pixToCmVal());
         Log.e(TAG, "top width " + topWidth + " side width " + sideWidth);
         Log.e(TAG, "top dimensions: " + top.getImage().height() + "x" + top.getImage().width());
         Log.e(TAG, "side dimensions: " + side.getImage().height() + "x" + side.getImage().width());
-        Log.e(TAG, "pixels to cm: " + Math.cbrt(pixToCmVal()));
+        Log.e(TAG, "pixels to cm: " + vol);
         Log.e(TAG, "Predicted Volume: " + volume() / pixToCmVal() + " cm3");
+
+        return vol;
     }
 
     private double pixToCmVal(){
