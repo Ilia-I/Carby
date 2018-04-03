@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
 import com.grouph.ces.carby.volume_estimation.ImageTasks.GrabCutTask;
@@ -115,6 +116,10 @@ public class ImageProcessor {
             approximator = new IntegralApproximation(activity, topFrame, sideFrame);
             double volume = approximator.getApproximation();
 
+            if(volume == -1.0) {
+                return null;
+            }
+
             calculator = new NutritionInformationCalculator(activity, volume, NutritionInformationCalculator.FOOD_BREAD);
 
             //TODO implement types
@@ -135,7 +140,11 @@ public class ImageProcessor {
             }
 //            approximator.showResults();
             this.showResults();
-            calculator.show();
+
+            if(calculator != null)
+                calculator.show();
+            else
+                Toast.makeText(activity, "Failed to detect food object",Toast.LENGTH_LONG).show();
         }
 
 

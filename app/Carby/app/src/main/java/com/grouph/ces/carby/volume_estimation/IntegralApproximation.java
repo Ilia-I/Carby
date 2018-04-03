@@ -70,6 +70,9 @@ public class IntegralApproximation {
             }
         }
 
+        if(maxContour.empty())
+            return null;
+
         Rect rect = Imgproc.boundingRect(maxContour);
 //        Imgproc.rectangle(input, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(255, 255, 255), 3);
 
@@ -122,8 +125,11 @@ public class IntegralApproximation {
         double scaleHeight = 0;
         Mat smallerMat;
 
-//        if(topWidth == sideWidth) // No resize if same size
-//            return;
+        if(topWidth == sideWidth) // No resize if same size
+            return;
+
+        if(topWidth == 0 || sideWidth == 0) // No contour detected
+            return;
 
         if(topWidth > sideWidth) {
             scaleWidth = topWidth;
@@ -142,6 +148,9 @@ public class IntegralApproximation {
     public double getApproximation() {
         Rect topDimensions = calculate2dDimensions(top.getImage());
         Rect sideDimensions = calculate2dDimensions(side.getImage());
+
+        if(topDimensions == null || sideDimensions == null)
+            return -1.0;
 
         topWidth = topDimensions.width;
         topHeight = topDimensions.height;
