@@ -4,10 +4,8 @@ import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.preference.PreferenceManager;
-import android.util.Log;
 
 import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
@@ -36,10 +34,6 @@ public class ImageProcessor {
     private Frame topDown;
     private Frame side;
 
-    private Bitmap topDownOut;
-    private Bitmap sideOut;
-
-
     public ImageProcessor(VolEstActivity activity) {
         this.activity = activity;
     }
@@ -56,27 +50,20 @@ public class ImageProcessor {
         new ProcessImageTask().execute();
     }
 
-    private void saveImages() {
+    private void saveImage(Mat image1, String name) {
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
         File dir = new File(Environment.getExternalStorageDirectory() + "/Carby/" + timeStamp);
         if(!dir.exists())
             dir.mkdirs();
 
-        File top = new File(dir, "top.png");
-        File side = new File(dir, "side.png");
-
+        File top = new File(dir, name);
         FileOutputStream fOut;
+
+        Bitmap bitmap = ProcessingAlgorithms.matToBitmap(image1, image1.width(), image1.height());
         try {
-            if(topDownOut != null) {
-                fOut = new FileOutputStream(top);
-                topDownOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);//PNG does not compress as it is a lossless format
-                fOut.flush();
-            }
-            if(sideOut != null) {
-                fOut = new FileOutputStream(side);
-                sideOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-                fOut.flush();
-            }
+            fOut = new FileOutputStream(top);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+            fOut.flush();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -91,6 +78,8 @@ public class ImageProcessor {
         private SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
         private IntegralApproximation approximator;
 
+        private Mat grabCutTopMat, grabCutSideMat;
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -102,11 +91,14 @@ public class ImageProcessor {
         protected Void doInBackground(Void... voids) {
             AsyncTask<Object, Void, Mat> grabCutTop = new GrabCutTask();
             AsyncTask<Object, Void, Mat> grabCutSide = new GrabCutTask();
+
+            ProcessingAlgorithms pa = new ProcessingAlgorithms(activity);
+            pa.undistort(topDown.getImage());
+            pa.undistort(side.getImage());
+
             grabCutTop.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topDown.getImage(), topDown.getBoundingBox());
             grabCutSide.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, side.getImage(), side.getBoundingBox());
 
-            Mat grabCutTopMat = new Mat();
-            Mat grabCutSideMat = new Mat();
             try {
                 grabCutTopMat = grabCutTop.get();
                 grabCutSideMat = grabCutSide.get();
@@ -119,8 +111,11 @@ public class ImageProcessor {
             Frame topFrame = new Frame(grabCutTopMat, topDown.getReferenceObjectSize(), topDown.getBoundingBox());
             Frame sideFrame = new Frame(grabCutSideMat, side.getReferenceObjectSize(), side.getBoundingBox());
             approximator = new IntegralApproximation(activity, topFrame, sideFrame);
-            approximator.performApproximation();
+            double volume = approximator.getApproximation();
 
+            if(volume == -1.0) {
+                return null;
+            }
 
             if (preferences.getBoolean(activity.getResources().getString(R.string.key_dev_mode), false)) {
                 RecordFrame testTop = new RecordFrame(ResultsFragment.IMAGE_SET_MASK + 1, topFrame);
@@ -138,8 +133,16 @@ public class ImageProcessor {
             if (dialog.isShowing()) {
                 dialog.dismiss();
             }
+
             //TODO set foodType
             approximator.showResults(NutritionInformationCalculator.FOOD_BREAD);
+
+//            this.showResults();
+//
+//            if(calculator != null)
+//                calculator.show();
+//            else
+//                Toast.makeText(activity, "Failed to detect food object",Toast.LENGTH_LONG).show();
         }
 
 
@@ -150,15 +153,19 @@ public class ImageProcessor {
 //            try {
 //                FileOutputStream fOut;
 //
-//                if(topDownOut != null) {
+//                Bitmap bitmap1, bitmap2;
+//                bitmap1 = ProcessingAlgorithms.matToBitmap(grabCutTopMat, grabCutTopMat.width(), grabCutTopMat.height());
+//                bitmap2 = ProcessingAlgorithms.matToBitmap(grabCutSideMat, grabCutSideMat.width(), grabCutSideMat.height());
+//
+//                if(bitmap1 != null) {
 //                    fOut = new FileOutputStream(out1);
-//                    topDownOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+//                    bitmap1.compress(Bitmap.CompressFormat.PNG, 100, fOut);
 //                    fOut.flush();
 //                }
 //
-//                if(sideOut != null) {
+//                if(bitmap2 != null) {
 //                    fOut = new FileOutputStream(out2);
-//                    sideOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+//                    bitmap2.compress(Bitmap.CompressFormat.PNG, 100, fOut);
 //                    fOut.flush();
 //                    fOut.close();
 //                }

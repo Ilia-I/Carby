@@ -1,5 +1,12 @@
 package com.grouph.ces.carby.volume_estimation;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.view.View;
+
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.JavaCameraView;
 import org.opencv.core.CvType;
@@ -8,13 +15,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-
-import android.content.Context;
-import android.hardware.Camera;
-import android.util.AttributeSet;
-import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
 
 public class CameraView extends JavaCameraView implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
 
@@ -25,6 +25,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     private Point p1, p2;
     private Frame frame;
     private OnCameraFrameRenderer frameRenderer;
+    private Mat mRGBA;
 
     public CameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -57,18 +58,21 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         frame = new Frame();
         frameRenderer = new OnCameraFrameRenderer();
         frameRenderer.updateBoundingBox(p1, p2);
+
+        mRGBA = new Mat(1280, 720, CvType.CV_8U);
     }
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        Mat mRGBA = inputFrame.rgba();
+        mRGBA = inputFrame.rgba();
 
-        Mat frameImage = frame.getImage();
-        mRGBA.copyTo(frameImage);
-        frame.setBoundingBox(new Rect(p1, p2));
-        frame.setReferenceObjectSize(frameRenderer.findPound(mRGBA));
-
+        synchronized (this) {
+            mRGBA.copyTo(frame.getImage());
+            frame.setBoundingBox(new Rect(p1, p2));
+            frame.setReferenceObjectSize(frameRenderer.findPound(mRGBA));
+        }
         System.gc();
+
         return frameRenderer.render(mRGBA);
     }
 
@@ -143,6 +147,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         return true;
     }
 
+    @Nullable
     private Corner getCornerTouch(int touchX, int touchY) {
         if(isWithinRegion(touchX, touchY, p1))
             return Corner.TP_LEFT;
@@ -158,15 +163,14 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
             return null;
     }
 
-    private boolean isWithinRegion(int touchX, int touchY, Point p) {
+    private boolean isWithinRegion(int touchX, int touchY, @NonNull Point p) {
         final int max_distance = 75;
 
         double dist = Math.sqrt((((touchX - p.x) * (touchX - p.x)) + (touchY - p.y)
                 * (touchY - p.y)));
-        if(dist <= max_distance)
-            return true;
 
-        return false;
+        return dist <= max_distance;
+
     }
 
 

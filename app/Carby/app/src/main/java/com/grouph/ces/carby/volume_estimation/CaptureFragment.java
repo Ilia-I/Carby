@@ -41,8 +41,8 @@ public final class CaptureFragment extends Fragment {
     private int imagesTaken = 0;
     private SharedPreferences preferences;
     private Toast toast;
-
     private VolEstActivity activityRef;
+    private Handler handler = new Handler();
 
 
     @Override
@@ -77,7 +77,6 @@ public final class CaptureFragment extends Fragment {
             toast = Toast.makeText(getActivity(), "Capturing image", Toast.LENGTH_SHORT);
             toast.show();
 
-            Handler handler = new Handler();
             Runnable checkForReferenceObject = new Runnable() {
                 @Override
                 public void run() {

@@ -1,15 +1,12 @@
 package com.grouph.ces.carby.volume_estimation;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 
 import com.grouph.ces.carby.R;
-import com.grouph.ces.carby.nutrition_data.NutritionResultActivity;
 import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
 
 import org.opencv.android.Utils;
@@ -18,10 +15,7 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,6 +68,9 @@ public class IntegralApproximation {
             }
         }
 
+        if(maxContour.empty())
+            return null;
+
         Rect rect = Imgproc.boundingRect(maxContour);
 //        Imgproc.rectangle(input, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(255, 255, 255), 3);
 
@@ -122,30 +119,40 @@ public class IntegralApproximation {
 
 
     private void scaleSmallerMat() {
+        Log.e(TAG, "orig top dimensions: " + top.getImage().height() + "x" + top.getImage().width());
+        Log.e(TAG, "orig side dimensions: " + side.getImage().height() + "x" + side.getImage().width());
         double scaleWidth = 0;
         double scaleHeight = 0;
         Mat smallerMat;
 
-//        if(topWidth == sideWidth) // No resize if same size
-//            return;
+        if(topWidth == sideWidth) // No resize if same size
+            return;
+
+        if(topWidth == 0 || sideWidth == 0) // No contour detected
+            return;
 
         if(topWidth > sideWidth) {
             scaleWidth = topWidth;
             scaleHeight = topWidth / sideWidth * sideHeight;
             smallerMat = side.getImage();
+
         }
         else {
             scaleWidth = sideWidth;
             scaleHeight = sideWidth / topWidth * topHeight;
             smallerMat = top.getImage();
+            top.setReferenceObjectSize(top.getReferenceObjectSize()*sideWidth/topWidth);
         }
 
         Imgproc.resize(smallerMat, smallerMat, new Size(scaleWidth, scaleHeight));
     }
 
-    public void performApproximation() {
+    public double getApproximation() {
         Rect topDimensions = calculate2dDimensions(top.getImage());
         Rect sideDimensions = calculate2dDimensions(side.getImage());
+
+        if(topDimensions == null || sideDimensions == null)
+            return -1.0;
 
         topWidth = topDimensions.width;
         topHeight = topDimensions.height;
@@ -154,20 +161,18 @@ public class IntegralApproximation {
 
         cropWithBoundingBoxes(topDimensions, sideDimensions);
         scaleSmallerMat();
-        Log.e(TAG, "top width " + topWidth + " side width " + sideWidth);
+
+        double vol = Math.cbrt(pixToCmVal());
         Log.e(TAG, "top dimensions: " + top.getImage().height() + "x" + top.getImage().width());
         Log.e(TAG, "side dimensions: " + side.getImage().height() + "x" + side.getImage().width());
-        Log.e(TAG, "pixels to cm: " + Math.cbrt(pixToCmVal()));
+        Log.e(TAG, "pixels to cm: " + vol);
         Log.e(TAG, "Predicted Volume: " + volume() / pixToCmVal() + " cm3");
+
+        return vol;
     }
 
     private double pixToCmVal(){
-        double val = 0;
-        if(topWidth > sideWidth)
-            val = Math.pow(top.getReferenceObjectSize() / POUND_RADIUS,3);
-        else
-            val = Math.pow(side.getReferenceObjectSize() / POUND_RADIUS,3);
-        return val;
+        return Math.pow(top.getReferenceObjectSize() / POUND_RADIUS,3);
     }
 
     public boolean loadTestMats() {
