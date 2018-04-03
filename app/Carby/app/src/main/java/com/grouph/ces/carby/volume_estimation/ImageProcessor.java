@@ -35,9 +35,6 @@ public class ImageProcessor {
     private Frame topDown;
     private Frame side;
 
-    private Bitmap topDownOut;
-    private Bitmap sideOut;
-
     public ImageProcessor(VolEstActivity activity) {
         this.activity = activity;
     }
@@ -54,27 +51,20 @@ public class ImageProcessor {
         new ProcessImageTask().execute();
     }
 
-    private void saveImages() {
+    private void saveImage(Mat image1, String name) {
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
         File dir = new File(Environment.getExternalStorageDirectory() + "/Carby/" + timeStamp);
         if(!dir.exists())
             dir.mkdirs();
 
-        File top = new File(dir, "top.png");
-        File side = new File(dir, "side.png");
-
+        File top = new File(dir, name);
         FileOutputStream fOut;
+
+        Bitmap bitmap = ProcessingAlgorithms.matToBitmap(image1, image1.width(), image1.height());
         try {
-            if(topDownOut != null) {
-                fOut = new FileOutputStream(top);
-                topDownOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);//PNG does not compress as it is a lossless format
-                fOut.flush();
-            }
-            if(sideOut != null) {
-                fOut = new FileOutputStream(side);
-                sideOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-                fOut.flush();
-            }
+            fOut = new FileOutputStream(top);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+            fOut.flush();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -90,6 +80,8 @@ public class ImageProcessor {
         private IntegralApproximation approximator;
         private NutritionInformationCalculator calculator;
 
+        private Mat grabCutTopMat, grabCutSideMat;
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -104,8 +96,6 @@ public class ImageProcessor {
             grabCutTop.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topDown.getImage(), topDown.getBoundingBox());
             grabCutSide.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, side.getImage(), side.getBoundingBox());
 
-            Mat grabCutTopMat = new Mat();
-            Mat grabCutSideMat = new Mat();
             try {
                 grabCutTopMat = grabCutTop.get();
                 grabCutSideMat = grabCutSide.get();
@@ -138,41 +128,46 @@ public class ImageProcessor {
             if (dialog.isShowing()) {
                 dialog.dismiss();
             }
-            //approximator.showResults();
+//            approximator.showResults();
+            this.showResults();
             calculator.show();
         }
 
 
-//        public void showResults() {
-//            File out1 = new File(activity.getCacheDir(), "1.png");
-//            File out2 = new File(activity.getCacheDir(), "2.png");
-//
-//            try {
-//                FileOutputStream fOut;
-//
-//                if(topDownOut != null) {
-//                    fOut = new FileOutputStream(out1);
-//                    topDownOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-//                    fOut.flush();
-//                }
-//
-//                if(sideOut != null) {
-//                    fOut = new FileOutputStream(out2);
-//                    sideOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-//                    fOut.flush();
-//                    fOut.close();
-//                }
-//            } catch (FileNotFoundException e) {
-//                e.printStackTrace();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//            Bundle bundle = new Bundle();
-//            bundle.putString("image1", out1.getAbsolutePath());
-//            bundle.putString("image2", out2.getAbsolutePath());
-//            activity.setFragmentResults(bundle);
-//        }
+        public void showResults() {
+            File out1 = new File(activity.getCacheDir(), "1.png");
+            File out2 = new File(activity.getCacheDir(), "2.png");
+
+            try {
+                FileOutputStream fOut;
+
+                Bitmap bitmap1, bitmap2;
+                bitmap1 = ProcessingAlgorithms.matToBitmap(grabCutTopMat, grabCutTopMat.width(), grabCutTopMat.height());
+                bitmap2 = ProcessingAlgorithms.matToBitmap(grabCutSideMat, grabCutSideMat.width(), grabCutSideMat.height());
+
+                if(bitmap1 != null) {
+                    fOut = new FileOutputStream(out1);
+                    bitmap1.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+                    fOut.flush();
+                }
+
+                if(bitmap2 != null) {
+                    fOut = new FileOutputStream(out2);
+                    bitmap2.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+                    fOut.flush();
+                    fOut.close();
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            Bundle bundle = new Bundle();
+            bundle.putString("image1", out1.getAbsolutePath());
+            bundle.putString("image2", out2.getAbsolutePath());
+            activity.setFragmentResults(bundle);
+        }
 
     }
 }
