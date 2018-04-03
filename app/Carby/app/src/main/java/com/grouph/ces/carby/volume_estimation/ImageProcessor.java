@@ -38,7 +38,6 @@ public class ImageProcessor {
     private Bitmap topDownOut;
     private Bitmap sideOut;
 
-
     public ImageProcessor(VolEstActivity activity) {
         this.activity = activity;
     }
@@ -141,7 +140,6 @@ public class ImageProcessor {
             }
             //approximator.showResults();
             calculator.show();
-
         }
 
 

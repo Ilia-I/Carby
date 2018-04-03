@@ -11,6 +11,8 @@ import org.opencv.core.Size;
 
 import android.content.Context;
 import android.hardware.Camera;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -143,6 +145,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         return true;
     }
 
+    @Nullable
     private Corner getCornerTouch(int touchX, int touchY) {
         if(isWithinRegion(touchX, touchY, p1))
             return Corner.TP_LEFT;
@@ -158,15 +161,14 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
             return null;
     }
 
-    private boolean isWithinRegion(int touchX, int touchY, Point p) {
+    private boolean isWithinRegion(int touchX, int touchY, @NonNull Point p) {
         final int max_distance = 75;
 
         double dist = Math.sqrt((((touchX - p.x) * (touchX - p.x)) + (touchY - p.y)
                 * (touchY - p.y)));
-        if(dist <= max_distance)
-            return true;
 
-        return false;
+        return dist <= max_distance;
+
     }
 
 

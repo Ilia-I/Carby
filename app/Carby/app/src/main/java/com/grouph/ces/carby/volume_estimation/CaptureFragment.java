@@ -41,7 +41,6 @@ public final class CaptureFragment extends Fragment {
     private int imagesTaken = 0;
     private SharedPreferences preferences;
     private Toast toast;
-
     private VolEstActivity activityRef;
 
 
