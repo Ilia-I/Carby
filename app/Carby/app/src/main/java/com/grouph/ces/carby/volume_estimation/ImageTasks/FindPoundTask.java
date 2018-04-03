@@ -72,12 +72,22 @@ public class FindPoundTask extends AsyncTask<Mat, Void, FindPoundTask.Result> {
                 }
                 Point center = new Point(x,y);
 
+                for(Mat m : blurredChannel)
+                    m.release();
+                for(Mat m : gray0Channel)
+                    m.release();
+
                 circles.release();
                 gray0.release();
                 blurred.release();
                 return new Result(center, r);
             }
         }
+        for(Mat m : blurredChannel)
+            m.release();
+        for(Mat m : gray0Channel)
+            m.release();
+
         circles.release();
         gray0.release();
         blurred.release();

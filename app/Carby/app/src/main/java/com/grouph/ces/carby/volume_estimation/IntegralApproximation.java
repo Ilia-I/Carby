@@ -121,6 +121,8 @@ public class IntegralApproximation {
 
 
     private void scaleSmallerMat() {
+        Log.e(TAG, "orig top dimensions: " + top.getImage().height() + "x" + top.getImage().width());
+        Log.e(TAG, "orig side dimensions: " + side.getImage().height() + "x" + side.getImage().width());
         double scaleWidth = 0;
         double scaleHeight = 0;
         Mat smallerMat;
@@ -135,11 +137,13 @@ public class IntegralApproximation {
             scaleWidth = topWidth;
             scaleHeight = topWidth / sideWidth * sideHeight;
             smallerMat = side.getImage();
+
         }
         else {
             scaleWidth = sideWidth;
             scaleHeight = sideWidth / topWidth * topHeight;
             smallerMat = top.getImage();
+            top.setReferenceObjectSize(top.getReferenceObjectSize()*sideWidth/topWidth);
         }
 
         Imgproc.resize(smallerMat, smallerMat, new Size(scaleWidth, scaleHeight));
@@ -161,7 +165,6 @@ public class IntegralApproximation {
         scaleSmallerMat();
 
         double vol = Math.cbrt(pixToCmVal());
-        Log.e(TAG, "top width " + topWidth + " side width " + sideWidth);
         Log.e(TAG, "top dimensions: " + top.getImage().height() + "x" + top.getImage().width());
         Log.e(TAG, "side dimensions: " + side.getImage().height() + "x" + side.getImage().width());
         Log.e(TAG, "pixels to cm: " + vol);
@@ -171,12 +174,7 @@ public class IntegralApproximation {
     }
 
     private double pixToCmVal(){
-        double val = 0;
-        if(topWidth > sideWidth)
-            val = Math.pow(top.getReferenceObjectSize() / POUND_RADIUS,3);
-        else
-            val = Math.pow(side.getReferenceObjectSize() / POUND_RADIUS,3);
-        return val;
+        return Math.pow(top.getReferenceObjectSize() / POUND_RADIUS,3);
     }
 
     public boolean loadTestMats() {
