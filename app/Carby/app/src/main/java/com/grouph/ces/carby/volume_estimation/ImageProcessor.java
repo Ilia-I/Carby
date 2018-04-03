@@ -9,6 +9,7 @@ import android.os.Environment;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 
+import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
 import com.grouph.ces.carby.volume_estimation.ImageTasks.GrabCutTask;
 
@@ -120,12 +121,13 @@ public class ImageProcessor {
             approximator = new IntegralApproximation(activity, topFrame, sideFrame);
             approximator.performApproximation();
 
-            //TODO implement types
-            RecordFrame testTop = new RecordFrame("testTop", topFrame);
-            testTop.saveObj(preferences);
-            RecordFrame testSide = new RecordFrame("testSide", sideFrame);
-            testSide.saveObj(preferences);
 
+            if (preferences.getBoolean(activity.getResources().getString(R.string.key_dev_mode), false)) {
+                RecordFrame testTop = new RecordFrame(ResultsFragment.IMAGE_SET_MASK + 1, topFrame);
+                testTop.saveObj(preferences);
+                RecordFrame testSide = new RecordFrame(ResultsFragment.IMAGE_SET_MASK + 2, sideFrame);
+                testSide.saveObj(preferences);
+            }
             return null;
         }
 
