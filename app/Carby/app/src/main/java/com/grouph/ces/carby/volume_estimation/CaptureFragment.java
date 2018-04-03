@@ -43,7 +43,7 @@ public final class CaptureFragment extends Fragment {
     private Toast toast;
     private VolEstActivity activityRef;
     private Handler handler = new Handler();
-    
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -85,7 +85,7 @@ public final class CaptureFragment extends Fragment {
                         if (frame.getReferenceObjectSize() > 0)
                             captureFrame(frame);
                         else {
-                            handler.postDelayed(this, 2);
+                            handler.postDelayed(this, 50);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
