@@ -43,13 +43,12 @@ public class FindPoundTask extends AsyncTask<Mat, Void, FindPoundTask.Result> {
         //Mat colourMask= new Mat();
         //Core.inRange(blurred,new Scalar(10,50,50),new Scalar(45,255,255),colourMask);
 
-        Mat gray = new Mat();
-        Imgproc.cvtColor(blurred, gray, Imgproc.COLOR_HSV2BGR);
+        Imgproc.cvtColor(blurred, blurred, Imgproc.COLOR_HSV2BGR);
 
         Mat circles=new Mat();
         Mat gray0 = new Mat(blurred.size(), CvType.CV_8U);
         List<Mat> blurredChannel = new ArrayList<>();
-        blurredChannel.add(gray);
+        blurredChannel.add(blurred);
         List<Mat> gray0Channel = new ArrayList<>();
         gray0Channel.add(gray0);
 
@@ -73,10 +72,15 @@ public class FindPoundTask extends AsyncTask<Mat, Void, FindPoundTask.Result> {
                 }
                 Point center = new Point(x,y);
 
-//                Log.e(TAG, "radius: " +r/POUND_RADIUS);
+                circles.release();
+                gray0.release();
+                blurred.release();
                 return new Result(center, r);
             }
         }
+        circles.release();
+        gray0.release();
+        blurred.release();
         return new Result(new Point(), -1.0);
     }
 
