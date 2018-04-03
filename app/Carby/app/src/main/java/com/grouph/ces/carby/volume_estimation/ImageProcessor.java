@@ -93,6 +93,11 @@ public class ImageProcessor {
         protected Void doInBackground(Void... voids) {
             AsyncTask<Object, Void, Mat> grabCutTop = new GrabCutTask();
             AsyncTask<Object, Void, Mat> grabCutSide = new GrabCutTask();
+
+            ProcessingAlgorithms pa = new ProcessingAlgorithms(activity);
+            pa.undistort(topDown.getImage());
+            pa.undistort(side.getImage());
+
             grabCutTop.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topDown.getImage(), topDown.getBoundingBox());
             grabCutSide.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, side.getImage(), side.getBoundingBox());
 

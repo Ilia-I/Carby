@@ -5,7 +5,10 @@ import org.opencv.core.Mat;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+
+import java.util.Arrays;
 
 public abstract class CalibrationResult {
     private static final String TAG = "OCVSample::CalibResult";
@@ -15,7 +18,7 @@ public abstract class CalibrationResult {
     private static final int DISTORTION_COEFFICIENTS_SIZE = 5;
 
     public static void save(Activity activity, Mat cameraMatrix, Mat distortionCoefficients) {
-        SharedPreferences sharedPref = activity.getSharedPreferences("prefs", Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(activity);
         SharedPreferences.Editor editor = sharedPref.edit();
 
         double[] cameraMatrixArray = new double[CAMERA_MATRIX_ROWS * CAMERA_MATRIX_COLS];
@@ -40,7 +43,7 @@ public abstract class CalibrationResult {
     }
 
     public static boolean tryLoad(Context context, Mat cameraMatrix, Mat distortionCoefficients) {
-        SharedPreferences sharedPref = context.getSharedPreferences("prefs", Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(context);
         if (sharedPref.getFloat("0", -1) == -1) {
             Log.i(TAG, "No previous calibration results found");
             return false;
@@ -51,6 +54,7 @@ public abstract class CalibrationResult {
             for (int j = 0; j < CAMERA_MATRIX_COLS; j++) {
                 Integer id = i * CAMERA_MATRIX_ROWS + j;
                 cameraMatrixArray[id] = sharedPref.getFloat(id.toString(), -1);
+                Log.e(TAG, "tryLoad: " + cameraMatrixArray[id]);
             }
         }
         cameraMatrix.put(0, 0, cameraMatrixArray);

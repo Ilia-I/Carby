@@ -42,7 +42,8 @@ public final class CaptureFragment extends Fragment {
     private SharedPreferences preferences;
     private Toast toast;
     private VolEstActivity activityRef;
-
+    private Handler handler = new Handler();
+    
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -76,7 +77,6 @@ public final class CaptureFragment extends Fragment {
             toast = Toast.makeText(getActivity(), "Capturing image", Toast.LENGTH_SHORT);
             toast.show();
 
-            Handler handler = new Handler();
             Runnable checkForReferenceObject = new Runnable() {
                 @Override
                 public void run() {
@@ -85,7 +85,7 @@ public final class CaptureFragment extends Fragment {
                         if (frame.getReferenceObjectSize() > 0)
                             captureFrame(frame);
                         else {
-                            handler.postDelayed(this, 50);
+                            handler.postDelayed(this, 2);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
