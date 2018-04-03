@@ -46,10 +46,11 @@ public class ProcessingAlgorithms {
     public void undistort(Mat input) {
         Mat undistorted = new Mat(input.rows(), input.cols(), CvType.CV_8U);
 
-        if(isCalibrated)
+        if(isCalibrated) {
             Imgproc.undistort(input, undistorted, mCameraMatrix, mDistortionCoefficients);
-
-        undistorted.copyTo(input);
+            undistorted.copyTo(input);
+        }
+        
         undistorted.release();
     }
 
