@@ -20,7 +20,7 @@ import android.util.Log;
 public class CameraCalibrator {
     private static final String TAG = "OpenCVCameraCalibrator";
 
-    private final Size mPatternSize = new Size(7, 9);
+    private final Size mPatternSize = new Size(9, 7);
     private final int mCornersSize = (int)(mPatternSize.width * mPatternSize.height);
     private boolean mPatternWasFound = false;
     private MatOfPoint2f mCorners = new MatOfPoint2f();
@@ -31,7 +31,10 @@ public class CameraCalibrator {
     private Mat mDistortionCoefficients = new Mat();
     private int mFlags;
     private double mRms;
-    private double mSquareSize = 0.0181;
+    //private double mSquareSize = 0.0181;
+//    private double mSquareSize = 0.023;
+    private double mSquareSize = 23;
+
     private Size mImageSize;
 
     public CameraCalibrator(int width, int height) {
