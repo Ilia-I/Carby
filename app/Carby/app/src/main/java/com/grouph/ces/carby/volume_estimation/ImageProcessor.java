@@ -4,12 +4,10 @@ import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.preference.PreferenceManager;
-import android.util.Log;
-import android.widget.Toast;
 
+import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
 import com.grouph.ces.carby.volume_estimation.ImageTasks.GrabCutTask;
 
@@ -79,7 +77,6 @@ public class ImageProcessor {
         private ProgressDialog dialog = new ProgressDialog(activity);
         private SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
         private IntegralApproximation approximator;
-        private NutritionInformationCalculator calculator;
 
         private Mat grabCutTopMat, grabCutSideMat;
 
@@ -120,14 +117,12 @@ public class ImageProcessor {
                 return null;
             }
 
-            calculator = new NutritionInformationCalculator(activity, volume, NutritionInformationCalculator.FOOD_BREAD);
-
-            //TODO implement types
-            RecordFrame testTop = new RecordFrame("testTop", topFrame);
-            testTop.saveObj(preferences);
-            RecordFrame testSide = new RecordFrame("testSide", sideFrame);
-            testSide.saveObj(preferences);
-
+            if (preferences.getBoolean(activity.getResources().getString(R.string.key_dev_mode), false)) {
+                RecordFrame testTop = new RecordFrame(ResultsFragment.IMAGE_SET_MASK + 1, topFrame);
+                testTop.saveObj(preferences);
+                RecordFrame testSide = new RecordFrame(ResultsFragment.IMAGE_SET_MASK + 2, sideFrame);
+                testSide.saveObj(preferences);
+            }
             return null;
         }
 
@@ -138,50 +133,53 @@ public class ImageProcessor {
             if (dialog.isShowing()) {
                 dialog.dismiss();
             }
-//            approximator.showResults();
-            this.showResults();
 
-            if(calculator != null)
-                calculator.show();
-            else
-                Toast.makeText(activity, "Failed to detect food object",Toast.LENGTH_LONG).show();
+            //TODO set foodType
+            approximator.showResults(NutritionInformationCalculator.FOOD_BREAD);
+
+//            this.showResults();
+//
+//            if(calculator != null)
+//                calculator.show();
+//            else
+//                Toast.makeText(activity, "Failed to detect food object",Toast.LENGTH_LONG).show();
         }
 
 
-        public void showResults() {
-            File out1 = new File(activity.getCacheDir(), "1.png");
-            File out2 = new File(activity.getCacheDir(), "2.png");
-
-            try {
-                FileOutputStream fOut;
-
-                Bitmap bitmap1, bitmap2;
-                bitmap1 = ProcessingAlgorithms.matToBitmap(grabCutTopMat, grabCutTopMat.width(), grabCutTopMat.height());
-                bitmap2 = ProcessingAlgorithms.matToBitmap(grabCutSideMat, grabCutSideMat.width(), grabCutSideMat.height());
-
-                if(bitmap1 != null) {
-                    fOut = new FileOutputStream(out1);
-                    bitmap1.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-                    fOut.flush();
-                }
-
-                if(bitmap2 != null) {
-                    fOut = new FileOutputStream(out2);
-                    bitmap2.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-                    fOut.flush();
-                    fOut.close();
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            Bundle bundle = new Bundle();
-            bundle.putString("image1", out1.getAbsolutePath());
-            bundle.putString("image2", out2.getAbsolutePath());
-            activity.setFragmentResults(bundle);
-        }
+//        public void showResults() {
+//            File out1 = new File(activity.getCacheDir(), "1.png");
+//            File out2 = new File(activity.getCacheDir(), "2.png");
+//
+//            try {
+//                FileOutputStream fOut;
+//
+//                Bitmap bitmap1, bitmap2;
+//                bitmap1 = ProcessingAlgorithms.matToBitmap(grabCutTopMat, grabCutTopMat.width(), grabCutTopMat.height());
+//                bitmap2 = ProcessingAlgorithms.matToBitmap(grabCutSideMat, grabCutSideMat.width(), grabCutSideMat.height());
+//
+//                if(bitmap1 != null) {
+//                    fOut = new FileOutputStream(out1);
+//                    bitmap1.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+//                    fOut.flush();
+//                }
+//
+//                if(bitmap2 != null) {
+//                    fOut = new FileOutputStream(out2);
+//                    bitmap2.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+//                    fOut.flush();
+//                    fOut.close();
+//                }
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            Bundle bundle = new Bundle();
+//            bundle.putString("image1", out1.getAbsolutePath());
+//            bundle.putString("image2", out2.getAbsolutePath());
+//            activity.setFragmentResults(bundle);
+//        }
 
     }
 }

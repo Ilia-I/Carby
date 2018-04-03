@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.grouph.ces.carby.volume_estimation.Frame;
+import com.grouph.ces.carby.volume_estimation.ResultsFragment;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
@@ -21,7 +22,7 @@ import java.util.Map;
 
 /**
  * Created by Martin Peev on 24.03.2018 г..
- * Version: 0.7
+ * Version: 0.8
  */
 
 public class RecordFrame {
@@ -86,7 +87,11 @@ public class RecordFrame {
     }
 
     private String namePrefix(String name){
-        if(name.startsWith(prefix)){
+        if(name.startsWith(prefix)
+                ||name.startsWith(ResultsFragment.IMAGE_SET_ORIGINAL)
+                ||name.startsWith(ResultsFragment.IMAGE_SET_MASK)
+                ||name.startsWith(ResultsFragment.IMAGE_SET_STRETCH)
+                ){
             return name;
         } else {
             return prefix+name;

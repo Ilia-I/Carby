@@ -2,10 +2,11 @@ package com.grouph.ces.carby.volume_estimation;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 
+import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
 
 import org.opencv.android.Utils;
@@ -14,10 +15,7 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -178,7 +176,7 @@ public class IntegralApproximation {
     }
 
     public boolean loadTestMats() {
-        SharedPreferences prefs = android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(activity);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
         for(String name : RecordFrame.recordedFrameNames(prefs)) {
             Log.d(TAG, "name: " + name);
             if(name.equalsIgnoreCase("takePicture_testTop")) {
@@ -206,37 +204,21 @@ public class IntegralApproximation {
         }
     }
 
-    public void showResults() {
-        File out1 = new File(activity.getCacheDir(), "1.png");
-        File out2 = new File(activity.getCacheDir(), "2.png");
-
-        try {
-            FileOutputStream fOut;
-
-            Bitmap topDownOut = ProcessingAlgorithms.matToBitmap(top.getImage(), top.getImage().width(), top.getImage().height());
-            if(topDownOut != null) {
-                fOut = new FileOutputStream(out1);
-                topDownOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-                fOut.flush();
-            }
-
-            Bitmap sideOut = ProcessingAlgorithms.matToBitmap(side.getImage(), side.getImage().width(), side.getImage().height());
-            if(sideOut != null) {
-                fOut = new FileOutputStream(out2);
-                sideOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-                fOut.flush();
-                fOut.close();
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void showResults(int foodType) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
+        if (preferences.getBoolean(activity.getResources().getString(R.string.key_dev_mode), false)) {
+            RecordFrame testTop = new RecordFrame(ResultsFragment.IMAGE_SET_STRETCH + 1, top);
+            testTop.saveObj(preferences);
+            RecordFrame testSide = new RecordFrame(ResultsFragment.IMAGE_SET_STRETCH + 2, side);
+            testSide.saveObj(preferences);
+            Bundle bundle = new Bundle();
+            bundle.putInt("foodType",foodType);
+            bundle.putDouble("volume",volume()/pixToCmVal());
+            activity.setFragmentResults(bundle);
+        } else {
+            NutritionInformationCalculator nic = new NutritionInformationCalculator(activity,volume()/pixToCmVal(),foodType);
+            nic.show();
         }
-
-        Bundle bundle = new Bundle();
-        bundle.putString("image1", out1.getAbsolutePath());
-        bundle.putString("image2", out2.getAbsolutePath());
-        activity.setFragmentResults(bundle);
     }
 
 }

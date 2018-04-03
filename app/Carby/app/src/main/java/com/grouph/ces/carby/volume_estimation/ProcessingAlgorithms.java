@@ -4,10 +4,8 @@ package com.grouph.ces.carby.volume_estimation;
  * Created by matthewball on 18/02/2018.
  */
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import com.grouph.ces.carby.camera_calibration.CalibrationResult;
 
