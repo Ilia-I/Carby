@@ -90,6 +90,7 @@ public class RecordFrame {
         if(name.startsWith(prefix)
                 ||name.startsWith(ResultsFragment.IMAGE_SET_ORIGINAL)
                 ||name.startsWith(ResultsFragment.IMAGE_SET_MASK)
+                ||name.startsWith(ResultsFragment.IMAGE_SET_STRETCH)
                 ){
             return name;
         } else {

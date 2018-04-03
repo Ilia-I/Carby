@@ -57,7 +57,7 @@ public class VolEstActivity extends AppCompatActivity{
         IntegralApproximation a = new IntegralApproximation(this);
         if(a.loadTestMats()) {
             a.performApproximation();
-            a.showResults();
+            a.showResults(NutritionInformationCalculator.FOOD_BREAD);
         }
     }
 }

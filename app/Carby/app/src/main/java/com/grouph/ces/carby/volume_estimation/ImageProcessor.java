@@ -138,7 +138,8 @@ public class ImageProcessor {
             if (dialog.isShowing()) {
                 dialog.dismiss();
             }
-            approximator.showResults();
+            //TODO set foodType
+            approximator.showResults(NutritionInformationCalculator.FOOD_BREAD);
         }
 
 

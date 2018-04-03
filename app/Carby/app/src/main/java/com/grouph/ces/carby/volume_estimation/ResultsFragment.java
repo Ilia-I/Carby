@@ -41,16 +41,18 @@ public class ResultsFragment extends Fragment {
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
             IMAGE_SET_ORIGINAL,
-            IMAGE_SET_MASK
+            IMAGE_SET_MASK,
+            IMAGE_SET_STRETCH
     })
     public @interface ImageSet {}
     public static final String IMAGE_SET_ORIGINAL = "original_";
     public static final String IMAGE_SET_MASK = "mask_";
+    public static final String IMAGE_SET_STRETCH = "stretch_";
 
     private List<String> imgset;
     private int current;
-    private String original1;
-    private String original2;
+    private Bitmap original1;
+    private Bitmap original2;
 
     private SharedPreferences preferences;
     private TextView tv;
@@ -87,9 +89,12 @@ public class ResultsFragment extends Fragment {
         imgset = new ArrayList<>();
         imgset.add(IMAGE_SET_ORIGINAL);
         imgset.add(IMAGE_SET_MASK);
+        imgset.add(IMAGE_SET_STRETCH);
         current=0;
         getOriginals();
         showImages(imgset.get(0));
+
+        Toast.makeText(getActivity(), "Swipe to see results.", Toast.LENGTH_SHORT).show();
     }
 
     private void displayImages() {
@@ -117,18 +122,27 @@ public class ResultsFragment extends Fragment {
     private void getOriginals(){
         List<String> rfs = RecordFrame.recordedFrameNames(preferences);
         Collections.sort(rfs, (String o1, String o2) -> o1.compareTo(o2));
-        original1 = rfs.get(rfs.size()-2);
-        original2 = rfs.get(rfs.size()-1);
+        original1 = new RecordFrame(preferences,rfs.get(rfs.size()-2)).getImage();
+        original2 = new RecordFrame(preferences,rfs.get(rfs.size()-1)).getImage();
     }
 
     private void nextImgSet(){
-        current = (current+1)%imgset.size();
+        current++;
+        if(current>=imgset.size()){
+            Bundle bundle = getArguments();
+            if(bundle!=null) {
+                new NutritionInformationCalculator(getActivity(), bundle.getDouble("volume"),bundle.getInt("foodType")).show();
+            } else {
+                Toast.makeText(getActivity(), "Bundle not found!", Toast.LENGTH_SHORT).show();
+
+            }
+        }
         showImages(imgset.get(current));
     }
 
     private void previousImgSet(){
         current--;
-        if(current<0) current = imgset.size()-1;
+        if(current<0) current = 0;// imgset.size()-1;
         showImages(imgset.get(current));
     }
 
@@ -136,10 +150,11 @@ public class ResultsFragment extends Fragment {
         tv.setText(set.substring(0,set.length()-1).toUpperCase());
         switch (set){
             case IMAGE_SET_ORIGINAL:
-                iv1.setImageBitmap(new RecordFrame(preferences,original1).getImage());
-                iv2.setImageBitmap(new RecordFrame(preferences,original2).getImage());
+                iv1.setImageBitmap(original1);
+                iv2.setImageBitmap(original2);
                 break;
             case IMAGE_SET_MASK:
+            case IMAGE_SET_STRETCH:
                 iv1.setImageBitmap(new RecordFrame(preferences,set+1).getImage());
                 iv2.setImageBitmap(new RecordFrame(preferences,set+2).getImage());
                 break;
