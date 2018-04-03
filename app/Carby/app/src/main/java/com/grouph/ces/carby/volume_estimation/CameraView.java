@@ -27,6 +27,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     private Point p1, p2;
     private Frame frame;
     private OnCameraFrameRenderer frameRenderer;
+    private Mat mRGBA;
 
     public CameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -59,11 +60,13 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         frame = new Frame();
         frameRenderer = new OnCameraFrameRenderer();
         frameRenderer.updateBoundingBox(p1, p2);
+
+        mRGBA = new Mat(1280, 720, CvType.CV_8U);
     }
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        Mat mRGBA = inputFrame.rgba();
+        mRGBA = inputFrame.rgba();
 
         synchronized (this) {
             mRGBA.copyTo(frame.getImage());
@@ -71,6 +74,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
             frame.setReferenceObjectSize(frameRenderer.findPound(mRGBA));
         }
         System.gc();
+
         return frameRenderer.render(mRGBA);
     }
 
