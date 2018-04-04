@@ -13,6 +13,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,8 +54,81 @@ public final class CaptureFragment extends Fragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.food_selection, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+        switch (preferences.getInt("foodType", 0)) {
+            case NutritionInformationCalculator.FOOD_OATS:
+                menu.findItem(R.id.food_oats).setChecked(true);
+            case NutritionInformationCalculator.FOOD_PASTA_BOILED:
+                menu.findItem(R.id.food_pasta_boiled).setChecked(true);
+                break;
+            case NutritionInformationCalculator.FOOD_NOODLES_BOILED:
+                menu.findItem(R.id.food_noodles_boiled).setChecked(true);
+                break;
+            case NutritionInformationCalculator.FOOD_RICE_BOILED:
+                menu.findItem(R.id.food_rice_boiled).setChecked(true);
+                break;
+            case NutritionInformationCalculator.FOOD_POTATO_BOILED:
+                menu.findItem(R.id.food_potato_boiled).setChecked(true);
+                break;
+            case NutritionInformationCalculator.FOOD_POTATO_SWEET:
+                menu.findItem(R.id.food_potato_sweet).setChecked(true);
+                break;
+            case NutritionInformationCalculator.FOOD_EGG_BOILED:
+                menu.findItem(R.id.food_egg_boiled).setChecked(true);
+                break;
+            default:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_BREAD).apply();
+                break;
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.food_bread:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_BREAD).apply();
+                item.setChecked(true);
+                return true;
+            case R.id.food_oats:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_OATS).apply();
+                item.setChecked(true);
+                return true;
+            case R.id.food_egg_boiled:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_EGG_BOILED).apply();
+                item.setChecked(true);
+                return true;
+            case R.id.food_noodles_boiled:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_NOODLES_BOILED).apply();
+                item.setChecked(true);
+                return true;
+            case R.id.food_pasta_boiled:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_PASTA_BOILED).apply();
+                item.setChecked(true);
+                return true;
+            case R.id.food_potato_boiled:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_POTATO_BOILED).apply();
+                item.setChecked(true);
+                return true;
+            case R.id.food_potato_sweet:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_POTATO_SWEET).apply();
+                item.setChecked(true);
+                return true;
+            case R.id.food_rice_boiled:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_RICE_BOILED).apply();
+                item.setChecked(true);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        setHasOptionsMenu(true);
+
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         activityRef = (VolEstActivity) getActivity();
 
@@ -74,16 +150,18 @@ public final class CaptureFragment extends Fragment {
 
         FloatingActionButton captureButton = getView().findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
+            captureButton.setEnabled(false);
             toast = Toast.makeText(getActivity(), "Capturing image", Toast.LENGTH_SHORT);
             toast.show();
-
             Runnable checkForReferenceObject = new Runnable() {
                 @Override
                 public void run() {
                     try {
                         Frame frame = mOpenCvCameraView.getFrame();
-                        if (frame.getReferenceObjectSize() > 0)
+                        if (frame.getReferenceObjectSize() > 0) {
                             captureFrame(frame);
+                            captureButton.setEnabled(true);
+                        }
                         else {
                             handler.postDelayed(this, 50);
                         }
@@ -108,7 +186,7 @@ public final class CaptureFragment extends Fragment {
         Toast.makeText(getActivity(), "Drag the corners to fit the image", Toast.LENGTH_SHORT).show();
     }
 
-    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(getContext()) {
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(getActivity()) {
         @Override
         public void onManagerConnected(int status) {
             switch (status) {

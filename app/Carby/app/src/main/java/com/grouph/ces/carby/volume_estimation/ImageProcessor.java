@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v7.preference.PreferenceManager;
+import android.widget.Toast;
 
 import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
@@ -77,8 +78,9 @@ public class ImageProcessor {
         private ProgressDialog dialog = new ProgressDialog(activity);
         private SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
         private IntegralApproximation approximator;
-
         private Mat grabCutTopMat, grabCutSideMat;
+
+        private double volume = -1.0;
 
         @Override
         protected void onPreExecute() {
@@ -119,11 +121,7 @@ public class ImageProcessor {
             }
 
             approximator = new IntegralApproximation(activity, topFrame, sideFrame);
-            double volume = approximator.getApproximation();
-
-            if(volume == -1.0) {
-                return null;
-            }
+            this.volume = approximator.getApproximation();
 
             if (preferences.getBoolean(activity.getResources().getString(R.string.key_dev_mode), false)) {
                 RecordFrame testTop = new RecordFrame(ResultsFragment.IMAGE_SET_STRETCH + 1, topFrame);
@@ -142,52 +140,13 @@ public class ImageProcessor {
                 dialog.dismiss();
             }
 
-            //TODO set foodType
-            approximator.showResults(NutritionInformationCalculator.FOOD_BREAD);
-
-//            this.showResults();
-//
-//            if(calculator != null)
-//                calculator.show();
-//            else
-//                Toast.makeText(activity, "Failed to detect food object",Toast.LENGTH_LONG).show();
+            if(volume != -1.0)
+                approximator.showResults(volume);
+            else {
+                Toast.makeText(activity, "Failed to detect food object", Toast.LENGTH_LONG).show();
+                activity.recreate();
+            }
         }
-
-
-//        public void showResults() {
-//            File out1 = new File(activity.getCacheDir(), "1.png");
-//            File out2 = new File(activity.getCacheDir(), "2.png");
-//
-//            try {
-//                FileOutputStream fOut;
-//
-//                Bitmap bitmap1, bitmap2;
-//                bitmap1 = ProcessingAlgorithms.matToBitmap(grabCutTopMat, grabCutTopMat.width(), grabCutTopMat.height());
-//                bitmap2 = ProcessingAlgorithms.matToBitmap(grabCutSideMat, grabCutSideMat.width(), grabCutSideMat.height());
-//
-//                if(bitmap1 != null) {
-//                    fOut = new FileOutputStream(out1);
-//                    bitmap1.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-//                    fOut.flush();
-//                }
-//
-//                if(bitmap2 != null) {
-//                    fOut = new FileOutputStream(out2);
-//                    bitmap2.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-//                    fOut.flush();
-//                    fOut.close();
-//                }
-//            } catch (FileNotFoundException e) {
-//                e.printStackTrace();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//            Bundle bundle = new Bundle();
-//            bundle.putString("image1", out1.getAbsolutePath());
-//            bundle.putString("image2", out2.getAbsolutePath());
-//            activity.setFragmentResults(bundle);
-//        }
 
     }
 }

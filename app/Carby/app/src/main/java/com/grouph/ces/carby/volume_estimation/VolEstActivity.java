@@ -6,7 +6,9 @@ import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
 
+import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.volume_estimation.DevMode.ShowFramesFragment;
 
 import org.opencv.android.OpenCVLoader;
@@ -54,8 +56,8 @@ public class VolEstActivity extends AppCompatActivity{
         if (!OpenCVLoader.initDebug()) {}
         IntegralApproximation a = new IntegralApproximation(this);
         if(a.loadTestMats()) {
-            a.getApproximation();
-            a.showResults(NutritionInformationCalculator.FOOD_BREAD);
+            double volume = a.getApproximation();
+            a.showResults(volume);
         }
     }
 }

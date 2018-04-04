@@ -71,4 +71,13 @@
     ShowFramesFragmentvity-->
     <string name="dialog_title_delete_img">Delete selected images?</string>
     <string name="dialog_message_delete_img">Are you sure you wish to permanently delete the selected images?</string>
+    <string name="food_type">Food type</string>
+    <string name="food_bread">Bread</string>
+    <string name="food_oats">Oats</string>
+    <string name="food_boiled_pasta">Boiled pasta</string>
+    <string name="food_boiled_noodles">Boiled noodles</string>
+    <string name="food_boiled_rice">Boiled rice</string>
+    <string name="food_boiled_potato">Boiled potato</string>
+    <string name="food_sweet_potato">Sweet potato</string>
+    <string name="food_boiled_egg">Boiled egg</string>
 </resources>

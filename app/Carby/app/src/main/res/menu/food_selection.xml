@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android" >
+    <group>
+        <item android:id="@+id/food_select"
+            android:title="@string/food_type">
+            <menu>
+                <group android:checkableBehavior="single">
+                    <item android:id="@+id/food_bread"
+                        android:title="@string/food_bread"
+                        android:checked="true"/>
+                    <item android:id="@+id/food_oats"
+                        android:title="@string/food_oats" />
+                    <item android:id="@+id/food_pasta_boiled"
+                        android:title="@string/food_boiled_pasta" />
+                    <item android:id="@+id/food_noodles_boiled"
+                        android:title="@string/food_boiled_noodles" />
+                    <item android:id="@+id/food_rice_boiled"
+                        android:title="@string/food_boiled_rice" />
+                    <item android:id="@+id/food_potato_boiled"
+                        android:title="@string/food_boiled_potato" />
+                    <item android:id="@+id/food_potato_sweet"
+                        android:title="@string/food_sweet_potato" />
+                    <item android:id="@+id/food_egg_boiled"
+                        android:title="@string/food_boiled_egg" />
+                </group>
+            </menu>
+        </item>
+    </group>
+</menu>
