@@ -16,7 +16,6 @@
 package com.grouph.ces.carby.ocr;
 
 import android.arch.persistence.room.Room;
-import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.util.SparseArray;
@@ -32,14 +31,12 @@ import com.grouph.ces.carby.nutrition_data.NutritionResultActivity;
 import com.grouph.ces.carby.nutrition_data.NutritionTable;
 import com.grouph.ces.carby.ui.camera.GraphicOverlay;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Processor which gets detects and processes the nutrition table
@@ -47,7 +44,7 @@ import java.util.Set;
 public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
     private static final int NUM_SCANS = 5;
-    private Context context;
+    private OcrCaptureActivity context;
     private GraphicOverlay<OcrGraphic> mGraphicOverlay;
     private int scan;
     private String barcode;
@@ -55,7 +52,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
     private List<List<String>> lineCollector;
     private long startTime;
 
-    public OcrDetectorProcessor(Context applicationContext, GraphicOverlay<OcrGraphic> ocrGraphicOverlay) {
+    public OcrDetectorProcessor(OcrCaptureActivity applicationContext, GraphicOverlay<OcrGraphic> ocrGraphicOverlay) {
         this.context = applicationContext;
         this.mGraphicOverlay = ocrGraphicOverlay;
         this.scan = 0;
@@ -63,7 +60,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         lineCollector = new ArrayList<>();
     }
 
-    public OcrDetectorProcessor(Context applicationContext, GraphicOverlay<OcrGraphic> ocrGraphicOverlay, String barcode) {
+    public OcrDetectorProcessor(OcrCaptureActivity applicationContext, GraphicOverlay<OcrGraphic> ocrGraphicOverlay, String barcode) {
         this(applicationContext,ocrGraphicOverlay);
         this.barcode = barcode;
     }
@@ -90,6 +87,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
             scan--;
             if(scan<=0){
                 scanComplete = true;
+                context.stopAnimation();
             }
         } else if(scanComplete){
             Log.d(this.getClass().getName(),"LineCorrector:"+lineCollector.size());

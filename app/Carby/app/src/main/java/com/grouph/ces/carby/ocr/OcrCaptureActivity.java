@@ -26,9 +26,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
-import android.os.Build;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -36,15 +34,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.ui.camera.CameraSource;
@@ -52,7 +48,6 @@ import com.grouph.ces.carby.ui.camera.CameraSourcePreview;
 import com.grouph.ces.carby.ui.camera.GraphicOverlay;
 
 import java.io.IOException;
-import java.util.Locale;
 
 /**
  * Activity for the Ocr Detecting app.  This app detects text and displays the value with the
@@ -78,6 +73,8 @@ public final class OcrCaptureActivity extends AppCompatActivity {
     private GraphicOverlay<OcrGraphic> mGraphicOverlay;
 
     private OcrDetectorProcessor processor;
+    private View bar;
+    private Animation animation;
 
     /**
      * Initializes the UI and creates the detector pipeline.
@@ -104,6 +101,7 @@ public final class OcrCaptureActivity extends AppCompatActivity {
         }
 
         OcrController oc = new OcrController(this,(FloatingActionButton)findViewById(R.id.btn_scan_table));
+        setupAnimation();
     }
 
     /**
@@ -132,15 +130,6 @@ public final class OcrCaptureActivity extends AppCompatActivity {
                 .show();
     }
 
-//    @Override
-//    public boolean onTouchEvent(MotionEvent e) {
-//        boolean b = scaleGestureDetector.onTouchEvent(e);
-//
-//        boolean c = gestureDetector.onTouchEvent(e);
-//
-//        return b || c || super.onTouchEvent(e);
-//    }
-
     /**
      * Creates and starts the camera.  Note that this uses a higher resolution in comparison
      * to other detection examples to enable the ocr detector to detect small text samples
@@ -157,14 +146,14 @@ public final class OcrCaptureActivity extends AppCompatActivity {
         TextRecognizer textRecognizer = new TextRecognizer.Builder(context).build();
 
         // Set the TextRecognizer's Processor.
-        processor = new OcrDetectorProcessor(getApplicationContext(),mGraphicOverlay);
+        processor = new OcrDetectorProcessor(this,mGraphicOverlay);
 
         //if passed a barcode
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             String barcode = extras.getString(getString(R.string.ocr_intent_barcode));
             if(barcode!=null){
-                processor = new OcrDetectorProcessor(getApplicationContext(),mGraphicOverlay,barcode);
+                processor = new OcrDetectorProcessor(this,mGraphicOverlay,barcode);
             }
         }
         textRecognizer.setProcessor(processor);
@@ -306,46 +295,38 @@ public final class OcrCaptureActivity extends AppCompatActivity {
         }
     }
 
-//    /**
-//     * onTap is called to speak the tapped TextBlock, if any, out loud.
-//     *
-//     * @param rawX - the raw position of the tap
-//     * @param rawY - the raw position of the tap.
-//     * @return true if the tap was on a TextBlock
-//     */
-//    private boolean onTap(float rawX, float rawY) {
-//        // Speak the text when the user taps on screen.
-//        OcrGraphic graphic = mGraphicOverlay.getGraphicAtLocation(rawX, rawY);
-//        TextBlock text = null;
-//        if (graphic != null) {
-//            text = graphic.getTextBlock();
-//            if (text != null && text.getValue() != null) {
-//                Log.d(TAG, "text data is being spoken! " + text.getValue());
-//                // Speak the string.
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//                    tts.speak(text.getValue(), TextToSpeech.QUEUE_ADD, null, "DEFAULT");
-//                }
-//            }
-//            else {
-//                Log.d(TAG, "text data is null");
-//            }
-//        }
-//        else {
-//            Log.d(TAG,"no text detected");
-//        }
-//        return text != null;
-//    }
-
     public void scan() {
         processor.scan();
+        startAnimation();
     }
 
-//    private class CaptureGestureListener extends GestureDetector.SimpleOnGestureListener {
-//
-//        @Override
-//        public boolean onSingleTapConfirmed(MotionEvent e) {
-//            return onTap(e.getRawX(), e.getRawY()) || super.onSingleTapConfirmed(e);
-//        }
-//    }
+    private void setupAnimation() {
+        bar = findViewById(R.id.bar);
+        animation = AnimationUtils.loadAnimation(OcrCaptureActivity.this, R.anim.scan_animation);
+        animation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
 
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                bar.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+    }
+
+    public void startAnimation() {
+        bar.setVisibility(View.VISIBLE);
+        bar.startAnimation(animation);
+    }
+
+    public void stopAnimation(){
+        bar.clearAnimation();
+        bar.setVisibility(View.GONE);
+        animation.cancel();
+    }
 }
