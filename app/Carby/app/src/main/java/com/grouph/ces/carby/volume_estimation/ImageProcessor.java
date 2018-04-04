@@ -112,6 +112,11 @@ public class ImageProcessor {
             Frame sideFrame = new Frame(grabCutSideMat, side.getReferenceObjectSize(), side.getBoundingBox());
 
             if (preferences.getBoolean(activity.getResources().getString(R.string.key_dev_mode), false)) {
+                RecordFrame oTop = new RecordFrame(ResultsFragment.IMAGE_SET_ORIGINAL + 1, topDown);
+                oTop.saveObj(preferences);
+                RecordFrame oSide = new RecordFrame(ResultsFragment.IMAGE_SET_ORIGINAL + 2, side);
+                oSide.saveObj(preferences);
+
                 RecordFrame testTop = new RecordFrame(ResultsFragment.IMAGE_SET_MASK + 1, topFrame);
                 testTop.saveObj(preferences);
                 RecordFrame testSide = new RecordFrame(ResultsFragment.IMAGE_SET_MASK + 2, sideFrame);

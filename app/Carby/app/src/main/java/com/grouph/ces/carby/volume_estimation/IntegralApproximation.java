@@ -206,17 +206,14 @@ public class IntegralApproximation {
 
     public void showResults(int foodType) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
+        double vol = volume()/pixToCmVal();
         if (preferences.getBoolean(activity.getResources().getString(R.string.key_dev_mode), false)) {
-            RecordFrame testTop = new RecordFrame(ResultsFragment.IMAGE_SET_STRETCH + 1, top);
-            testTop.saveObj(preferences);
-            RecordFrame testSide = new RecordFrame(ResultsFragment.IMAGE_SET_STRETCH + 2, side);
-            testSide.saveObj(preferences);
             Bundle bundle = new Bundle();
             bundle.putInt("foodType",foodType);
-            bundle.putDouble("volume",volume()/pixToCmVal());
+            bundle.putDouble("volume",vol);
             activity.setFragmentResults(bundle);
         } else {
-            NutritionInformationCalculator nic = new NutritionInformationCalculator(activity,volume()/pixToCmVal(),foodType);
+            NutritionInformationCalculator nic = new NutritionInformationCalculator(activity,vol,foodType);
             nic.show();
         }
     }

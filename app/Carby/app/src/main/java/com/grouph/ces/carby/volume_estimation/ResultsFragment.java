@@ -3,16 +3,12 @@ package com.grouph.ces.carby.volume_estimation;
 import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringDef;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,12 +21,9 @@ import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.volume_estimation.DevMode.OnSwipeListener;
 import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
 
-import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -51,8 +44,8 @@ public class ResultsFragment extends Fragment {
 
     private List<String> imgset;
     private int current;
-    private Bitmap original1;
-    private Bitmap original2;
+//    private Bitmap original1;
+//    private Bitmap original2;
 
     private SharedPreferences preferences;
     private TextView tv;
@@ -91,40 +84,40 @@ public class ResultsFragment extends Fragment {
         imgset.add(IMAGE_SET_MASK);
         imgset.add(IMAGE_SET_STRETCH);
         current=0;
-        getOriginals();
+//        getOriginals();
         showImages(imgset.get(0));
 
         Toast.makeText(getActivity(), "Swipe to see results.", Toast.LENGTH_SHORT).show();
     }
 
-    private void displayImages() {
-        Bundle bundle = getArguments();
-        if(bundle!=null) {
-            String out1path = bundle.getString("image1");
-            String out2path = bundle.getString("image2");
+//    private void displayImages() {
+//        Bundle bundle = getArguments();
+//        if(bundle!=null) {
+//            String out1path = bundle.getString("image1");
+//            String out2path = bundle.getString("image2");
+//
+//            if (out1path != null) {
+//                File imgFile1 = new File(out1path);
+//                Bitmap myBitmap1 = BitmapFactory.decodeFile(imgFile1.getAbsolutePath());
+//                Bitmap scaledPicture = Bitmap.createScaledBitmap(myBitmap1, myBitmap1.getWidth() * 2, myBitmap1.getHeight() * 2, false);
+//                iv1.setImageBitmap(scaledPicture);
+//            }
+//
+//            if (out2path != null) {
+//                File imgFile2 = new File(out2path);
+//                Bitmap myBitmap2 = BitmapFactory.decodeFile(imgFile2.getAbsolutePath());
+//                Bitmap scaledPicture = Bitmap.createScaledBitmap(myBitmap2, myBitmap2.getWidth() * 2, myBitmap2.getHeight() * 2, false);
+//                iv2.setImageBitmap(scaledPicture);
+//            }
+//        }
+//    }
 
-            if (out1path != null) {
-                File imgFile1 = new File(out1path);
-                Bitmap myBitmap1 = BitmapFactory.decodeFile(imgFile1.getAbsolutePath());
-                Bitmap scaledPicture = Bitmap.createScaledBitmap(myBitmap1, myBitmap1.getWidth() * 2, myBitmap1.getHeight() * 2, false);
-                iv1.setImageBitmap(scaledPicture);
-            }
-
-            if (out2path != null) {
-                File imgFile2 = new File(out2path);
-                Bitmap myBitmap2 = BitmapFactory.decodeFile(imgFile2.getAbsolutePath());
-                Bitmap scaledPicture = Bitmap.createScaledBitmap(myBitmap2, myBitmap2.getWidth() * 2, myBitmap2.getHeight() * 2, false);
-                iv2.setImageBitmap(scaledPicture);
-            }
-        }
-    }
-
-    private void getOriginals(){
-        List<String> rfs = RecordFrame.recordedFrameNames(preferences);
-        Collections.sort(rfs, (String o1, String o2) -> o1.compareTo(o2));
-        original1 = new RecordFrame(preferences,rfs.get(rfs.size()-2)).getImage();
-        original2 = new RecordFrame(preferences,rfs.get(rfs.size()-1)).getImage();
-    }
+//    private void getOriginals(){
+//        List<String> rfs = RecordFrame.recordedFrameNames(preferences);
+//        Collections.sort(rfs, (String o1, String o2) -> o1.compareTo(o2));
+//        original1 = new RecordFrame(preferences,rfs.get(rfs.size()-2)).getImage();
+//        original2 = new RecordFrame(preferences,rfs.get(rfs.size()-1)).getImage();
+//    }
 
     private void nextImgSet(){
         current++;
@@ -148,17 +141,8 @@ public class ResultsFragment extends Fragment {
 
     private void showImages(@ImageSet String set){
         tv.setText(set.substring(0,set.length()-1).toUpperCase());
-        switch (set){
-            case IMAGE_SET_ORIGINAL:
-                iv1.setImageBitmap(original1);
-                iv2.setImageBitmap(original2);
-                break;
-            case IMAGE_SET_MASK:
-            case IMAGE_SET_STRETCH:
-                iv1.setImageBitmap(new RecordFrame(preferences,set+1).getImage());
-                iv2.setImageBitmap(new RecordFrame(preferences,set+2).getImage());
-                break;
-        }
+        iv1.setImageBitmap(new RecordFrame(preferences,set+1).getImage());
+        iv2.setImageBitmap(new RecordFrame(preferences,set+2).getImage());
     }
 
     @Override
