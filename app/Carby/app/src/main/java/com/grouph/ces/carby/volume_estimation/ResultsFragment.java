@@ -62,6 +62,7 @@ public class ResultsFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
         tv = getView().findViewById(R.id.img_type);

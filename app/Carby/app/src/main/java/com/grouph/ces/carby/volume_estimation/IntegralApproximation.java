@@ -116,8 +116,6 @@ public class IntegralApproximation {
         return vol;
     }
 
-
-
     private void scaleSmallerMat() {
         Log.e(TAG, "orig top dimensions: " + top.getImage().height() + "x" + top.getImage().width());
         Log.e(TAG, "orig side dimensions: " + side.getImage().height() + "x" + side.getImage().width());
@@ -162,13 +160,14 @@ public class IntegralApproximation {
         cropWithBoundingBoxes(topDimensions, sideDimensions);
         scaleSmallerMat();
 
-        double vol = Math.cbrt(pixToCmVal());
         Log.e(TAG, "top dimensions: " + top.getImage().height() + "x" + top.getImage().width());
         Log.e(TAG, "side dimensions: " + side.getImage().height() + "x" + side.getImage().width());
-        Log.e(TAG, "pixels to cm: " + vol);
-        Log.e(TAG, "Predicted Volume: " + volume() / pixToCmVal() + " cm3");
+        Log.e(TAG, "pixels to cm: " + Math.cbrt(pixToCmVal()));
 
-        return vol;
+        double volume = volume() / pixToCmVal();
+        Log.e(TAG, "Predicted Volume: " + volume + " cm3");
+
+        return volume;
     }
 
     private double pixToCmVal(){
@@ -204,16 +203,17 @@ public class IntegralApproximation {
         }
     }
 
-    public void showResults(int foodType) {
+    public void showResults(double volume) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
-        double vol = volume()/pixToCmVal();
+
+        int foodType = preferences.getInt("foodType", 0);
         if (preferences.getBoolean(activity.getResources().getString(R.string.key_dev_mode), false)) {
             Bundle bundle = new Bundle();
             bundle.putInt("foodType",foodType);
-            bundle.putDouble("volume",vol);
+            bundle.putDouble("volume",volume);
             activity.setFragmentResults(bundle);
         } else {
-            NutritionInformationCalculator nic = new NutritionInformationCalculator(activity,vol,foodType);
+            NutritionInformationCalculator nic = new NutritionInformationCalculator(activity,volume,foodType);
             nic.show();
         }
     }
