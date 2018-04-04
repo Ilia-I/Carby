@@ -110,6 +110,14 @@ public class ImageProcessor {
 
             Frame topFrame = new Frame(grabCutTopMat, topDown.getReferenceObjectSize(), topDown.getBoundingBox());
             Frame sideFrame = new Frame(grabCutSideMat, side.getReferenceObjectSize(), side.getBoundingBox());
+
+            if (preferences.getBoolean(activity.getResources().getString(R.string.key_dev_mode), false)) {
+                RecordFrame testTop = new RecordFrame(ResultsFragment.IMAGE_SET_MASK + 1, topFrame);
+                testTop.saveObj(preferences);
+                RecordFrame testSide = new RecordFrame(ResultsFragment.IMAGE_SET_MASK + 2, sideFrame);
+                testSide.saveObj(preferences);
+            }
+
             approximator = new IntegralApproximation(activity, topFrame, sideFrame);
             double volume = approximator.getApproximation();
 
@@ -118,9 +126,9 @@ public class ImageProcessor {
             }
 
             if (preferences.getBoolean(activity.getResources().getString(R.string.key_dev_mode), false)) {
-                RecordFrame testTop = new RecordFrame(ResultsFragment.IMAGE_SET_MASK + 1, topFrame);
+                RecordFrame testTop = new RecordFrame(ResultsFragment.IMAGE_SET_STRETCH + 1, topFrame);
                 testTop.saveObj(preferences);
-                RecordFrame testSide = new RecordFrame(ResultsFragment.IMAGE_SET_MASK + 2, sideFrame);
+                RecordFrame testSide = new RecordFrame(ResultsFragment.IMAGE_SET_STRETCH + 2, sideFrame);
                 testSide.saveObj(preferences);
             }
             return null;
