@@ -73,7 +73,7 @@ public class ImageProcessor {
     }
 
 
-    private class ProcessImageTask extends AsyncTask<Void, Void, Void> {
+    private class ProcessImageTask extends AsyncTask<Void, Integer, Void> {
 
         private ProgressDialog dialog = new ProgressDialog(activity);
         private SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
@@ -85,7 +85,8 @@ public class ImageProcessor {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            this.dialog.setMessage("Please wait");
+            this.dialog.setIndeterminate(false);
+            this.dialog.setMessage("Rectifying image distortion");
             this.dialog.show();
         }
 
@@ -94,9 +95,12 @@ public class ImageProcessor {
             AsyncTask<Object, Void, Mat> grabCutTop = new GrabCutTask();
             AsyncTask<Object, Void, Mat> grabCutSide = new GrabCutTask();
 
+            publishProgress(0);
             ProcessingAlgorithms pa = new ProcessingAlgorithms(activity);
             pa.undistort(topDown.getImage());
+            publishProgress(5);
             pa.undistort(side.getImage());
+            publishProgress(10);
 
             grabCutTop.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topDown.getImage(), topDown.getBoundingBox());
             grabCutSide.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, side.getImage(), side.getBoundingBox());
@@ -109,6 +113,7 @@ public class ImageProcessor {
             } catch (ExecutionException e) {
                 e.printStackTrace();
             }
+            publishProgress(50);
 
             Frame topFrame = new Frame(grabCutTopMat, topDown.getReferenceObjectSize(), topDown.getBoundingBox());
             Frame sideFrame = new Frame(grabCutSideMat, side.getReferenceObjectSize(), side.getBoundingBox());
@@ -124,9 +129,11 @@ public class ImageProcessor {
                 RecordFrame testSide = new RecordFrame(ResultsFragment.IMAGE_SET_MASK + 2, sideFrame);
                 testSide.saveObj(preferences);
             }
+            publishProgress(55);
 
             approximator = new IntegralApproximation(activity, topFrame, sideFrame);
             this.volume = approximator.getApproximation();
+            publishProgress(95);
 
             if (preferences.getBoolean(activity.getResources().getString(R.string.key_dev_mode), false)) {
                 RecordFrame testTop = new RecordFrame(ResultsFragment.IMAGE_SET_STRETCH + 1, topFrame);
@@ -134,9 +141,21 @@ public class ImageProcessor {
                 RecordFrame testSide = new RecordFrame(ResultsFragment.IMAGE_SET_STRETCH + 2, sideFrame);
                 testSide.saveObj(preferences);
             }
+            publishProgress(100);
+
             return null;
         }
 
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            if(values[0] == 10)
+                this.dialog.setMessage("Performing GrabCut");
+            else if(values[0] == 55)
+                this.dialog.setMessage("Performing volume calculation");
+
+            this.dialog.setProgress(values[0]);
+            super.onProgressUpdate(values);
+        }
 
         @Override
         protected void onPostExecute(Void aVoid) {
