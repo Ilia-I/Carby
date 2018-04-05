@@ -44,8 +44,6 @@ public class ResultsFragment extends Fragment {
 
     private List<String> imgset;
     private int current;
-//    private Bitmap original1;
-//    private Bitmap original2;
 
     private SharedPreferences preferences;
     private TextView tv;
@@ -90,35 +88,6 @@ public class ResultsFragment extends Fragment {
 
         Toast.makeText(getActivity(), "Swipe to see results.", Toast.LENGTH_SHORT).show();
     }
-
-//    private void displayImages() {
-//        Bundle bundle = getArguments();
-//        if(bundle!=null) {
-//            String out1path = bundle.getString("image1");
-//            String out2path = bundle.getString("image2");
-//
-//            if (out1path != null) {
-//                File imgFile1 = new File(out1path);
-//                Bitmap myBitmap1 = BitmapFactory.decodeFile(imgFile1.getAbsolutePath());
-//                Bitmap scaledPicture = Bitmap.createScaledBitmap(myBitmap1, myBitmap1.getWidth() * 2, myBitmap1.getHeight() * 2, false);
-//                iv1.setImageBitmap(scaledPicture);
-//            }
-//
-//            if (out2path != null) {
-//                File imgFile2 = new File(out2path);
-//                Bitmap myBitmap2 = BitmapFactory.decodeFile(imgFile2.getAbsolutePath());
-//                Bitmap scaledPicture = Bitmap.createScaledBitmap(myBitmap2, myBitmap2.getWidth() * 2, myBitmap2.getHeight() * 2, false);
-//                iv2.setImageBitmap(scaledPicture);
-//            }
-//        }
-//    }
-
-//    private void getOriginals(){
-//        List<String> rfs = RecordFrame.recordedFrameNames(preferences);
-//        Collections.sort(rfs, (String o1, String o2) -> o1.compareTo(o2));
-//        original1 = new RecordFrame(preferences,rfs.get(rfs.size()-2)).getImage();
-//        original2 = new RecordFrame(preferences,rfs.get(rfs.size()-1)).getImage();
-//    }
 
     private void nextImgSet(){
         current++;

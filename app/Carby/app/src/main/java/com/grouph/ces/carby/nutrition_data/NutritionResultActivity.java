@@ -1,25 +1,25 @@
 package com.grouph.ces.carby.nutrition_data;
 
 import android.arch.persistence.room.Room;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.database.AppDatabase;
 import com.grouph.ces.carby.database.ConsumptionDB;
+import com.grouph.ces.carby.volume_estimation.DevMode.OnSwipeListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +45,9 @@ public class NutritionResultActivity extends AppCompatActivity {
             mass = extras.getDouble("mass");
             per.setText("Total weight "+formatDouble(mass)+"g");
             initAlternateConsumption();
+            if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getResources().getString(R.string.key_dev_mode), false)) {
+                setupSwipeListener();
+            }
         }
         
         if(extras!=null){
@@ -118,6 +121,14 @@ public class NutritionResultActivity extends AppCompatActivity {
                 mSaltVal.setText(formatDouble(nutritionTable.getComponentValue("Salt")) + nutritionTable.getSaltUnit());
             }
         }
+    }
+
+    private void setupSwipeListener() {
+        findViewById(R.id.nutrition_result_layout).setOnTouchListener(new OnSwipeListener(this){
+            public void onSwipeRight() {
+                onBackPressed();
+            }
+        });
     }
 
     private String formatDouble(double val){
