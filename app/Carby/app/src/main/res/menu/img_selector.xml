@@ -3,6 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/food_selector"
+        android:icon="@drawable/ic_food"
+        android:title="@string/food_type"
+        app:showAsAction="ifRoom"/>
+    <item
         android:id="@+id/action_delete"
         android:icon="@drawable/ic_delete"
         android:title="@string/action_delete"

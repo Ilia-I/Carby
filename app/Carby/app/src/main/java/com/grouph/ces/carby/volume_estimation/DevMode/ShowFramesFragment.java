@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,6 +29,7 @@ import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.preferences.SettingsActivity;
 import com.grouph.ces.carby.volume_estimation.Frame;
 import com.grouph.ces.carby.volume_estimation.ImageProcessor;
+import com.grouph.ces.carby.volume_estimation.NutritionInformationCalculator;
 import com.grouph.ces.carby.volume_estimation.VolEstActivity;
 
 import org.opencv.android.Utils;
@@ -39,7 +41,7 @@ import java.util.List;
 
 /**
  * Created by Martin Peev on 25.03.2018 г..
- * Version: 1.1
+ * Version: 1.2
  */
 
 public class ShowFramesFragment extends Fragment {
@@ -47,6 +49,8 @@ public class ShowFramesFragment extends Fragment {
     private List<Bitmap> images;
     private List<Integer> selected;
     private ImageGridAdapter iga;
+    private SharedPreferences preferences;
+    private GridView gv;
 
     private final double downscaleFactor = 2.5;
     private final int bitmapHeight = (int) (720/downscaleFactor);
@@ -61,6 +65,9 @@ public class ShowFramesFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        gv = getView().findViewById(R.id.gridview);
+        registerForContextMenu(gv);
         setHasOptionsMenu(true);
         getRecordFrames();
         decodeImages();
@@ -173,8 +180,6 @@ public class ShowFramesFragment extends Fragment {
         }
     }
 
-
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -222,6 +227,9 @@ public class ShowFramesFragment extends Fragment {
                 dialog.setCanceledOnTouchOutside(false);
                 dialog.show();
                 return true;
+            case R.id.food_selector:
+                getActivity().openContextMenu(gv);
+                return true;
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
@@ -239,5 +247,93 @@ public class ShowFramesFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.img_selector, menu);
         super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getActivity().getMenuInflater();
+        inflater.inflate(R.menu.food_selection, menu);
+        menu.findItem(R.id.reset_images).setVisible(false);
+
+        switch (preferences.getInt("foodType", 0)) {
+            case NutritionInformationCalculator.FOOD_OATS:
+                menu.findItem(R.id.food_oats).setChecked(true);
+            case NutritionInformationCalculator.FOOD_PASTA_BOILED:
+                menu.findItem(R.id.food_pasta_boiled).setChecked(true);
+                break;
+            case NutritionInformationCalculator.FOOD_NOODLES_BOILED:
+                menu.findItem(R.id.food_noodles_boiled).setChecked(true);
+                break;
+            case NutritionInformationCalculator.FOOD_RICE_BOILED:
+                menu.findItem(R.id.food_rice_boiled).setChecked(true);
+                break;
+            case NutritionInformationCalculator.FOOD_POTATO_BOILED:
+                menu.findItem(R.id.food_potato_boiled).setChecked(true);
+                break;
+            case NutritionInformationCalculator.FOOD_POTATO_SWEET:
+                menu.findItem(R.id.food_potato_sweet).setChecked(true);
+                break;
+            case NutritionInformationCalculator.FOOD_EGG_BOILED:
+                menu.findItem(R.id.food_egg_boiled).setChecked(true);
+                break;
+            default:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_BREAD).apply();
+                break;
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.food_bread:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_BREAD).apply();
+                item.setChecked(true);
+                generateToastFoodSelected(NutritionInformationCalculator.FOOD_BREAD);
+                return true;
+            case R.id.food_oats:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_OATS).apply();
+                item.setChecked(true);
+                generateToastFoodSelected(NutritionInformationCalculator.FOOD_OATS);
+                return true;
+            case R.id.food_egg_boiled:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_EGG_BOILED).apply();
+                item.setChecked(true);
+                generateToastFoodSelected(NutritionInformationCalculator.FOOD_EGG_BOILED);
+                return true;
+            case R.id.food_noodles_boiled:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_NOODLES_BOILED).apply();
+                item.setChecked(true);
+                generateToastFoodSelected(NutritionInformationCalculator.FOOD_NOODLES_BOILED);
+                return true;
+            case R.id.food_pasta_boiled:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_PASTA_BOILED).apply();
+                item.setChecked(true);
+                generateToastFoodSelected(NutritionInformationCalculator.FOOD_PASTA_BOILED);
+                return true;
+            case R.id.food_potato_boiled:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_POTATO_BOILED).apply();
+                item.setChecked(true);
+                generateToastFoodSelected(NutritionInformationCalculator.FOOD_POTATO_BOILED);
+                return true;
+            case R.id.food_potato_sweet:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_POTATO_SWEET).apply();
+                item.setChecked(true);
+                generateToastFoodSelected(NutritionInformationCalculator.FOOD_POTATO_SWEET);
+                return true;
+            case R.id.food_rice_boiled:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_RICE_BOILED).apply();
+                item.setChecked(true);
+                generateToastFoodSelected(NutritionInformationCalculator.FOOD_RICE_BOILED);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void generateToastFoodSelected(@NutritionInformationCalculator.FoodType int foodType) {
+        String name = NutritionInformationCalculator.getName(foodType);
+        name = name.substring(name.indexOf("_")+1).replaceAll("_"," ");
+        Toast.makeText(getActivity(), "Food type set to: "+name, Toast.LENGTH_SHORT).show();
     }
 }

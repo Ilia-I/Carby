@@ -40,7 +40,6 @@ public class VolEstActivity extends AppCompatActivity{
     }
 
     private void setFragment(Fragment fragment, Bundle bundle, String backstackKey){
-        getSupportActionBar().show();
         FragmentManager fm = getFragmentManager();
         if (fm != null) {
             fragment.setArguments(bundle);
@@ -48,6 +47,7 @@ public class VolEstActivity extends AppCompatActivity{
             ft.replace(android.R.id.content, fragment);
             if(!backstackKey.isEmpty())ft.addToBackStack(backstackKey);
             ft.commit();
+            getSupportActionBar().show();
         }
     }
 
