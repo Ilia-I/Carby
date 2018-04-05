@@ -8,12 +8,13 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SurfaceView;
@@ -54,9 +55,11 @@ public final class CaptureFragment extends Fragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getActivity().getMenuInflater();
         inflater.inflate(R.menu.food_selection, menu);
-        super.onCreateOptionsMenu(menu, inflater);
+
         switch (preferences.getInt("foodType", 0)) {
             case NutritionInformationCalculator.FOOD_OATS:
                 menu.findItem(R.id.food_oats).setChecked(true);
@@ -85,53 +88,73 @@ public final class CaptureFragment extends Fragment {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.food_bread:
                 preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_BREAD).apply();
                 item.setChecked(true);
+                generateToastFoodSelected(NutritionInformationCalculator.FOOD_BREAD);
                 return true;
             case R.id.food_oats:
                 preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_OATS).apply();
                 item.setChecked(true);
+                generateToastFoodSelected(NutritionInformationCalculator.FOOD_OATS);
                 return true;
             case R.id.food_egg_boiled:
                 preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_EGG_BOILED).apply();
                 item.setChecked(true);
+                generateToastFoodSelected(NutritionInformationCalculator.FOOD_EGG_BOILED);
                 return true;
             case R.id.food_noodles_boiled:
                 preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_NOODLES_BOILED).apply();
                 item.setChecked(true);
+                generateToastFoodSelected(NutritionInformationCalculator.FOOD_NOODLES_BOILED);
                 return true;
             case R.id.food_pasta_boiled:
                 preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_PASTA_BOILED).apply();
                 item.setChecked(true);
+                generateToastFoodSelected(NutritionInformationCalculator.FOOD_PASTA_BOILED);
                 return true;
             case R.id.food_potato_boiled:
                 preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_POTATO_BOILED).apply();
                 item.setChecked(true);
+                generateToastFoodSelected(NutritionInformationCalculator.FOOD_POTATO_BOILED);
                 return true;
             case R.id.food_potato_sweet:
                 preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_POTATO_SWEET).apply();
                 item.setChecked(true);
+                generateToastFoodSelected(NutritionInformationCalculator.FOOD_POTATO_SWEET);
                 return true;
             case R.id.food_rice_boiled:
                 preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_RICE_BOILED).apply();
                 item.setChecked(true);
+                generateToastFoodSelected(NutritionInformationCalculator.FOOD_RICE_BOILED);
+                return true;
+            case R.id.reset_images:
+                imagesTaken = 0;
+                imageProcessor = new ImageProcessor(activityRef);
+                Toast.makeText(activityRef, "Reset taken images.", Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+    private void generateToastFoodSelected(@NutritionInformationCalculator.FoodType int foodType) {
+        String name = NutritionInformationCalculator.getName(foodType);
+        name = name.substring(name.indexOf("_")+1).replaceAll("_"," ");
+        Toast.makeText(activityRef, "Food type set to: "+name, Toast.LENGTH_SHORT).show();
+    }
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        setHasOptionsMenu(true);
+        ConstraintLayout cl = getView().findViewById(R.id.vol_cap_constraint_layout);
+        registerForContextMenu(cl);
 
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         activityRef = (VolEstActivity) getActivity();
-
+        activityRef.getSupportActionBar().hide();
         // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
         int rc = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA);
@@ -178,9 +201,9 @@ public final class CaptureFragment extends Fragment {
             openGallery();
         });
 
-        FloatingActionButton resetButton = getView().findViewById(R.id.btn_reset);
+        FloatingActionButton resetButton = getView().findViewById(R.id.btn_more);
         resetButton.setOnClickListener((view) -> {
-            imagesTaken = 0;
+            getActivity().openContextMenu(cl);
         });
 
         Toast.makeText(getActivity(), "Drag the corners to fit the image", Toast.LENGTH_SHORT).show();

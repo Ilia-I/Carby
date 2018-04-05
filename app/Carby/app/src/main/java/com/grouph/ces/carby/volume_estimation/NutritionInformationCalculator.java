@@ -205,7 +205,7 @@ public class NutritionInformationCalculator {
         }
     }
 
-    private String getName(){
+    public static String getName(@FoodType int foodType){
         switch (foodType){
             case FOOD_BREAD: return "FOOD_BREAD";
             case FOOD_OATS: return "FOOD_OATS";
@@ -221,7 +221,7 @@ public class NutritionInformationCalculator {
 
     private int getID(){
         AppDatabase db = Room.databaseBuilder(context ,AppDatabase.class,"myDB").allowMainThreadQueries().build();
-        NutritionDataDB nd = db.nutritionDataDao().findByName(getName());
+        NutritionDataDB nd = db.nutritionDataDao().findByName(getName(foodType));
         if(nd==null){
             return record(db).getKey();
         } else {
@@ -241,7 +241,7 @@ public class NutritionInformationCalculator {
         nt.setComponent("Protein",getProteinVal());
         nt.setComponent("Salt",getSaltVal());
 
-        NutritionDataDB nd = new NutritionDataDB(getName(),"",nt);
+        NutritionDataDB nd = new NutritionDataDB(getName(foodType),"",nt);
         db.nutritionDataDao().insertAll(nd);
         return nd;
     }

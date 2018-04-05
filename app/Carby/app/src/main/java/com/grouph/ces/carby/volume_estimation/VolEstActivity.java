@@ -6,9 +6,7 @@ import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
 
-import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.volume_estimation.DevMode.ShowFramesFragment;
 
 import org.opencv.android.OpenCVLoader;
@@ -42,6 +40,7 @@ public class VolEstActivity extends AppCompatActivity{
     }
 
     private void setFragment(Fragment fragment, Bundle bundle, String backstackKey){
+        getSupportActionBar().show();
         FragmentManager fm = getFragmentManager();
         if (fm != null) {
             fragment.setArguments(bundle);

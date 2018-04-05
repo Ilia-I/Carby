@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group>
         <item android:id="@+id/food_select"
             android:title="@string/food_type">
@@ -26,5 +25,7 @@
                 </group>
             </menu>
         </item>
+        <item android:id="@+id/reset_images"
+            android:title="Reset Current Images"></item>
     </group>
 </menu>
