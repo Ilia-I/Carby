@@ -160,9 +160,16 @@ public class IntegralApproximation {
         cropWithBoundingBoxes(topDimensions, sideDimensions);
         scaleSmallerMat();
 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
         Log.e(TAG, "top dimensions: " + top.getImage().height() + "x" + top.getImage().width());
+        preferences.edit().putInt("topDimensH", top.getImage().height()).apply();
+        preferences.edit().putInt("topDimensW", top.getImage().width()).apply();
         Log.e(TAG, "side dimensions: " + side.getImage().height() + "x" + side.getImage().width());
+        preferences.edit().putInt("sideDimensH", side.getImage().height()).apply();
+        preferences.edit().putInt("sideDimensW", side.getImage().width()).apply();
         Log.e(TAG, "pixels to cm: " + Math.cbrt(pixToCmVal()));
+        preferences.edit().putString("pixelToCm", Double.valueOf(Math.cbrt(pixToCmVal())).toString()).apply();
+
 
         double volume = volume() / pixToCmVal();
         Log.e(TAG, "Predicted Volume: " + volume + " cm3");

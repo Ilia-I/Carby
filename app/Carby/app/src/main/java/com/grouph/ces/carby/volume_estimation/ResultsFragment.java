@@ -41,6 +41,7 @@ public class ResultsFragment extends Fragment {
     public static final String IMAGE_SET_ORIGINAL = "original_";
     public static final String IMAGE_SET_MASK = "mask_";
     public static final String IMAGE_SET_STRETCH = "stretch_";
+    private final String CALCULATIONS = "calculations";
 
     private List<String> imgset;
     private int current;
@@ -82,8 +83,8 @@ public class ResultsFragment extends Fragment {
         imgset.add(IMAGE_SET_ORIGINAL);
         imgset.add(IMAGE_SET_MASK);
         imgset.add(IMAGE_SET_STRETCH);
+        imgset.add(CALCULATIONS);
         current=0;
-//        getOriginals();
         showImages(imgset.get(0));
 
         Toast.makeText(getActivity(), "Swipe to see results.", Toast.LENGTH_SHORT).show();
@@ -92,12 +93,12 @@ public class ResultsFragment extends Fragment {
     private void nextImgSet(){
         current++;
         if(current>=imgset.size()){
+            current--;//adjust in case of back operation
             Bundle bundle = getArguments();
             if(bundle!=null) {
                 new NutritionInformationCalculator(getActivity(), bundle.getDouble("volume"),bundle.getInt("foodType")).show();
             } else {
                 Toast.makeText(getActivity(), "Bundle not found!", Toast.LENGTH_SHORT).show();
-
             }
         }
         showImages(imgset.get(current));
@@ -110,9 +111,21 @@ public class ResultsFragment extends Fragment {
     }
 
     private void showImages(@ImageSet String set){
-        tv.setText(set.substring(0,set.length()-1).toUpperCase());
-        iv1.setImageBitmap(new RecordFrame(preferences,set+1).getImage());
-        iv2.setImageBitmap(new RecordFrame(preferences,set+2).getImage());
+        if(!set.equals(CALCULATIONS)) {
+            tv.setText(set.substring(0,set.length()-1).toUpperCase());
+            iv1.setImageBitmap(new RecordFrame(preferences, set + 1).getImage());
+            iv1.setVisibility(View.VISIBLE);
+            iv2.setImageBitmap(new RecordFrame(preferences, set + 2).getImage());
+            iv2.setVisibility(View.VISIBLE);
+        } else {
+            tv.setText(set.toUpperCase()+
+                    ":\n\nTop Dimensions: "+preferences.getInt("topDimensH", 0)+"x"+preferences.getInt("topDimensW", 0)+
+                    "\nSide Dimensions: "+preferences.getInt("sideDimensH", 0)+"x"+preferences.getInt("sideDimensW", 0)+
+                    "\nPixels to cm: "+Double.valueOf(preferences.getString("pixelToCm","0"))+
+                    "\nEstimated Volume: "+getArguments().getDouble("volume")+"cm3");
+            iv1.setVisibility(View.GONE);
+            iv2.setVisibility(View.GONE);
+        }
     }
 
     @Override
