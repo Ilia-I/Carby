@@ -231,7 +231,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         if(barcode==null){
             barcode = "";
         }
-        NutritionDataDB nd = new NutritionDataDB(barcode,nt);
+        NutritionDataDB nd = new NutritionDataDB(barcode,nt,NutritionDataDB.SOURCE_NUTRITION_TABLE_SCANNER);
         db.nutritionDataDao().insertAll(nd);
         nd = db.nutritionDataDao().findByData(nd.getName(),nd.getBarcode(),nd.getNt());
 //        Log.d(this.getClass().getName(),"ID:"+nd.getKey()+"\nBarcode: "+barcode);

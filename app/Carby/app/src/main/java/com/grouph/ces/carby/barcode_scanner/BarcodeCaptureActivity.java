@@ -501,7 +501,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
                 e.printStackTrace();
             }
             if(result!=null){
-                data = new NutritionDataDB(barcode.displayValue,result);
+                data = new NutritionDataDB(barcode.displayValue,result,NutritionDataDB.SOURCE_OPEN_FOOD_FACTS);
                 db.nutritionDataDao().insertAll(data);
                 data = db.nutritionDataDao().findByData(data.getName(),data.getBarcode(),data.getNt());//fetch the correct key
                 return data;

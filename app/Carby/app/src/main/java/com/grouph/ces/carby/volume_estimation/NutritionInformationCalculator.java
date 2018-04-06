@@ -241,7 +241,7 @@ public class NutritionInformationCalculator {
         nt.setComponent("Protein",getProteinVal());
         nt.setComponent("Salt",getSaltVal());
 
-        NutritionDataDB nd = new NutritionDataDB(getName(foodType),"",nt);
+        NutritionDataDB nd = new NutritionDataDB(getName(foodType),"",nt,NutritionDataDB.SOURCE_VOLUME_ESTIMATION);
         db.nutritionDataDao().insertAll(nd);
         nd = db.nutritionDataDao().findByData(nd.getName(),nd.getBarcode(),nd.getNt());//fetch the correct key
         return nd;
