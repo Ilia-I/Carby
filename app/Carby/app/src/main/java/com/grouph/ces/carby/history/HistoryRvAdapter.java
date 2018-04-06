@@ -47,12 +47,8 @@ public class HistoryRvAdapter extends RecyclerView.Adapter<HistoryRvAdapter.Hist
 
     @Override
     public void onBindViewHolder(HistoryViewHolder holder, int position) {
-        try {
-            holder.date.setText(dateFormat.parse(entries.get(position).getTime().toString()).toString());
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        holder.quantity.setText(String.format(Locale.ENGLISH, "%.2fg", entries.get(position).getQuantity()));
+        holder.date.setText(dateFormat.format(entries.get(position).getTime()));
+        holder.quantity.setText(String.format(Locale.ENGLISH, "%.1fg", entries.get(position).getQuantity()));
         holder.name.setText(nutritionDataDao.findByID(entries.get(position).getKey()).getName());
     }
 
@@ -83,7 +79,7 @@ public class HistoryRvAdapter extends RecyclerView.Adapter<HistoryRvAdapter.Hist
             INutritionTable nt = nutritionDataDao.findByID(key).getNt();
             Intent result = new Intent(context, NutritionResultActivity.class);
             result.putExtra("jsonNutritionTable",nt.toJasonObject().toString());
-            result.putExtra("id",key);
+            result.putExtra("id",-1);
             context.startActivity(result);
             return false;
         }
