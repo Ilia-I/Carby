@@ -466,7 +466,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         Log.i("Barcode", "Barcode detected: " + barcode.displayValue);
         //do something with barcode data returned
 
-        progressCard.setVisibility(View.VISIBLE);
+        /*progressCard.setVisibility(View.VISIBLE);*/
         NutritionDataDB dataDB = getNutritionTable(barcode);
 
         if (dataDB!=null){
