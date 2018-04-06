@@ -20,6 +20,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -29,7 +30,6 @@ import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -100,6 +100,8 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
     private Context context = this;
 
+    private ProgressDialog progressDialog;
+
     /**
      * Initializes the UI and creates the detector pipeline.
      */
@@ -118,6 +120,8 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         progressCard = findViewById(R.id.progress_card);
 
         progressCard.setVisibility(View.GONE);
+
+        progressDialog = new ProgressDialog(this);
 
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -466,14 +470,22 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         Log.i("Barcode", "Barcode detected: " + barcode.displayValue);
         //do something with barcode data returned
 
-        /*progressCard.setVisibility(View.VISIBLE);*/
+        //this.runOnUiThread(() -> progressCard.setVisibility(View.VISIBLE));
+
+        this.runOnUiThread(() -> {
+                    progressDialog.setMessage("Searching databases for barcode");
+                    progressDialog.show();
+                });
+
         NutritionDataDB dataDB = getNutritionTable(barcode);
 
         if (dataDB!=null){
-            //progressCard.setVisibility(View.GONE);
+            //this.runOnUiThread(() -> progressCard.setVisibility(View.GONE));
+            this.runOnUiThread(() -> progressDialog.dismiss());
             sendToNutritionResult(dataDB.getNt(),dataDB.getKey());
         }else{
-            //progressCard.setVisibility(View.GONE);
+            //this.runOnUiThread(() -> progressCard.setVisibility(View.GONE));
+            this.runOnUiThread(() -> progressDialog.dismiss());
             startOCR(barcode.displayValue);
         }
     }
@@ -483,7 +495,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
             Log.d(this.getClass().getName(),"Barcode: " + barcode.displayValue);
             INutritionTable result = null;
 
-            //1. check local database
+            //1. Check local database
             NutritionDataDB data = db.nutritionDataDao().findByBarcode(barcode.displayValue);
             if(data!=null) {
                 result = data.getNt();
@@ -493,7 +505,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
                 }
             }
 
-            //TODO 2. check open food facts database (get info about result and set result variable)
+            //2. Check open food facts database (get info about result and set result variable)
             BarcodeLookup barcodeLookup = new BarcodeLookup();
             try {
                 result = barcodeLookup.execute(barcode).get();
