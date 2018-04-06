@@ -25,7 +25,7 @@ import java.util.Locale;
 
 public class HistoryRvAdapter extends RecyclerView.Adapter<HistoryRvAdapter.HistoryViewHolder> {
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy E hh:mm a z", Locale.ENGLISH);
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy hh:mma", Locale.ENGLISH);
 
     private Context context;
     private List<ConsumptionDB> entries;
