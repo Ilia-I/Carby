@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.grouph.ces.carby.barcode_scanner;
+package com.grouph.ces.carby.barcode;
 
 import android.graphics.Canvas;
 import android.graphics.Color;

@@ -44,7 +44,7 @@
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name=".barcode_scanner.BarcodeCaptureActivity"
+            android:name=".barcode.BarcodeCaptureActivity"
             android:label="Read Barcode"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" />
