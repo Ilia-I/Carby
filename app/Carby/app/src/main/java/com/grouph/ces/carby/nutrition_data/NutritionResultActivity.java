@@ -38,16 +38,20 @@ public class NutritionResultActivity extends AppCompatActivity {
         extras = getIntent().getExtras();
         nutritionTable = new NutritionTable();
 
-        if(extras.getBoolean("per100g",true)) {
+        if (extras.getBoolean("per100g", true)) {
             initConsumption();
         } else {
             TextView per = findViewById(R.id.per);
             mass = extras.getDouble("mass");
-            per.setText("Total weight "+formatDouble(mass)+"g");
+            per.setText("Total weight " + formatDouble(mass) + "g");
             initAlternateConsumption();
             if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getResources().getString(R.string.key_dev_mode), false)) {
                 setupSwipeListener();
             }
+        }
+
+        if(extras.getInt("id",-1)<0) {
+            hideConsumption();
         }
         
         if(extras!=null){
@@ -121,6 +125,12 @@ public class NutritionResultActivity extends AppCompatActivity {
                 mSaltVal.setText(formatDouble(nutritionTable.getComponentValue("Salt")) + nutritionTable.getSaltUnit());
             }
         }
+    }
+
+    private void hideConsumption() {
+        findViewById(R.id.radioGroup).setVisibility(View.GONE);
+        findViewById(R.id.add_all_btn).setVisibility(View.GONE);
+        findViewById(R.id.consumeLabel).setVisibility(View.GONE);
     }
 
     private void setupSwipeListener() {
