@@ -35,14 +35,12 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -95,9 +93,6 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
     private AppDatabase db;
 
-    private CardView progressCard;
-    private ProgressBar progressBar;
-
     private Context context = this;
 
     private ProgressDialog progressDialog;
@@ -115,11 +110,6 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay<BarcodeGraphic>) findViewById(R.id.graphicOverlay);
-
-        progressBar = findViewById(R.id.progress_bar);
-        progressCard = findViewById(R.id.progress_card);
-
-        progressCard.setVisibility(View.GONE);
 
         progressDialog = new ProgressDialog(this);
 
@@ -470,8 +460,6 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         Log.i("Barcode", "Barcode detected: " + barcode.displayValue);
         //do something with barcode data returned
 
-        //this.runOnUiThread(() -> progressCard.setVisibility(View.VISIBLE));
-
         this.runOnUiThread(() -> {
                     progressDialog.setMessage("Searching databases for barcode");
                     progressDialog.show();
@@ -480,11 +468,9 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         NutritionDataDB dataDB = getNutritionTable(barcode);
 
         if (dataDB!=null){
-            //this.runOnUiThread(() -> progressCard.setVisibility(View.GONE));
             this.runOnUiThread(() -> progressDialog.dismiss());
             sendToNutritionResult(dataDB.getNt(),dataDB.getKey());
         }else{
-            //this.runOnUiThread(() -> progressCard.setVisibility(View.GONE));
             this.runOnUiThread(() -> progressDialog.dismiss());
             startOCR(barcode.displayValue);
         }
