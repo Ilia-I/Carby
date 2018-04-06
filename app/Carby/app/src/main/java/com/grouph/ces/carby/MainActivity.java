@@ -7,9 +7,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 
-import com.grouph.ces.carby.barcodescanner.BarcodeCaptureActivity;
+import com.grouph.ces.carby.barcode_scanner.BarcodeCaptureActivity;
 import com.grouph.ces.carby.ocr.OcrCaptureActivity;
-import com.grouph.ces.carby.volume_estimation.CaptureFragment;
 import com.grouph.ces.carby.volume_estimation.VolEstActivity;
 
 public class MainActivity extends BaseActivity implements OnClickListener {

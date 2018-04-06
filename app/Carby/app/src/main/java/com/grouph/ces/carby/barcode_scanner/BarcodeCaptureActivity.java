@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.grouph.ces.carby.barcodescanner;
+package com.grouph.ces.carby.barcode_scanner;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
