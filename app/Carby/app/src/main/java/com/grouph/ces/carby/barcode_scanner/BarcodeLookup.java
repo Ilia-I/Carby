@@ -1,4 +1,4 @@
-package com.grouph.ces.carby.barcodescanner;
+package com.grouph.ces.carby.barcode_scanner;
 
 import android.os.AsyncTask;
 import android.util.Log;

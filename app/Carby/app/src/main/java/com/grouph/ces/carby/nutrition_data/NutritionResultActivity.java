@@ -145,6 +145,7 @@ public class NutritionResultActivity extends AppCompatActivity {
                 if (id >= 0) {
                     AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "myDB").allowMainThreadQueries().build();
                     db.consumptionDataDao().insert(new ConsumptionDB(id, mass));
+                    Toast.makeText(getApplicationContext(), "Added "+mass+"g consumption!", Toast.LENGTH_SHORT).show();
                     addAll.setEnabled(false);
                 }
             }
@@ -179,6 +180,7 @@ public class NutritionResultActivity extends AppCompatActivity {
                         if(quantity>0) {
                             Log.d(this.getClass().getName(),"id:"+id+"\nquantity:"+quantity+"\nnt:"+db.nutritionDataDao().findByID(id));
                             db.consumptionDataDao().insert(new ConsumptionDB(id, quantity));
+                            Toast.makeText(getApplicationContext(), "Added "+quantity+"g consumption!", Toast.LENGTH_SHORT).show();
                             addConsumed.setEnabled(false);
                         }
                     }
