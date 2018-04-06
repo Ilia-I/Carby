@@ -233,7 +233,9 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         }
         NutritionDataDB nd = new NutritionDataDB(barcode,nt);
         db.nutritionDataDao().insertAll(nd);
-        Log.d(this.getClass().getName(),"Barcode: "+barcode+"\nLoaded Table:\n"+db.nutritionDataDao().findByBarcode(barcode).getNt());
+        nd = db.nutritionDataDao().findByData(nd.getName(),nd.getBarcode(),nd.getNt());
+//        Log.d(this.getClass().getName(),"ID:"+nd.getKey()+"\nBarcode: "+barcode);
+//        Log.d(this.getClass().getName(),"Loaded Table:\n"+nd.getNt());
         return nd.getKey();
     }
 

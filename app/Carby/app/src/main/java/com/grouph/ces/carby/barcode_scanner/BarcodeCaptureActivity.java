@@ -376,6 +376,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
             if(result!=null){
                 data = new NutritionDataDB(barcode.displayValue,result);
                 db.nutritionDataDao().insertAll(data);
+                data = db.nutritionDataDao().findByData(data.getName(),data.getBarcode(),data.getNt());//fetch the correct key
                 return data;
             }
         }

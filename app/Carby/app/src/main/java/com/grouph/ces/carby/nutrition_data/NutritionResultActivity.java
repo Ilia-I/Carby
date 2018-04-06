@@ -38,16 +38,20 @@ public class NutritionResultActivity extends AppCompatActivity {
         extras = getIntent().getExtras();
         nutritionTable = new NutritionTable();
 
-        if(extras.getBoolean("per100g",true)) {
+        if (extras.getBoolean("per100g", true)) {
             initConsumption();
         } else {
             TextView per = findViewById(R.id.per);
             mass = extras.getDouble("mass");
-            per.setText("Total weight "+formatDouble(mass)+"g");
+            per.setText("Total weight " + formatDouble(mass) + "g");
             initAlternateConsumption();
             if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getResources().getString(R.string.key_dev_mode), false)) {
                 setupSwipeListener();
             }
+        }
+
+        if(extras.getInt("id",-1)<0) {
+            hideConsumption();
         }
         
         if(extras!=null){
@@ -123,6 +127,12 @@ public class NutritionResultActivity extends AppCompatActivity {
         }
     }
 
+    private void hideConsumption() {
+        findViewById(R.id.radioGroup).setVisibility(View.GONE);
+        findViewById(R.id.add_all_btn).setVisibility(View.GONE);
+        findViewById(R.id.consumeLabel).setVisibility(View.GONE);
+    }
+
     private void setupSwipeListener() {
         findViewById(R.id.nutrition_result_layout).setOnTouchListener(new OnSwipeListener(this){
             public void onSwipeRight() {
@@ -145,6 +155,7 @@ public class NutritionResultActivity extends AppCompatActivity {
                 if (id >= 0) {
                     AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "myDB").allowMainThreadQueries().build();
                     db.consumptionDataDao().insert(new ConsumptionDB(id, mass));
+                    Toast.makeText(getApplicationContext(), "Added "+mass+"g consumption!", Toast.LENGTH_SHORT).show();
                     addAll.setEnabled(false);
                 }
             }
@@ -174,11 +185,12 @@ public class NutritionResultActivity extends AppCompatActivity {
                 if(extras!=null){
                     int id = extras.getInt("id",-1);
                     if(id>=0){
-                        AppDatabase db = Room.databaseBuilder(getApplicationContext() ,AppDatabase.class,"myDB").allowMainThreadQueries().build();
+                        AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class,"myDB").allowMainThreadQueries().build();
                         int quantity = getQuantity();
                         if(quantity>0) {
                             Log.d(this.getClass().getName(),"id:"+id+"\nquantity:"+quantity+"\nnt:"+db.nutritionDataDao().findByID(id));
                             db.consumptionDataDao().insert(new ConsumptionDB(id, quantity));
+                            Toast.makeText(getApplicationContext(), "Added "+quantity+"g consumption!", Toast.LENGTH_SHORT).show();
                             addConsumed.setEnabled(false);
                         }
                     }

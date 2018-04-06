@@ -88,6 +88,8 @@ public class ImageProcessor {
             this.dialog.setIndeterminate(false);
             this.dialog.setMessage("Rectifying image distortion");
             this.dialog.show();
+            this.dialog.setCancelable(false);
+            this.dialog.setCanceledOnTouchOutside(false);
         }
 
         @Override

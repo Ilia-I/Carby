@@ -38,7 +38,6 @@ public class IntegralApproximation {
     private double sideWidth;
     private double sideHeight;
 
-
     public IntegralApproximation(Activity activity) {
         this.activity = (VolEstActivity) activity;
     }
