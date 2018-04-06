@@ -94,7 +94,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".HistoryActivity"
+            android:name=".history.HistoryActivity"
             android:label="@string/app_name"
             android:parentActivityName=".MainActivity">
             <intent-filter>

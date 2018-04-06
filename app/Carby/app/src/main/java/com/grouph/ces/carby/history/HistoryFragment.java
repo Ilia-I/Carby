@@ -1,6 +1,5 @@
-package com.grouph.ces.carby;
+package com.grouph.ces.carby.history;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.arch.persistence.room.Room;
 import android.os.Bundle;
@@ -11,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.database.AppDatabase;
 
 public class HistoryFragment extends Fragment {
@@ -37,6 +37,6 @@ public class HistoryFragment extends Fragment {
         LinearLayoutManager lm = new LinearLayoutManager(activity);
         RecyclerView recyclerView = activity.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(lm);
-        recyclerView.setAdapter(new HistoryRvAdapter(db));
+        recyclerView.setAdapter(new HistoryRvAdapter(db, activity));
     }
 }

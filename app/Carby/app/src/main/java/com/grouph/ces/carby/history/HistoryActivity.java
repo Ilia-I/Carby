@@ -1,4 +1,4 @@
-package com.grouph.ces.carby;
+package com.grouph.ces.carby.history;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -6,7 +6,6 @@ import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 import com.grouph.ces.carby.volume_estimation.ResultsFragment;
@@ -16,12 +15,12 @@ public class HistoryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setFragmentHistory(savedInstanceState);
+        setFragment(new HistoryFragment(), savedInstanceState, "");
     }
 
     public void setFragmentHistory(Bundle bundle){
         Log.d(this.getClass().getName(),"setFragmentResults");
-        setFragment(new HistoryFragment(), bundle, "results_fragment");
+        setFragment(new HistoryFragment(), bundle, "history_fragment");
     }
 
     public void setFragmentResults(Bundle bundle){

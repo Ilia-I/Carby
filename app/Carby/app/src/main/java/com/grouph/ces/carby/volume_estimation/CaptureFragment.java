@@ -151,6 +151,7 @@ public final class CaptureFragment extends Fragment {
         ConstraintLayout cl = getView().findViewById(R.id.vol_cap_constraint_layout);
         registerForContextMenu(cl);
 
+        mOpenCvCameraView = getView().findViewById(R.id.camera_preview);
         int rc = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA);
         if (rc == PackageManager.PERMISSION_GRANTED)
             mOpenCvCameraView.enableView();
@@ -163,7 +164,6 @@ public final class CaptureFragment extends Fragment {
         // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
 
-        mOpenCvCameraView = getView().findViewById(R.id.camera_preview);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(mOpenCvCameraView);
         mOpenCvCameraView.setOnTouchListener(mOpenCvCameraView);
