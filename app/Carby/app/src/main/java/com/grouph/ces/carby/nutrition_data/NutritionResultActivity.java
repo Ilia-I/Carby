@@ -174,7 +174,7 @@ public class NutritionResultActivity extends AppCompatActivity {
                 if(extras!=null){
                     int id = extras.getInt("id",-1);
                     if(id>=0){
-                        AppDatabase db = Room.databaseBuilder(getApplicationContext() ,AppDatabase.class,"myDB").allowMainThreadQueries().build();
+                        AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class,"myDB").allowMainThreadQueries().build();
                         int quantity = getQuantity();
                         if(quantity>0) {
                             Log.d(this.getClass().getName(),"id:"+id+"\nquantity:"+quantity+"\nnt:"+db.nutritionDataDao().findByID(id));

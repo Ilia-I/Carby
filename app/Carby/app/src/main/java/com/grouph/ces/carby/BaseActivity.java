@@ -56,6 +56,9 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent(this, NutritionResultActivity.class);
             intent.putExtra("jsonNutritionTable", jsonNutritionTable.toString());
             startActivity(intent);
+        } else if (id == R.id.nav_history) {
+            Intent intent = new Intent(this, HistoryActivity.class);
+            startActivity(intent);
         }
         /* else if (id == R.id.nav_feature) {
 

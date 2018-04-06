@@ -48,7 +48,6 @@ public final class CaptureFragment extends Fragment {
     private VolEstActivity activityRef;
     private Handler handler = new Handler();
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.vol_capture, container, false);
@@ -152,24 +151,23 @@ public final class CaptureFragment extends Fragment {
         ConstraintLayout cl = getView().findViewById(R.id.vol_cap_constraint_layout);
         registerForContextMenu(cl);
 
+        int rc = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA);
+        if (rc == PackageManager.PERMISSION_GRANTED)
+            mOpenCvCameraView.enableView();
+        else
+            requestPermissions();
+
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         activityRef = (VolEstActivity) getActivity();
         activityRef.getSupportActionBar().hide();
         // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
-        int rc = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA);
 
         mOpenCvCameraView = getView().findViewById(R.id.camera_preview);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(mOpenCvCameraView);
         mOpenCvCameraView.setOnTouchListener(mOpenCvCameraView);
         preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-
-        if (rc == PackageManager.PERMISSION_GRANTED)
-            mOpenCvCameraView.enableView();
-        else
-            requestPermissions();
-
 
         FloatingActionButton captureButton = getView().findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
