@@ -243,6 +243,7 @@ public class NutritionInformationCalculator {
 
         NutritionDataDB nd = new NutritionDataDB(getName(foodType),"",nt);
         db.nutritionDataDao().insertAll(nd);
+        nd = db.nutritionDataDao().findByData(nd.getName(),nd.getBarcode(),nd.getNt());//fetch the correct key
         return nd;
     }
 
