@@ -325,8 +325,11 @@ public final class OcrCaptureActivity extends AppCompatActivity {
     }
 
     public void stopAnimation(){
-        bar.clearAnimation();
-        bar.setVisibility(View.GONE);
-        animation.cancel();
+        runOnUiThread(new Runnable() {
+            public void run() {
+            bar.clearAnimation();
+            bar.setVisibility(View.GONE);
+            animation.cancel();
+        }});
     }
 }
