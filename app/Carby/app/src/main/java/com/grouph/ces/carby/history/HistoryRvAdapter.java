@@ -29,14 +29,12 @@ public class HistoryRvAdapter extends RecyclerView.Adapter<HistoryRvAdapter.Hist
 
     private Context context;
     private List<ConsumptionDB> entries;
-    private ConsumptionDao consumptionDao;
     private NutritionDataDao nutritionDataDao;
 
-    public HistoryRvAdapter(AppDatabase db, Context context) {
+    public HistoryRvAdapter(AppDatabase db, List<ConsumptionDB> entries, Context context) {
         this.context = context;
-        this.consumptionDao = db.consumptionDataDao();
         this.nutritionDataDao = db.nutritionDataDao();
-        this.entries = consumptionDao.getAll();
+        this.entries = entries;
     }
 
     @Override

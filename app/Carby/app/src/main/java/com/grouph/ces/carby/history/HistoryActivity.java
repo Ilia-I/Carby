@@ -15,17 +15,17 @@ public class HistoryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setFragment(new HistoryFragment(), savedInstanceState, "");
+        setFragment(new HistoryMasterFragment(), savedInstanceState, "");
     }
 
-    public void setFragmentHistory(Bundle bundle){
-        Log.d(this.getClass().getName(),"setFragmentResults");
-        setFragment(new HistoryFragment(), bundle, "history_fragment");
+    public void setFragmentHistoryMaster(Bundle bundle){
+        Log.d(this.getClass().getName(),"setFragmentMaster");
+        setFragment(new HistoryMasterFragment(), bundle, "master_fragment");
     }
 
-    public void setFragmentResults(Bundle bundle){
-        Log.d(this.getClass().getName(),"setFragmentResults");
-        setFragment(new ResultsFragment(),bundle, "results_fragment");
+    public void setFragmentHistoryDetail(Bundle bundle){
+        Log.d(this.getClass().getName(),"setFragmentDetail");
+        setFragment(new HistoryDetailFragment(), bundle, "detail_fragment");
     }
 
     private void setFragment(Fragment fragment, Bundle bundle, String backstackKey){
