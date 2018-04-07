@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -50,19 +51,23 @@ public class NutritionResultActivity extends AppCompatActivity {
             }
         }
 
-        if(extras.getInt("id",-1)<0) {
+        if (extras.getInt("id", -1) < 0) {
             hideConsumption();
         }
-        
-        if(extras!=null){
+
+        if (extras != null) {
             try {
                 JSONObject jsonNutritionTable = new JSONObject(extras.getString("jsonNutritionTable"));
                 nutritionTable.setAll(jsonNutritionTable);
-            } catch (JSONException e){
+            } catch (JSONException e) {
                 Log.e("Error", "JSONException in NutritionResultActivity");
             }
         }
 
+        setValues();
+    }
+
+    private void setValues(){
         if(nutritionTable != null) {
             TextView mEnergyVal = findViewById(R.id.energy_val);
             TextView mFatVal = findViewById(R.id.fat_val);
@@ -77,53 +82,27 @@ public class NutritionResultActivity extends AppCompatActivity {
             TextView mProteinVal = findViewById(R.id.protein_val);
             TextView mSaltVal = findViewById(R.id.salt_val);
 
-            if(nutritionTable.getComponentValue("Energy") !=null){
-                mEnergyVal.setText(formatDouble(nutritionTable.getComponentValue("Energy")) + nutritionTable.getEnergyUnit());
-            }
+            setComponent(mEnergyVal,"Energy",nutritionTable.getEnergyUnit());
 
-            if(nutritionTable.getComponentValue("Fat") !=null){
-                mFatVal.setText(formatDouble(nutritionTable.getComponentValue("Fat")) + nutritionTable.getFatsUnit());
-            }
+            setComponent(mFatVal,"Fat",nutritionTable.getFatsUnit());
+            setComponent(mMonoUnsat,"mono-unsaturates",nutritionTable.getFatsUnit());
+            setComponent(mPolyUnsat,"polyunsaturates",nutritionTable.getFatsUnit());
+            setComponent(mSaturatedVal,"saturates",nutritionTable.getFatsUnit());
 
-            if(nutritionTable.getComponentValue("mono-unsaturates") !=null){
-                mMonoUnsat.setText(formatDouble(nutritionTable.getComponentValue("mono-unsaturates")) + nutritionTable.getFatsUnit());
-            }
+            setComponent(mCarbVal,"Carbohydrate",nutritionTable.getCarbohydratesUnit());
+            setComponent(mCarbSugarsVal,"sugars",nutritionTable.getCarbohydratesUnit());
+            setComponent(mCarbPolyolsVal,"polyols",nutritionTable.getCarbohydratesUnit());
+            setComponent(mCarbStarchVal,"starch",nutritionTable.getCarbohydratesUnit());
 
-            if(nutritionTable.getComponentValue("polyunsaturates") !=null){
-                mPolyUnsat.setText(formatDouble(nutritionTable.getComponentValue("polyunsaturates")) + nutritionTable.getFatsUnit());
-            }
+            setComponent(mFibreVal,"Fibre",nutritionTable.getFibreUnit());
+            setComponent(mProteinVal,"Protein",nutritionTable.getProteinUnit());
+            setComponent(mSaltVal,"Salt",nutritionTable.getSaltUnit());
+        }
+    }
 
-            if(nutritionTable.getComponentValue("saturates") !=null){
-                mSaturatedVal.setText(formatDouble(nutritionTable.getComponentValue("saturates")) + nutritionTable.getFatsUnit());
-            }
-
-            if(nutritionTable.getComponentValue("Carbohydrate") !=null){
-                mCarbVal.setText(formatDouble(nutritionTable.getComponentValue("Carbohydrate")) + nutritionTable.getCarbohydratesUnit());
-            }
-
-            if(nutritionTable.getComponentValue("sugars") !=null){
-                mCarbSugarsVal.setText(formatDouble(nutritionTable.getComponentValue("sugars")) + nutritionTable.getCarbohydratesUnit());
-            }
-
-            if(nutritionTable.getComponentValue("polyols") !=null){
-                mCarbPolyolsVal.setText(formatDouble(nutritionTable.getComponentValue("polyols")) + nutritionTable.getCarbohydratesUnit());
-            }
-
-            if(nutritionTable.getComponentValue("starch") !=null){
-                mCarbStarchVal.setText(formatDouble(nutritionTable.getComponentValue("starch")) + nutritionTable.getCarbohydratesUnit());
-            }
-
-            if(nutritionTable.getComponentValue("Fibre") !=null){
-                mFibreVal.setText(formatDouble(nutritionTable.getComponentValue("Fibre")) + nutritionTable.getFibreUnit());
-            }
-
-            if(nutritionTable.getComponentValue("Protein") !=null){
-                mProteinVal.setText(formatDouble(nutritionTable.getComponentValue("Protein")) + nutritionTable.getProteinUnit());
-            }
-
-            if(nutritionTable.getComponentValue("Salt") !=null){
-                mSaltVal.setText(formatDouble(nutritionTable.getComponentValue("Salt")) + nutritionTable.getSaltUnit());
-            }
+    private void setComponent(TextView textView, String componentName, @INutritionTable.MeasurementUnit String unit){
+        if(nutritionTable.getComponentValue(componentName) !=null){
+            textView.setText(formatDouble(nutritionTable.getComponentValue(componentName)) + unit);
         }
     }
 
@@ -229,6 +208,16 @@ public class NutritionResultActivity extends AppCompatActivity {
                     r.setChecked(false);
                 }
             }
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default: return super.onOptionsItemSelected(item);
         }
     }
 }

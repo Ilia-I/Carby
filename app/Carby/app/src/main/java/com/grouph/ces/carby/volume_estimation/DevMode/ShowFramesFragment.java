@@ -183,11 +183,13 @@ public class ShowFramesFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                getActivity().onBackPressed();
+                return true;
             case R.id.action_settings:
                 Intent intent = new Intent(getActivity(),SettingsActivity.class);
                 startActivity(intent);
                 return true;
-
             case R.id.action_accept:
                 if(selected.size()==2) {
                     VolEstActivity activity = ((VolEstActivity)getActivity());
@@ -199,40 +201,41 @@ public class ShowFramesFragment extends Fragment {
                     Toast.makeText(getActivity(), "Please select two images!", Toast.LENGTH_SHORT).show();
                 }
                 return true;
-
             case R.id.action_delete:
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                if(selected.size()>0) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-                builder.setMessage(R.string.dialog_message_delete_img);
-                builder.setTitle(R.string.dialog_title_delete_img);
+                    builder.setMessage(R.string.dialog_message_delete_img);
+                    builder.setTitle(R.string.dialog_title_delete_img);
 
-                builder.setPositiveButton(R.string.ok, (DialogInterface dialog, int id) -> {
-                    Collections.sort(selected, (Integer o1, Integer o2) -> Integer.compare(o1,o2));
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                    for(int k=selected.size()-1;k>=0;k--){
-                        Integer i = selected.get(k);
-                        rfs.get(i).delete(preferences);
-                        rfs.remove(i.intValue());
-                        images.remove(i.intValue());
-                    }
-                    selected = new ArrayList<>();
-                    iga.notifyDataSetChanged();
-                    dialog.dismiss();
-                });
-                builder.setNegativeButton(R.string.cancel, (DialogInterface dialog, int id) -> {
-                    dialog.dismiss();
-                });
+                    builder.setPositiveButton(R.string.ok, (DialogInterface dialog, int id) -> {
+                        Collections.sort(selected, (Integer o1, Integer o2) -> Integer.compare(o1, o2));
+                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                        for (int k = selected.size() - 1; k >= 0; k--) {
+                            Integer i = selected.get(k);
+                            rfs.get(i).delete(preferences);
+                            rfs.remove(i.intValue());
+                            images.remove(i.intValue());
+                        }
+                        selected = new ArrayList<>();
+                        iga.notifyDataSetChanged();
+                        dialog.dismiss();
+                    });
+                    builder.setNegativeButton(R.string.cancel, (DialogInterface dialog, int id) -> {
+                        dialog.dismiss();
+                    });
 
-                AlertDialog dialog = builder.create();
-                dialog.setCanceledOnTouchOutside(false);
-                dialog.show();
+                    AlertDialog dialog = builder.create();
+                    dialog.setCanceledOnTouchOutside(false);
+                    dialog.show();
+                } else {
+                    Toast.makeText(getActivity(), "No images selected!", Toast.LENGTH_SHORT).show();
+                }
                 return true;
             case R.id.food_selector:
                 getActivity().openContextMenu(gv);
                 return true;
             default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
         }
     }
