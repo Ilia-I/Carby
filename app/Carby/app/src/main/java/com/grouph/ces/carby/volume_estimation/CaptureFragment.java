@@ -169,6 +169,9 @@ public final class CaptureFragment extends Fragment {
         mOpenCvCameraView.setOnTouchListener(mOpenCvCameraView);
         preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
+        if(!preferences.contains("foodType"))
+            preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_BREAD).apply();
+
         FloatingActionButton captureButton = getView().findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
             captureButton.setEnabled(false);
