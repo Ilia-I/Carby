@@ -746,19 +746,34 @@ public class   CameraSource {
         }
         Camera camera = Camera.open(requestedCameraId);
 
+        Camera.Parameters parameters = camera.getParameters();
+        Camera.Size result=null;
+        for (Camera.Size size : parameters.getSupportedPreviewSizes()) {
+            if (size.width<=mRequestedPreviewWidth && size.height<=mRequestedPreviewHeight) {
+                if (result==null) {
+                    result=size;
+                } else {
+                    int resultArea=result.width*result.height;
+                    int newArea=size.width*size.height;
+
+                    if (newArea>resultArea) {
+                        result=size;
+                    }
+                }
+            }
+        }
+
         SizePair sizePair = selectSizePair(camera, mRequestedPreviewWidth, mRequestedPreviewHeight);
         if (sizePair == null) {
             throw new RuntimeException("Could not find suitable preview size.");
         }
         Size pictureSize = sizePair.pictureSize();
-        mPreviewSize = sizePair.previewSize();
+        mPreviewSize = new Size(result.width, result.height);
 
         int[] previewFpsRange = selectPreviewFpsRange(camera, mRequestedFps);
         if (previewFpsRange == null) {
             throw new RuntimeException("Could not find suitable preview frames per second range.");
         }
-
-        Camera.Parameters parameters = camera.getParameters();
 
         if (pictureSize != null) {
             parameters.setPictureSize(pictureSize.getWidth(), pictureSize.getHeight());
