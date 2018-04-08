@@ -47,17 +47,20 @@
             android:name=".barcode.BarcodeCaptureActivity"
             android:label="Read Barcode"
             android:parentActivityName=".MainActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/BarcodeTheme"/>
         <activity
             android:name=".ocr.OcrCaptureActivity"
             android:parentActivityName=".MainActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/OCRTheme"/>
         <activity
             android:name=".volume_estimation.VolEstActivity"
             android:label="@string/app_name"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="landscape"
-            android:configChanges="orientation|screenSize">
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/VolumeTheme">
             <intent-filter>
                 <action android:name=".VolEstActivity" />
 

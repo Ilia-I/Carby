@@ -102,6 +102,7 @@ public class CameraSourcePreview extends ViewGroup {
                 mOverlay.clear();
             }
             mStartRequested = false;
+//            mCameraSource.doZoom(50f);
         }
     }
 

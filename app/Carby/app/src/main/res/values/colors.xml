@@ -8,6 +8,10 @@
     <color name="menu2">#13B0A5</color>
     <color name="menu3">#EF6363</color>
 
+    <color name="menu1dark">#b38328</color>
+    <color name="menu2dark">#0c736c</color>
+    <color name="menu3dark">#8f3c3c</color>
+
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
 </resources>
