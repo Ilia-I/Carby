@@ -18,18 +18,22 @@ package com.grouph.ces.carby.ui.camera;
 import android.Manifest;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.hardware.Camera;
 import android.support.annotation.RequiresPermission;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.gms.common.images.Size;
 
 import java.io.IOException;
 
-public class CameraSourcePreview extends ViewGroup {
+public class CameraSourcePreview extends ViewGroup implements View.OnTouchListener {
     private static final String TAG = "CameraSourcePreview";
 
     private Context mContext;
@@ -37,6 +41,8 @@ public class CameraSourcePreview extends ViewGroup {
     private boolean mStartRequested;
     private boolean mSurfaceAvailable;
     private CameraSource mCameraSource;
+
+    private int zoomMode = 0;
 
     private GraphicOverlay mOverlay;
 
@@ -60,6 +66,8 @@ public class CameraSourcePreview extends ViewGroup {
         mCameraSource = cameraSource;
 
         if (mCameraSource != null) {
+            setOnTouchListener(this);
+
             mStartRequested = true;
             startIfReady();
         }
@@ -69,6 +77,7 @@ public class CameraSourcePreview extends ViewGroup {
     public void start(CameraSource cameraSource, GraphicOverlay overlay) throws IOException, SecurityException {
         mOverlay = overlay;
         start(cameraSource);
+        Toast.makeText(this.mContext, "Touch to zoom/unzoom", Toast.LENGTH_LONG).show();
     }
 
     public void stop() {
@@ -106,6 +115,23 @@ public class CameraSourcePreview extends ViewGroup {
         }
     }
 
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        switch (motionEvent.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                if(zoomMode == 0) {
+                    mCameraSource.doZoom(5);
+                    zoomMode = 1;
+                    return true;
+                } else {
+                    mCameraSource.doZoom(0);
+                    zoomMode = 0;
+                    return true;
+                }
+            default: return false;
+        }
+    }
+
     private class SurfaceCallback implements SurfaceHolder.Callback {
         @Override
         public void surfaceCreated(SurfaceHolder surface) {
@@ -126,6 +152,8 @@ public class CameraSourcePreview extends ViewGroup {
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+            Size size = mCameraSource.getPreviewSize();
+            holder.setFixedSize(size.getWidth(), size.getHeight());
         }
     }
 
