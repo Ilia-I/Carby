@@ -39,6 +39,7 @@ public class HistoryMasterFragment extends Fragment {
     public void onResume() {
         super.onResume();
         cv.setSelectionMode(MaterialCalendarView.SELECTION_MODE_SINGLE);
+        this.activity.getSupportActionBar().setTitle("History");
     }
 
     @Override
