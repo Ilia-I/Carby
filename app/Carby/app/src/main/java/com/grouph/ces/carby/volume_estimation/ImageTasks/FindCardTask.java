@@ -10,6 +10,7 @@ import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
@@ -26,12 +27,12 @@ public class FindCardTask extends AsyncTask<Mat, Void, FindCardTask.Result> {
     private static String TAG = "FindCardTask";
 
     public class Result {
-        boolean detected = false;
-        Mat refObject;
+        public RotatedRect boundRect;
+        public double width;
 
-        public Result(boolean detected, Mat refObject) {
-            this.detected = detected;
-            this.refObject = refObject;
+        public Result(RotatedRect r, double w) {
+            this.boundRect = r;
+            this.width = w;
         }
     }
 
@@ -56,7 +57,6 @@ public class FindCardTask extends AsyncTask<Mat, Void, FindCardTask.Result> {
         MatOfPoint2f approxCurve;
         double minArea = 16000/(scalingFactor*scalingFactor);
         double maxArea = 80000/(scalingFactor*scalingFactor);
-        int maxId = -1;
 
         //find contours for all 3 channels
         for (int c = 0; c < 3; c++) {
@@ -77,23 +77,21 @@ public class FindCardTask extends AsyncTask<Mat, Void, FindCardTask.Result> {
 
                 if (approxCurve.total() == 4 && area >= minArea && area <= maxArea) {
                     RotatedRect rect = Imgproc.minAreaRect(temp);
+                    RotatedRect newRect = new RotatedRect(rect.center,rect.size,0);
                     Point points[] = new Point[4];
-                    rect.points(points);
+                    newRect.points(points);
                     if (checkRatio(points)){
-                        maxId = contours.indexOf(contour);
                         Log.e(TAG, "doInBackground: "+area);
+                        rect.size.height*=scalingFactor;
+                        rect.size.width*=scalingFactor;
+                        double w = newRect.size.width*scalingFactor;
+                        return new Result(rect, w);
                     }
                 }
             }
         }
 
-        if(maxId >= 0) {
-            Imgproc.drawContours(output, contours, maxId, new Scalar(255, 0,0), 1);
-            Imgproc.resize(output,output, new org.opencv.core.Size(src.width(),src.height()));
-            return new Result(true, output);
-        }
-
-        return new Result(false, mats[0]);
+        return new Result(new RotatedRect(), -1);
     }
 
     //checks if the ratio of the detected card is within the actual dimension limit
