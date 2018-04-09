@@ -194,7 +194,12 @@ public final class CaptureFragment extends Fragment {
                     }
                 }
             };
-            checkForReferenceObject.run();
+            if(imagesTaken < 1)
+                checkForReferenceObject.run();
+            else {
+                Frame frame = mOpenCvCameraView.getFrame();
+                captureFrame(frame);
+            }
         });
 
         FloatingActionButton searchGallery = getView().findViewById(R.id.search_gallery);
