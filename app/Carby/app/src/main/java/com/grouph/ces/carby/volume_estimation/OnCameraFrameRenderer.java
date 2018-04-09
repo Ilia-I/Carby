@@ -34,6 +34,7 @@ public class OnCameraFrameRenderer {
     private double circleRadius = -1.0;
 
     private MatOfPoint cardPoints;
+    private double cardWidth;
 
     private Point prevCenter;
     private double prevRadius = -1.0;
@@ -65,6 +66,7 @@ public class OnCameraFrameRenderer {
         try {
             FindCardTask.Result result = new FindCardTask().execute(inputFrame).get();
             cardPoints = result.boundRect;
+            cardWidth = result.width;
             return result.width;
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -84,7 +86,7 @@ public class OnCameraFrameRenderer {
     }
 
     public Mat render(Mat inputFrame) {
-        if(isCreditCard) {
+        if(isCreditCard && cardWidth != -1.0) {
             List<MatOfPoint> temp = new ArrayList<>();
             temp.add(cardPoints);
             Imgproc.drawContours(inputFrame, temp, 0, new Scalar(255,0,0), 2);

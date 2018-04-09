@@ -40,7 +40,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     }
 
     private void setRefObjectType() {
-        String s = prefs.getString("ref_object_preference", null);
+        String s = prefs.getString("ref_object_preference", "");
         switch (s) {
             case "cc": isCreditCard = true; break;
             case "pound": isCreditCard = false; break;
