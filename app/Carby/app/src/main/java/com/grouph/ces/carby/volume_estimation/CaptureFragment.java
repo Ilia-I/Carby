@@ -2,12 +2,15 @@ package com.grouph.ces.carby.volume_estimation;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -148,15 +151,20 @@ public final class CaptureFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(getActivity());
+        } else {
+            setup();
+        }
+    }
+
+    private void setup(){
         ConstraintLayout cl = getView().findViewById(R.id.vol_cap_constraint_layout);
         registerForContextMenu(cl);
 
         mOpenCvCameraView = getView().findViewById(R.id.camera_preview);
-        int rc = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA);
-        if (rc == PackageManager.PERMISSION_GRANTED)
-            mOpenCvCameraView.enableView();
-        else
-            requestPermissions();
+        mOpenCvCameraView.enableView();
 
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         activityRef = (VolEstActivity) getActivity();
@@ -252,7 +260,7 @@ public final class CaptureFragment extends Fragment {
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
         imageProcessor = new ImageProcessor(activityRef);
-        mOpenCvCameraView.enableView();
+        if(mOpenCvCameraView!=null) mOpenCvCameraView.enableView();
 
         imagesTaken = 0;
     }
@@ -266,40 +274,63 @@ public final class CaptureFragment extends Fragment {
         imageProcessor.processImages();
     }
 
-    private void requestPermissions() {
+    public void requestPermissions(Activity activity) {
         Log.w(TAG, "Camera permission is not granted. Requesting permission");
 
-        final String[] permissions = new String[]{ Manifest.permission.CAMERA,
+        final String[] permissions = new String[]{
+                Manifest.permission.CAMERA,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(activity,
                 Manifest.permission.CAMERA)) {
-            ActivityCompat.requestPermissions(getActivity(), permissions, RC_HANDLE_CAMERA_PERM);
+            ActivityCompat.requestPermissions(activity, permissions, RC_HANDLE_CAMERA_PERM);
             return;
         }
 
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(activity,
                 Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            ActivityCompat.requestPermissions(getActivity(), permissions, RC_HANDLE_READ_PERM);
+            ActivityCompat.requestPermissions(activity, permissions, RC_HANDLE_READ_PERM);
             return;
         }
 
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(activity,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            ActivityCompat.requestPermissions(getActivity(), permissions, RC_HANDLE_WRITE_PERM);
+            ActivityCompat.requestPermissions(activity, permissions, RC_HANDLE_WRITE_PERM);
+            return;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Log.e(this.getClass().getName(),"onRequestPermissionResult");
+        if (requestCode != RC_HANDLE_CAMERA_PERM) {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
             return;
         }
 
-        final Activity thisActivity = getActivity();
+        if (grantResults.length != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Camera permission granted - initialize the camera source");
+            setup();
+            mOpenCvCameraView.disableView();
+            mOpenCvCameraView.enableView();
+            return;
+        }
 
-        View.OnClickListener listener = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ActivityCompat.requestPermissions(thisActivity, permissions,
-                        RC_HANDLE_CAMERA_PERM);
+        Log.e(TAG, "Permission not granted: results len = " + grantResults.length +
+                " Result code = " + (grantResults.length > 0 ? grantResults[0] : "(empty)"));
+
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                getActivity().onBackPressed();
             }
         };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Multitracker sample")
+                .setMessage(R.string.no_camera_permission)
+                .setPositiveButton(R.string.ok, listener)
+                .show();
     }
 
     public void captureFrame(Frame frame) {
