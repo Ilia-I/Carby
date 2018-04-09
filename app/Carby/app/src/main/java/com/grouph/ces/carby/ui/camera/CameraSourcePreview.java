@@ -18,11 +18,9 @@ package com.grouph.ces.carby.ui.camera;
 import android.Manifest;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.hardware.Camera;
 import android.support.annotation.RequiresPermission;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -120,8 +118,21 @@ public class CameraSourcePreview extends ViewGroup implements View.OnTouchListen
         }
     }
 
+    private static final long DOUBLE_CLICK_TIME_DELTA = 300;//milliseconds
+    long lastClickTime = 0;
+
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
+        long clickTime = System.currentTimeMillis();
+        if (clickTime - lastClickTime < DOUBLE_CLICK_TIME_DELTA){
+            lastClickTime = 0;
+            return onDoubleTap(view,motionEvent);
+        }
+        lastClickTime = clickTime;
+        return false;
+    }
+
+    public boolean onDoubleTap(View view, MotionEvent motionEvent){
         switch (motionEvent.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 if(zoomMode == 0) {
