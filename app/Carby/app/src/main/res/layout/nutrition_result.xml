@@ -621,6 +621,7 @@
                 android:paddingLeft="0dp"
                 android:layout_marginLeft="55dp"
                 android:hint="Value in grams"
+                android:maxLength="5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/radioButton500"
                 />

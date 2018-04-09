@@ -11,6 +11,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -127,6 +128,8 @@ public class NutritionResultActivity extends AppCompatActivity {
         findViewById(R.id.radioGroup).setVisibility(View.GONE);
         findViewById(R.id.add_all_btn).setVisibility(View.GONE);
         findViewById(R.id.consumeLabel).setVisibility(View.GONE);
+        findViewById(R.id.add_all_btn).setVisibility(View.GONE);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 
     private void setupSwipeListener() {
@@ -154,7 +157,6 @@ public class NutritionResultActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), String.format(Locale.ENGLISH, "Added %.1fg consumption", mass), Toast.LENGTH_SHORT).show();
                     addAll.setEnabled(false);
                     hideConsumption();
-                    addAll.setVisibility(View.GONE);
                 }
             }
         });
