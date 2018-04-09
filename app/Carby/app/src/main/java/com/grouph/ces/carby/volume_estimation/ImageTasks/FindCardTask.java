@@ -67,7 +67,6 @@ public class FindCardTask extends AsyncTask<Mat, Void, FindCardTask.Result> {
             Imgproc.dilate(gray,gray,new Mat());
             Imgproc.findContours(gray, contours, new Mat(),
                     Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-
             for (MatOfPoint contour : contours) {
                 MatOfPoint2f temp = new MatOfPoint2f(contour.toArray());
                 Imgproc.boundingRect(contour);
