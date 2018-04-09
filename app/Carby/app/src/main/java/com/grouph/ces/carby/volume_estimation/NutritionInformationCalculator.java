@@ -252,7 +252,7 @@ public class NutritionInformationCalculator {
      */
     public void show(){
         Intent result = new Intent(context, NutritionResultActivity.class);
-        result.putExtra("jsonNutritionTable",nutritionTable.toJasonObject().toString());
+        result.putExtra("jsonNutritionTable", nutritionTable.toJasonObject().toString());
         result.putExtra("id",getID());
         result.putExtra("per100g",false);
         result.putExtra("mass",mass);

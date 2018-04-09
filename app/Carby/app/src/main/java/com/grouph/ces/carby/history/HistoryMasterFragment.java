@@ -18,6 +18,7 @@ import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class HistoryMasterFragment extends Fragment {
@@ -73,7 +74,7 @@ public class HistoryMasterFragment extends Fragment {
                     .commit();
         else
             cv.state().edit()
-                    .setMaximumDate(entries.get(0).getTime())
+                    .setMaximumDate(getTomorrow())
                     .setMinimumDate(entries.get(entries.size()-1).getTime())
                     .commit();
 
@@ -87,6 +88,12 @@ public class HistoryMasterFragment extends Fragment {
             activity.setFragmentHistoryDetail(b);
             cv.setSelectionMode(MaterialCalendarView.SELECTION_MODE_NONE);
         });
+    }
+
+    private Date getTomorrow() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, 1);
+        return cal.getTime();
     }
 
 }

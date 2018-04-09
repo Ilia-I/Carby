@@ -24,6 +24,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class NutritionResultActivity extends AppCompatActivity {
 
@@ -134,7 +135,7 @@ public class NutritionResultActivity extends AppCompatActivity {
                 if (id >= 0) {
                     AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "myDB").allowMainThreadQueries().build();
                     db.consumptionDataDao().insert(new ConsumptionDB(id, mass));
-                    Toast.makeText(getApplicationContext(), "Added "+mass+"g consumption!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), String.format(Locale.ENGLISH, "Added %.1fg consumption", mass), Toast.LENGTH_SHORT).show();
                     addAll.setEnabled(false);
                 }
             }
