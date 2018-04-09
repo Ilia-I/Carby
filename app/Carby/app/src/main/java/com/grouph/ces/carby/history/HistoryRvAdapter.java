@@ -68,7 +68,7 @@ public class HistoryRvAdapter extends RecyclerView.Adapter<HistoryRvAdapter.Hist
     public void onBindViewHolder(HistoryViewHolder holder, int position) {
         holder.date.setText(dateFormat.format(entries.get(position).getTime()));
         holder.quantity.setText(String.format(Locale.ENGLISH, "%.1fg", entries.get(position).getQuantity()));
-        holder.name.setText(NutritionDataDB.sourceName(db.nutritionDataDao().findByID(entries.get(position).getRef()).getSource()));
+        holder.name.setText(String.format(Locale.ENGLISH, "Source: %s", NutritionDataDB.sourceName(db.nutritionDataDao().findByID(entries.get(position).getRef()).getSource())));
     }
 
     @Override

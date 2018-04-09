@@ -797,6 +797,9 @@ public class   CameraSource {
             }
         }
 
+        if (parameters.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE))
+            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        
         // setting mFocusMode to the one set in the params
         mFocusMode = parameters.getFocusMode();
 
