@@ -10,11 +10,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.database.AppDatabase;
 import com.grouph.ces.carby.database.ConsumptionDB;
 import com.grouph.ces.carby.database.ConsumptionDao;
+import com.grouph.ces.carby.database.NutritionDataDao;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 
 import java.text.ParseException;
@@ -72,5 +74,18 @@ public class HistoryDetailFragment extends Fragment {
         RecyclerView recyclerView = activity.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(new HistoryRvAdapter(activity, currentDate));
+        TextView tv = activity.findViewById(R.id.carb_total);
+        tv.setText(String.format(Locale.ENGLISH, "CARBOHYDRATE TOTAL: %.1fg", getTotal()));
+    }
+
+    private double getTotal() {
+        double total = 0;
+        List<ConsumptionDB> entries = db.consumptionDataDao().getAll();
+        for(ConsumptionDB entry : entries) {
+            Double amount = db.nutritionDataDao().findByID(entry.getRef()).getNt().getComponentValue("Carbohydrate");
+            if(amount != null)
+                total += amount;
+        }
+        return total;
     }
 }
