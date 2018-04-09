@@ -1,6 +1,7 @@
 package com.grouph.ces.carby.nutrition_data;
 
 import android.arch.persistence.room.Room;
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.IntDef;
@@ -11,7 +12,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -129,7 +130,8 @@ public class NutritionResultActivity extends AppCompatActivity {
         findViewById(R.id.add_all_btn).setVisibility(View.GONE);
         findViewById(R.id.consumeLabel).setVisibility(View.GONE);
         findViewById(R.id.add_all_btn).setVisibility(View.GONE);
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow( ((EditText)findViewById(R.id.userValue)).getWindowToken(), 0);
     }
 
     private void setupSwipeListener() {
