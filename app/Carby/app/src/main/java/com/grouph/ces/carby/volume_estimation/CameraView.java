@@ -1,8 +1,10 @@
 package com.grouph.ces.carby.volume_estimation;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -27,8 +29,24 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
     private OnCameraFrameRenderer frameRenderer;
     private Mat mRGBA;
 
+    private boolean isCreditCard;
+
+    private SharedPreferences prefs;
+
     public CameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        setRefObjectType();
+    }
+
+    private void setRefObjectType() {
+        String s = prefs.getString("ref_object_preference", null);
+        switch (s) {
+            case "cc": isCreditCard = true; break;
+            case "pound": isCreditCard = false; break;
+            default: isCreditCard = false;
+        }
     }
 
     public void setResolution(int width, int height) {

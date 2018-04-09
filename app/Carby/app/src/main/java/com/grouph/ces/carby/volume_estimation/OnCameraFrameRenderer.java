@@ -3,11 +3,13 @@ package com.grouph.ces.carby.volume_estimation;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.grouph.ces.carby.volume_estimation.ImageTasks.FindCardTask;
 import com.grouph.ces.carby.volume_estimation.ImageTasks.FindPoundTask;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -29,6 +31,8 @@ public class OnCameraFrameRenderer {
     private Point circleCenter;
     private double circleRadius = -1.0;
 
+    private MatOfPoint cardPoints;
+
     private Point prevCenter;
     private double prevRadius = -1.0;
 
@@ -47,6 +51,19 @@ public class OnCameraFrameRenderer {
             e.printStackTrace();
         }
         return circleRadius;
+    }
+
+    public double findCard(Mat inputFrame) {
+        try {
+            FindCardTask.Result result = new FindCardTask().execute(inputFrame).get();
+            cardPoints = result.boundRect;
+            return result.width;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return -1.0;
     }
 
     public void updateBoundingBox(Point p1, Point p2) {

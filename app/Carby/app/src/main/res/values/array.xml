@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="refObjects">
+        <item name="cc">Credit Card</item>
+        <item name="pound">£2 coin</item>
+    </string-array>
+
+    <string-array name="refObjectValues">
+        <item name="cc">cc</item>
+        <item name="pound">pound</item>
+    </string-array>
+</resources>

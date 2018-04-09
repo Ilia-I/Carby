@@ -65,5 +65,19 @@ public class SettingsFragment extends PreferenceFragment {
             dialog.show();
             return true;
         });
+
+//        Preference refObjectPreference = findPreference("ref_object_preference");
+//        refObjectPreference.setOnPreferenceChangeListener((Preference preference, Object newValue) ->{
+//            switch (newValue.toString()) {
+//                case "cc":
+//
+//                    break;
+//
+//                case "pound":
+//                    break;
+//            }
+//
+//            return true;
+//        });
     }
 }
