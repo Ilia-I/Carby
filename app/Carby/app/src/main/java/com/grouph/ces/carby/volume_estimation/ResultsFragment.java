@@ -25,6 +25,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by matthewball on 13/03/2018.
@@ -118,11 +119,18 @@ public class ResultsFragment extends Fragment {
             iv2.setImageBitmap(new RecordFrame(preferences, set + 2).getImage());
             iv2.setVisibility(View.VISIBLE);
         } else {
-            tv.setText(set.toUpperCase()+
-                    ":\n\nTop Dimensions: "+preferences.getInt("topDimensH", 0)+"x"+preferences.getInt("topDimensW", 0)+
-                    "\nSide Dimensions: "+preferences.getInt("sideDimensH", 0)+"x"+preferences.getInt("sideDimensW", 0)+
-                    "\nPixels to cm: "+Double.valueOf(preferences.getString("pixelToCm","0"))+
-                    "\nEstimated Volume: "+getArguments().getDouble("volume")+"cm3");
+            double pixelsToCm = Double.valueOf(preferences.getString("pixelToCm","0"));
+            String s = String.format(Locale.ENGLISH, ":\n\nTop Dimensions: %.2fcm x %.2fcm" +
+                    "\nSide Dimensions: %.2fcm x %.2fcm" +
+                    "\nPixels to cm: %.2f" +
+                    "\nEstimated Volume: %.2f cm3",
+                    preferences.getInt("topDimensH", 0)/pixelsToCm,
+                    preferences.getInt("topDimensW", 0)/pixelsToCm,
+                    preferences.getInt("sideDimensH", 0)/pixelsToCm,
+                    preferences.getInt("sideDimensW", 0)/pixelsToCm,
+                    pixelsToCm,
+                    getArguments().getDouble("volume"));
+            tv.setText(set.toUpperCase()+ s);
             iv1.setVisibility(View.GONE);
             iv2.setVisibility(View.GONE);
         }

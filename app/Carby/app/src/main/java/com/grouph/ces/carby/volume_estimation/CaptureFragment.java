@@ -172,6 +172,7 @@ public final class CaptureFragment extends Fragment {
         if(!preferences.contains("foodType"))
             preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_BREAD).apply();
 
+        Toast.makeText(getActivity(), "Take top-down image in landscape", Toast.LENGTH_LONG).show();
         FloatingActionButton captureButton = getView().findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
             captureButton.setEnabled(false);
@@ -320,6 +321,7 @@ public final class CaptureFragment extends Fragment {
         if (++imagesTaken == 1) {
             toast.setText("Captured 1st image");
             toast.show();
+            Toast.makeText(getActivity(), "Take side-view image in landscape", Toast.LENGTH_LONG).show();
         }
         else {
             toast.setText("Captured 2nd image");
