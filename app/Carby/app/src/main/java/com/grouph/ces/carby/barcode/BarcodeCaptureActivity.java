@@ -39,6 +39,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.vision.MultiProcessor;
@@ -389,6 +390,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         Intent intent = new Intent(this, NutritionResultActivity.class);
         intent.putExtra("jsonNutritionTable", jsonNutritionTable.toString());
         intent.putExtra("id",key);
+        intent.putExtra("source",NutritionResultActivity.SOURCE_BARCODE_SCANNER);
         startActivity(intent);
     }
 

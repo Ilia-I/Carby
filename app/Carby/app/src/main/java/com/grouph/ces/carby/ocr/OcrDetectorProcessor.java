@@ -104,6 +104,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         Intent result = new Intent(context, NutritionResultActivity.class);
         result.putExtra("jsonNutritionTable",nt.toJasonObject().toString());
         result.putExtra("id",key);
+        result.putExtra("source",NutritionResultActivity.SOURCE_NUTRITION_TABLE_SCANNER);
         context.startActivity(result);
     }
 

@@ -256,6 +256,7 @@ public class NutritionInformationCalculator {
         result.putExtra("id",getID());
         result.putExtra("per100g",false);
         result.putExtra("mass",mass);
+        result.putExtra("source",NutritionResultActivity.SOURCE_VOLUME_ESTIMATION);
         context.startActivity(result);
     }
 }

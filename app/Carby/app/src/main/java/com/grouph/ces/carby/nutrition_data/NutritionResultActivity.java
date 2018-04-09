@@ -1,9 +1,13 @@
 package com.grouph.ces.carby.nutrition_data;
 
 import android.arch.persistence.room.Room;
+import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.annotation.IntDef;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,11 +26,23 @@ import com.grouph.ces.carby.volume_estimation.DevMode.OnSwipeListener;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 public class NutritionResultActivity extends AppCompatActivity {
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            SOURCE_BARCODE_SCANNER,
+            SOURCE_NUTRITION_TABLE_SCANNER,
+            SOURCE_VOLUME_ESTIMATION
+    })
+    public @interface NutritionDataSource {}
+    public static final int SOURCE_BARCODE_SCANNER = 0;
+    public static final int SOURCE_NUTRITION_TABLE_SCANNER = 1;
+    public static final int SOURCE_VOLUME_ESTIMATION = 2;
 
     private Bundle extras;
     private INutritionTable nutritionTable;
@@ -36,8 +52,8 @@ public class NutritionResultActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.nutrition_result);
         extras = getIntent().getExtras();
+        setContentView(R.layout.nutrition_result);
         nutritionTable = new NutritionTable();
 
         if (extras.getBoolean("per100g", true)) {
@@ -137,6 +153,8 @@ public class NutritionResultActivity extends AppCompatActivity {
                     db.consumptionDataDao().insert(new ConsumptionDB(id, mass));
                     Toast.makeText(getApplicationContext(), String.format(Locale.ENGLISH, "Added %.1fg consumption", mass), Toast.LENGTH_SHORT).show();
                     addAll.setEnabled(false);
+                    hideConsumption();
+                    addAll.setVisibility(View.GONE);
                 }
             }
         });
@@ -157,6 +175,16 @@ public class NutritionResultActivity extends AppCompatActivity {
             rb.setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) -> check(rb));
         }
 
+        ((EditText)findViewById(R.id.userValue)).addTextChangedListener(new TextWatcher(){
+            @Override
+            public void afterTextChanged(Editable mEdit)
+            {
+                ((RadioButton)findViewById(R.id.radioButtonCustom)).setChecked(true);
+            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after){}
+            public void onTextChanged(CharSequence s, int start, int before, int count){}
+        });
+
         Button addConsumed = findViewById(R.id.add_btn);
         addConsumed.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -172,6 +200,7 @@ public class NutritionResultActivity extends AppCompatActivity {
                             db.consumptionDataDao().insert(new ConsumptionDB(id, quantity));
                             Toast.makeText(getApplicationContext(), "Added "+quantity+"g consumption!", Toast.LENGTH_SHORT).show();
                             addConsumed.setEnabled(false);
+                            hideConsumption();
                         }
                     }
                 } else {
@@ -210,6 +239,21 @@ public class NutritionResultActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    @Override
+    public Resources.Theme getTheme(){
+        Resources.Theme theme = super.getTheme();
+        switch (getIntent().getExtras().getInt("source",-1)){
+            case SOURCE_BARCODE_SCANNER: theme.applyStyle(R.style.BarcodeTheme,true);
+                break;
+            case SOURCE_NUTRITION_TABLE_SCANNER: theme.applyStyle(R.style.OCRTheme,true);
+                break;
+            case SOURCE_VOLUME_ESTIMATION: theme.applyStyle(R.style.VolumeTheme,true);
+                break;
+            default:
+        }
+        return theme;
     }
 
     @Override
