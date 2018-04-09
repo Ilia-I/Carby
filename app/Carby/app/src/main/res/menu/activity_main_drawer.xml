@@ -6,11 +6,8 @@
     <item android:title="Demo">
         <menu>
             <item
-                android:id="@+id/nav_nutrition"
-                android:title="Nutrition table" />
-            <item
                 android:id="@+id/nav_history"
-                android:title="History Viewer" />
+                android:title="History" />
         </menu>
 
     </item>
