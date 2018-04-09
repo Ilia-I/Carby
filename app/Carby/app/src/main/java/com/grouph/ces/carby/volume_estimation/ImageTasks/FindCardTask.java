@@ -27,10 +27,10 @@ public class FindCardTask extends AsyncTask<Mat, Void, FindCardTask.Result> {
     private static String TAG = "FindCardTask";
 
     public class Result {
-        public RotatedRect boundRect;
+        public MatOfPoint boundRect;
         public double width;
 
-        public Result(RotatedRect r, double w) {
+        public Result(MatOfPoint r, double w) {
             this.boundRect = r;
             this.width = w;
         }
@@ -85,13 +85,13 @@ public class FindCardTask extends AsyncTask<Mat, Void, FindCardTask.Result> {
                         rect.size.height*=scalingFactor;
                         rect.size.width*=scalingFactor;
                         double w = newRect.size.width*scalingFactor;
-                        return new Result(rect, w);
+                        return new Result(contour, w);
                     }
                 }
             }
         }
 
-        return new Result(new RotatedRect(), -1);
+        return new Result(new MatOfPoint(), -1);
     }
 
     //checks if the ratio of the detected card is within the actual dimension limit
