@@ -73,7 +73,7 @@ public class FindCardTask extends AsyncTask<Mat, Void, FindCardTask.Result> {
                 double area = Imgproc.contourArea(contour);
                 approxCurve = new MatOfPoint2f();
                 Imgproc.approxPolyDP(temp, approxCurve,
-                        Imgproc.arcLength(temp, true) * 0.07, true);
+                        Imgproc.arcLength(temp, true) * 0.04, true);
 
                 if (approxCurve.total() == 4 && area >= minArea && area <= maxArea) {
                     RotatedRect rect = Imgproc.minAreaRect(temp);
@@ -82,8 +82,7 @@ public class FindCardTask extends AsyncTask<Mat, Void, FindCardTask.Result> {
                     newRect.points(points);
                     if (checkRatio(points)){
                         Log.e(TAG, "doInBackground: "+area);
-                        rect.size.height*=scalingFactor;
-                        rect.size.width*=scalingFactor;
+                        Core.multiply( contour, new Scalar(scalingFactor, scalingFactor), contour );
                         double w = newRect.size.width*scalingFactor;
                         return new Result(contour, w);
                     }
@@ -99,7 +98,7 @@ public class FindCardTask extends AsyncTask<Mat, Void, FindCardTask.Result> {
         double width = points[2].x - points[1].x;
         double height = points[0].y - points[1].y;
         double ratio = width / height;
-        if ((1.55 < ratio && ratio < 1.65) || (0.58 < ratio && ratio < 0.68)) {
+        if (1.55 < ratio && ratio < 1.65) {
             return true;
         }
         return false;
