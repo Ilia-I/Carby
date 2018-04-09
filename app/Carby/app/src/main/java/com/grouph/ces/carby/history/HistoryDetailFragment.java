@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,12 +15,9 @@ import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.database.AppDatabase;
 import com.grouph.ces.carby.database.ConsumptionDB;
 import com.grouph.ces.carby.database.ConsumptionDao;
-import com.grouph.ces.carby.database.NutritionDataDao;
-import com.prolificinteractive.materialcalendarview.CalendarDay;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -84,7 +80,7 @@ public class HistoryDetailFragment extends Fragment {
         for(ConsumptionDB entry : entries) {
             Double amount = db.nutritionDataDao().findByID(entry.getRef()).getNt().getComponentValue("Carbohydrate");
             if(amount != null)
-                total += amount;
+                total += amount*entry.getQuantity()/100;
         }
         return total;
     }

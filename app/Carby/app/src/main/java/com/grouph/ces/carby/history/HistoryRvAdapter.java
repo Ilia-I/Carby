@@ -13,13 +13,11 @@ import android.widget.TextView;
 import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.database.AppDatabase;
 import com.grouph.ces.carby.database.ConsumptionDB;
-import com.grouph.ces.carby.database.ConsumptionDao;
 import com.grouph.ces.carby.database.NutritionDataDB;
-import com.grouph.ces.carby.database.NutritionDataDao;
 import com.grouph.ces.carby.nutrition_data.INutritionTable;
 import com.grouph.ces.carby.nutrition_data.NutritionResultActivity;
+import com.grouph.ces.carby.nutrition_data.NutritionTable;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -97,10 +95,23 @@ public class HistoryRvAdapter extends RecyclerView.Adapter<HistoryRvAdapter.Hist
             int ref = entries.get(position).getRef();
             INutritionTable nt = db.nutritionDataDao().findByID(ref).getNt();
             Intent result = new Intent(context, NutritionResultActivity.class);
-            result.putExtra("jsonNutritionTable",nt.toJasonObject().toString());
+            result.putExtra("jsonNutritionTable",calculateValues(nt,entries.get(position).getQuantity()).toJasonObject().toString());
             result.putExtra("id",-1);
+            result.putExtra("per100g",false);
+            result.putExtra("mass",entries.get(position).getQuantity());
             context.startActivity(result);
             return false;
+        }
+
+        private INutritionTable calculateValues(INutritionTable nt, double quantity) {
+            INutritionTable result = new NutritionTable();
+            for(String component: nt.listOfContents()){
+                Double val = nt.getComponentValue(component);
+                if(val!=null){
+                    result.setComponent(component,val*quantity/100);
+                }
+            }
+            return result;
         }
     }
 }
