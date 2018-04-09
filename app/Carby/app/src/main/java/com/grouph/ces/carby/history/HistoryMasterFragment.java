@@ -16,7 +16,6 @@ import com.grouph.ces.carby.database.ConsumptionDB;
 import com.grouph.ces.carby.database.ConsumptionDao;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -58,10 +57,6 @@ public class HistoryMasterFragment extends Fragment {
         consumptionDao = db.consumptionDataDao();
         List<ConsumptionDB> list = consumptionDao.getAll();
         setCalendar(list);
-
-        linearLayoutManager = new LinearLayoutManager(activity);
-        recyclerView = activity.findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(linearLayoutManager);
     }
 
     private void setCalendar(List<ConsumptionDB> entries) {
@@ -74,7 +69,7 @@ public class HistoryMasterFragment extends Fragment {
                     .commit();
         else
             cv.state().edit()
-                    .setMaximumDate(getTomorrow())
+                    .setMaximumDate(new Date())
                     .setMinimumDate(entries.get(entries.size()-1).getTime())
                     .commit();
 
@@ -88,12 +83,6 @@ public class HistoryMasterFragment extends Fragment {
             activity.setFragmentHistoryDetail(b);
             cv.setSelectionMode(MaterialCalendarView.SELECTION_MODE_NONE);
         });
-    }
-
-    private Date getTomorrow() {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DATE, 1);
-        return cal.getTime();
     }
 
 }

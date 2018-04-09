@@ -1,5 +1,6 @@
 package com.grouph.ces.carby.history;
 
+import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
@@ -20,6 +21,9 @@ import com.grouph.ces.carby.nutrition_data.NutritionResultActivity;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -29,12 +33,29 @@ public class HistoryRvAdapter extends RecyclerView.Adapter<HistoryRvAdapter.Hist
 
     private Context context;
     private List<ConsumptionDB> entries;
-    private NutritionDataDao nutritionDataDao;
+    private AppDatabase db;
 
-    public HistoryRvAdapter(AppDatabase db, List<ConsumptionDB> entries, Context context) {
+    public HistoryRvAdapter(Context context, Date currentDate) {
         this.context = context;
-        this.nutritionDataDao = db.nutritionDataDao();
-        this.entries = entries;
+        this.db = Room.databaseBuilder(context, AppDatabase.class,"myDB").allowMainThreadQueries().build();
+        this.entries = getEntriesForDate(db.consumptionDataDao().getAll(), currentDate);
+    }
+
+
+    private List<ConsumptionDB> getEntriesForDate(List<ConsumptionDB> all, Date date) {
+        List<ConsumptionDB> entriesForDate = new ArrayList<>();
+        Calendar cal1 = Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
+
+        for(ConsumptionDB entry : all) {
+            cal1.setTime(entry.getTime());
+            cal2.setTime(date);
+            boolean sameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                    cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+            if (sameDay)
+                entriesForDate.add(entry);
+        }
+        return entriesForDate;
     }
 
     @Override
@@ -47,7 +68,7 @@ public class HistoryRvAdapter extends RecyclerView.Adapter<HistoryRvAdapter.Hist
     public void onBindViewHolder(HistoryViewHolder holder, int position) {
         holder.date.setText(dateFormat.format(entries.get(position).getTime()));
         holder.quantity.setText(String.format(Locale.ENGLISH, "%.1fg", entries.get(position).getQuantity()));
-        holder.name.setText(NutritionDataDB.sourceName(nutritionDataDao.findByID(entries.get(position).getRef()).getSource()));
+        holder.name.setText(NutritionDataDB.sourceName(db.nutritionDataDao().findByID(entries.get(position).getRef()).getSource()));
     }
 
     @Override
@@ -73,8 +94,8 @@ public class HistoryRvAdapter extends RecyclerView.Adapter<HistoryRvAdapter.Hist
         public boolean onTouch(View view, MotionEvent motionEvent) {
             int position = getLayoutPosition();
 
-            int key = entries.get(position).getKey();
-            INutritionTable nt = nutritionDataDao.findByID(key).getNt();
+            int ref = entries.get(position).getRef();
+            INutritionTable nt = db.nutritionDataDao().findByID(ref).getNt();
             Intent result = new Intent(context, NutritionResultActivity.class);
             result.putExtra("jsonNutritionTable",nt.toJasonObject().toString());
             result.putExtra("id",-1);

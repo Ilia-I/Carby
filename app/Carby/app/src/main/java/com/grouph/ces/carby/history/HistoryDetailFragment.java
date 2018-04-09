@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ import java.util.Locale;
 public class HistoryDetailFragment extends Fragment {
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.ENGLISH);
+    private static final String TAG = "HistoryDetailFragment";
 
     private HistoryActivity activity;
     private AppDatabase db;
@@ -47,7 +49,7 @@ public class HistoryDetailFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         this.activity = (HistoryActivity) this.getActivity();
-        this.db = Room.databaseBuilder(activity ,AppDatabase.class,"myDB").allowMainThreadQueries().build();
+        this.db = Room.databaseBuilder(activity, AppDatabase.class,"myDB").allowMainThreadQueries().build();
         this.consumptionDao = db.consumptionDataDao();
 
         Bundle bundle = getArguments();
@@ -66,27 +68,9 @@ public class HistoryDetailFragment extends Fragment {
                             , cal.get(Calendar.MONTH)
                             , cal.get(Calendar.YEAR)));
         }
-
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(activity);
         RecyclerView recyclerView = activity.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setAdapter(new HistoryRvAdapter(db, getEntriesForDate(), activity));
-    }
-
-    private List<ConsumptionDB> getEntriesForDate() {
-        List<ConsumptionDB> entries = consumptionDao.getAll();
-        List<ConsumptionDB> entriesForDate = new ArrayList<>();
-        Calendar cal1 = Calendar.getInstance();
-        Calendar cal2 = Calendar.getInstance();
-
-        for(ConsumptionDB entry : entries) {
-            cal1.setTime(entry.getTime());
-            cal2.setTime(currentDate);
-            boolean sameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                    cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
-            if (sameDay)
-                entriesForDate.add(entry);
-        }
-        return entriesForDate;
+        recyclerView.setAdapter(new HistoryRvAdapter(activity, currentDate));
     }
 }

@@ -22,6 +22,7 @@ import android.hardware.Camera;
 import android.support.annotation.RequiresPermission;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -42,6 +43,11 @@ public class CameraSourcePreview extends ViewGroup implements View.OnTouchListen
     private boolean mSurfaceAvailable;
     private CameraSource mCameraSource;
 
+    //variable for counting two successive up-down events
+    int clickCount = 0;
+    long startTime;
+    long duration;
+    static final int MAX_DURATION = 500;
     private int zoomMode = 0;
 
     private GraphicOverlay mOverlay;
@@ -111,7 +117,6 @@ public class CameraSourcePreview extends ViewGroup implements View.OnTouchListen
                 mOverlay.clear();
             }
             mStartRequested = false;
-//            mCameraSource.doZoom(50f);
         }
     }
 
@@ -152,8 +157,6 @@ public class CameraSourcePreview extends ViewGroup implements View.OnTouchListen
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            Size size = mCameraSource.getPreviewSize();
-            holder.setFixedSize(size.getWidth(), size.getHeight());
         }
     }
 
