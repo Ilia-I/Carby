@@ -180,29 +180,36 @@ public final class CaptureFragment extends Fragment {
         if(!preferences.contains("foodType"))
             preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_BREAD).apply();
 
+        Toast.makeText(getActivity(), "Take top-down image in landscape", Toast.LENGTH_LONG).show();
         FloatingActionButton captureButton = getView().findViewById(R.id.btn_capture);
         captureButton.setOnClickListener((view) -> {
             captureButton.setEnabled(false);
             toast = Toast.makeText(getActivity(), "Capturing image", Toast.LENGTH_SHORT);
             toast.show();
-            Runnable checkForReferenceObject = new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Frame frame = mOpenCvCameraView.getFrame();
-                        if (frame.getReferenceObjectSize() > 0) {
-                            captureFrame(frame);
-                            captureButton.setEnabled(true);
+
+            if(imagesTaken < 1) {
+                Runnable checkForReferenceObject = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Frame frame = mOpenCvCameraView.getFrame();
+                            if (frame.getReferenceObjectSize() > 0) {
+                                captureFrame(frame);
+                                captureButton.setEnabled(true);
+                            } else {
+                                handler.postDelayed(this, 50);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                        else {
-                            handler.postDelayed(this, 50);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
-                }
-            };
-            checkForReferenceObject.run();
+                };
+                checkForReferenceObject.run();
+            }
+            else {
+                Frame frame = mOpenCvCameraView.getFrame();
+                captureFrame(frame);
+            }
         });
 
         FloatingActionButton searchGallery = getView().findViewById(R.id.search_gallery);
@@ -345,6 +352,7 @@ public final class CaptureFragment extends Fragment {
         if (++imagesTaken == 1) {
             toast.setText("Captured 1st image");
             toast.show();
+            Toast.makeText(getActivity(), "Take side-view image in landscape", Toast.LENGTH_LONG).show();
         }
         else {
             toast.setText("Captured 2nd image");
