@@ -20,6 +20,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
     private static final String TAG = "myCameraView";
     private static final Size FRAME_SIZE = new Size(1280,720);
+    private boolean detectRefObject = true;
 
     private enum Corner { TP_LEFT, TP_RIGHT, BTM_LEFT, BTM_RIGHT, CENTRE }
     private Point p1, p2;
@@ -62,6 +63,10 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         mRGBA = new Mat(1280, 720, CvType.CV_8U);
     }
 
+    public void toggleRefObjectDetection() {
+        detectRefObject = !detectRefObject;
+    }
+
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRGBA = inputFrame.rgba();
@@ -69,11 +74,13 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         synchronized (this) {
             mRGBA.copyTo(frame.getImage());
             frame.setBoundingBox(new Rect(p1, p2));
-            frame.setReferenceObjectSize(frameRenderer.findPound(mRGBA));
+
+            if(detectRefObject)
+                frame.setReferenceObjectSize(frameRenderer.findPound(mRGBA));
         }
         System.gc();
 
-        return frameRenderer.render(mRGBA);
+        return frameRenderer.render(mRGBA, detectRefObject);
     }
 
     @Override

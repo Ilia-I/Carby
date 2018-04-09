@@ -58,26 +58,28 @@ public class OnCameraFrameRenderer {
         boxColor = s;
     }
 
-    public Mat render(Mat inputFrame) {
-        if(circleRadius != -1.0) {
-            // circle center
-            Imgproc.circle(inputFrame, circleCenter, 3, new Scalar(0, 255, 0), -1);
-            // circle outline
-            Imgproc.circle(inputFrame, circleCenter, (int) circleRadius, new Scalar(255, 0, 0), 3);
 
-            prevCenter = circleCenter;
-            prevRadius = circleRadius;
-
-            frameResetCount = 0;
-        } else {
-            if(prevRadius != -1.0 && frameResetCount < 10) {
+    public Mat render(Mat inputFrame, boolean drawRefObject) {
+        if(drawRefObject)
+            if(circleRadius != -1.0) {
                 // circle center
-                Imgproc.circle(inputFrame, prevCenter, 3, new Scalar(0, 255, 0), -1);
+                Imgproc.circle(inputFrame, circleCenter, 3, new Scalar(0, 255, 0), -1);
                 // circle outline
-                Imgproc.circle(inputFrame, prevCenter, (int) prevRadius, new Scalar(255, 0, 0), 3);
+                Imgproc.circle(inputFrame, circleCenter, (int) circleRadius, new Scalar(255, 0, 0), 3);
+
+                prevCenter = circleCenter;
+                prevRadius = circleRadius;
+
+                frameResetCount = 0;
+            } else {
+                if(prevRadius != -1.0 && frameResetCount < 10) {
+                    // circle center
+                    Imgproc.circle(inputFrame, prevCenter, 3, new Scalar(0, 255, 0), -1);
+                    // circle outline
+                    Imgproc.circle(inputFrame, prevCenter, (int) prevRadius, new Scalar(255, 0, 0), 3);
+                }
+                frameResetCount++;
             }
-            frameResetCount++;
-        }
 
         // Draw bounding box
         Imgproc.rectangle(inputFrame, p1, p2, boxColor, 3, Imgproc.LINE_AA,0);

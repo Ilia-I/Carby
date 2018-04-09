@@ -195,6 +195,7 @@ public final class CaptureFragment extends Fragment {
                             Frame frame = mOpenCvCameraView.getFrame();
                             if (frame.getReferenceObjectSize() > 0) {
                                 captureFrame(frame);
+                                mOpenCvCameraView.toggleRefObjectDetection();
                                 captureButton.setEnabled(true);
                             } else {
                                 handler.postDelayed(this, 50);
