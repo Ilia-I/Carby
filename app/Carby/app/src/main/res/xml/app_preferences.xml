@@ -11,6 +11,13 @@
                 android:targetClass="com.grouph.ces.carby.camera_calibration.CameraCalibrationActivity"/>
         </Preference>
 
+        <android.support.v7.preference.ListPreference
+            android:defaultValue="pound"
+            android:key="ref_object_preference"
+            android:title="Reference Object"
+            android:entries="@array/refObjects"
+            android:entryValues="@array/refObjectValues" />
+
     </android.support.v7.preference.PreferenceCategory>
 
     <android.support.v7.preference.PreferenceCategory android:title="Storage">

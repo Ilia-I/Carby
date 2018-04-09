@@ -27,6 +27,7 @@ public class IntegralApproximation {
 
     private static final String TAG = "IntegralApproximation";
     private static final double POUND_RADIUS = 1.42;
+    private static final double CARD_WIDTH = 8.56;
 
     private VolEstActivity activity;
 
@@ -177,7 +178,13 @@ public class IntegralApproximation {
     }
 
     private double pixToCmVal(){
-        return Math.pow(top.getReferenceObjectSize() / POUND_RADIUS,3);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+        String s = prefs.getString("ref_object_preference", null);
+        switch (s) {
+            case "cc": return Math.pow(top.getReferenceObjectSize() / CARD_WIDTH, 3);
+            case "pound": return Math.pow(top.getReferenceObjectSize() / POUND_RADIUS, 3);
+            default: return -1.0;
+        }
     }
 
     public boolean loadTestMats() {
