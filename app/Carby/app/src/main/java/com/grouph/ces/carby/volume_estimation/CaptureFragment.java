@@ -135,6 +135,7 @@ public final class CaptureFragment extends Fragment {
             case R.id.reset_images:
                 imagesTaken = 0;
                 imageProcessor = new ImageProcessor(activityRef);
+                mOpenCvCameraView.toggleRefObjectDetection();
                 Toast.makeText(activityRef, "Reset taken images.", Toast.LENGTH_SHORT).show();
                 return true;
             default:

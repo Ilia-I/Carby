@@ -179,7 +179,7 @@ public class IntegralApproximation {
 
     private double pixToCmVal(){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
-        String s = prefs.getString("ref_object_preference", null);
+        String s = prefs.getString("ref_object_preference", "");
         switch (s) {
             case "cc": return Math.pow(top.getReferenceObjectSize() / CARD_WIDTH, 3);
             case "pound": return Math.pow(top.getReferenceObjectSize() / POUND_RADIUS, 3);

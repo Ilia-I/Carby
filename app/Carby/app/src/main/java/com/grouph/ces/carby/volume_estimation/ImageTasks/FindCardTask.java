@@ -82,7 +82,7 @@ public class FindCardTask extends AsyncTask<Mat, Void, FindCardTask.Result> {
                     newRect.points(points);
                     if (checkRatio(points)){
                         Log.e(TAG, "doInBackground: "+area);
-                        Core.multiply( contour, new Scalar(scalingFactor, scalingFactor), contour );
+                        Core.multiply( contour, new Scalar(scalingFactor, scalingFactor), contour);
                         double w = newRect.size.width*scalingFactor;
                         return new Result(contour, w);
                     }
