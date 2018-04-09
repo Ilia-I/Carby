@@ -177,25 +177,26 @@ public final class CaptureFragment extends Fragment {
             captureButton.setEnabled(false);
             toast = Toast.makeText(getActivity(), "Capturing image", Toast.LENGTH_SHORT);
             toast.show();
-            Runnable checkForReferenceObject = new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Frame frame = mOpenCvCameraView.getFrame();
-                        if (frame.getReferenceObjectSize() > 0) {
-                            captureFrame(frame);
-                            captureButton.setEnabled(true);
+
+            if(imagesTaken < 1) {
+                Runnable checkForReferenceObject = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Frame frame = mOpenCvCameraView.getFrame();
+                            if (frame.getReferenceObjectSize() > 0) {
+                                captureFrame(frame);
+                                captureButton.setEnabled(true);
+                            } else {
+                                handler.postDelayed(this, 50);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                        else {
-                            handler.postDelayed(this, 50);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
-                }
-            };
-            if(imagesTaken < 1)
+                };
                 checkForReferenceObject.run();
+            }
             else {
                 Frame frame = mOpenCvCameraView.getFrame();
                 captureFrame(frame);
