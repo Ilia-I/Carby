@@ -16,6 +16,8 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -38,7 +40,13 @@ public class OnCameraFrameRenderer {
 
     private int frameResetCount = 0;
 
+    private boolean isCreditCard = false;
+
     public OnCameraFrameRenderer() {}
+
+    public void setCreditCard(boolean b) {
+        isCreditCard = b;
+    }
 
     public double findPound(Mat inputFrame) {
         try {
@@ -76,25 +84,30 @@ public class OnCameraFrameRenderer {
     }
 
     public Mat render(Mat inputFrame) {
-        if(circleRadius != -1.0) {
-            // circle center
-            Imgproc.circle(inputFrame, circleCenter, 3, new Scalar(0, 255, 0), -1);
-            // circle outline
-            Imgproc.circle(inputFrame, circleCenter, (int) circleRadius, new Scalar(255, 0, 0), 3);
-
-            prevCenter = circleCenter;
-            prevRadius = circleRadius;
-
-            frameResetCount = 0;
-        } else {
-            if(prevRadius != -1.0 && frameResetCount < 10) {
+        if(isCreditCard) {
+            List<MatOfPoint> temp = new ArrayList<>();
+            temp.add(cardPoints);
+            Imgproc.drawContours(inputFrame, temp, 0, new Scalar(255,0,0), 2);
+        } else
+            if(circleRadius != -1.0) {
                 // circle center
-                Imgproc.circle(inputFrame, prevCenter, 3, new Scalar(0, 255, 0), -1);
+                Imgproc.circle(inputFrame, circleCenter, 3, new Scalar(0, 255, 0), -1);
                 // circle outline
-                Imgproc.circle(inputFrame, prevCenter, (int) prevRadius, new Scalar(255, 0, 0), 3);
+                Imgproc.circle(inputFrame, circleCenter, (int) circleRadius, new Scalar(255, 0, 0), 3);
+
+                prevCenter = circleCenter;
+                prevRadius = circleRadius;
+
+                frameResetCount = 0;
+            } else {
+                if(prevRadius != -1.0 && frameResetCount < 10) {
+                    // circle center
+                    Imgproc.circle(inputFrame, prevCenter, 3, new Scalar(0, 255, 0), -1);
+                    // circle outline
+                    Imgproc.circle(inputFrame, prevCenter, (int) prevRadius, new Scalar(255, 0, 0), 3);
+                }
+                frameResetCount++;
             }
-            frameResetCount++;
-        }
 
         // Draw bounding box
         Imgproc.rectangle(inputFrame, p1, p2, boxColor, 3, Imgproc.LINE_AA,0);

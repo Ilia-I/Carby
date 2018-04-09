@@ -37,7 +37,6 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         super(context, attrs);
 
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        setRefObjectType();
     }
 
     private void setRefObjectType() {
@@ -45,8 +44,9 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         switch (s) {
             case "cc": isCreditCard = true; break;
             case "pound": isCreditCard = false; break;
-            default: isCreditCard = false;
+            default: isCreditCard = false; break;
         }
+        frameRenderer.setCreditCard(isCreditCard);
     }
 
     public void setResolution(int width, int height) {
@@ -75,6 +75,7 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
 
         frame = new Frame();
         frameRenderer = new OnCameraFrameRenderer();
+        setRefObjectType();
         frameRenderer.updateBoundingBox(p1, p2);
 
         mRGBA = new Mat(1280, 720, CvType.CV_8U);
@@ -87,7 +88,10 @@ public class CameraView extends JavaCameraView implements CameraBridgeViewBase.C
         synchronized (this) {
             mRGBA.copyTo(frame.getImage());
             frame.setBoundingBox(new Rect(p1, p2));
-            frame.setReferenceObjectSize(frameRenderer.findPound(mRGBA));
+            if(isCreditCard)
+                frame.setReferenceObjectSize(frameRenderer.findPound(mRGBA));
+            else
+                frame.setReferenceObjectSize(frameRenderer.findCard(mRGBA));
         }
         System.gc();
 
