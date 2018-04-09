@@ -787,7 +787,6 @@ public class   CameraSource {
         parameters.setPreviewFormat(ImageFormat.NV21);
 
         setRotation(camera, parameters, requestedCameraId);
-
         if (mFocusMode != null) {
             if (parameters.getSupportedFocusModes().contains(
                     mFocusMode)) {

@@ -91,16 +91,21 @@ public class HistoryRvAdapter extends RecyclerView.Adapter<HistoryRvAdapter.Hist
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
             int position = getLayoutPosition();
-
-            int ref = entries.get(position).getRef();
-            INutritionTable nt = db.nutritionDataDao().findByID(ref).getNt();
-            Intent result = new Intent(context, NutritionResultActivity.class);
-            result.putExtra("jsonNutritionTable",calculateValues(nt,entries.get(position).getQuantity()).toJasonObject().toString());
-            result.putExtra("id",-1);
-            result.putExtra("per100g",false);
-            result.putExtra("mass",entries.get(position).getQuantity());
-            context.startActivity(result);
-            return false;
+            switch (motionEvent.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    int ref = entries.get(position).getRef();
+                    INutritionTable nt = db.nutritionDataDao().findByID(ref).getNt();
+                    Intent result = new Intent(context, NutritionResultActivity.class);
+                    result.putExtra("jsonNutritionTable",calculateValues(nt,entries.get(position).getQuantity()).toJasonObject().toString());
+                    result.putExtra("id",-1);
+                    result.putExtra("per100g",false);
+                    result.putExtra("mass",entries.get(position).getQuantity());
+                    context.startActivity(result);
+                    return false;
+                default: return false;
+            }
         }
 
         private INutritionTable calculateValues(INutritionTable nt, double quantity) {

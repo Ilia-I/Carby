@@ -14,7 +14,6 @@ import android.widget.TextView;
 import com.grouph.ces.carby.R;
 import com.grouph.ces.carby.database.AppDatabase;
 import com.grouph.ces.carby.database.ConsumptionDB;
-import com.grouph.ces.carby.database.ConsumptionDao;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -30,7 +29,6 @@ public class HistoryDetailFragment extends Fragment {
 
     private HistoryActivity activity;
     private AppDatabase db;
-    private ConsumptionDao consumptionDao;
     private Date currentDate;
 
     @Override
@@ -48,7 +46,6 @@ public class HistoryDetailFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         this.activity = (HistoryActivity) this.getActivity();
         this.db = Room.databaseBuilder(activity, AppDatabase.class,"myDB").allowMainThreadQueries().build();
-        this.consumptionDao = db.consumptionDataDao();
 
         Bundle bundle = getArguments();
         if (bundle != null) {
