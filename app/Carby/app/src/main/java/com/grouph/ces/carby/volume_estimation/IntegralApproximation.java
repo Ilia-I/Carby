@@ -142,7 +142,7 @@ public class IntegralApproximation {
             top.setReferenceObjectSize(top.getReferenceObjectSize()*sideWidth/topWidth);
         }
 
-        Imgproc.resize(smallerMat, smallerMat, new Size(scaleWidth, scaleHeight));
+        Imgproc.resize(smallerMat, smallerMat, new Size(scaleWidth, scaleHeight), 0,0, Imgproc.INTER_NEAREST);
     }
 
     public double getApproximation() {
