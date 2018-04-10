@@ -43,7 +43,7 @@ public class NutritionDataDB {
     private String name;
 
     @ColumnInfo(name = "source")
-    private int source;
+    private @DataSource int source;
 
     @Ignore
     public NutritionDataDB(String barcode, INutritionTable nt, @DataSource int source){
