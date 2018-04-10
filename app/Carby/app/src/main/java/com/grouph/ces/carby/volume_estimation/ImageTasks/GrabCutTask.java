@@ -48,7 +48,7 @@ public class GrabCutTask extends AsyncTask<Object, Void, Mat> {
         Rect rect = new Rect(p1, p2);
 
         Imgproc.grabCut(scaledImg, firstMask, rect, bgModel, fgModel,
-                25, Imgproc.GC_INIT_WITH_RECT);
+                10, Imgproc.GC_INIT_WITH_RECT);
 
         Core.compare(firstMask, source, firstMask, Core.CMP_EQ);
         Mat foreground = new Mat(scaledImg.size(), CvType.CV_8UC3, white);
