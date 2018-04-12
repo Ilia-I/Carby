@@ -262,16 +262,19 @@ public class ShowFramesFragment extends Fragment {
         switch (preferences.getInt("foodType", 0)) {
             case NutritionInformationCalculator.FOOD_OATS:
                 menu.findItem(R.id.food_oats).setChecked(true);
-            case NutritionInformationCalculator.FOOD_PASTA_BOILED:
-                menu.findItem(R.id.food_pasta_boiled).setChecked(true);
-                break;
-            case NutritionInformationCalculator.FOOD_NOODLES_BOILED:
-                menu.findItem(R.id.food_noodles_boiled).setChecked(true);
-                break;
+//            case NutritionInformationCalculator.FOOD_PASTA_BOILED:
+//                menu.findItem(R.id.food_pasta_boiled).setChecked(true);
+//                break;
+//            case NutritionInformationCalculator.FOOD_NOODLES_BOILED:
+//                menu.findItem(R.id.food_noodles_boiled).setChecked(true);
+//                break;
             case NutritionInformationCalculator.FOOD_RICE_BOILED:
                 menu.findItem(R.id.food_rice_boiled).setChecked(true);
                 break;
             case NutritionInformationCalculator.FOOD_POTATO_BOILED:
+                menu.findItem(R.id.food_potato_boiled).setChecked(true);
+                break;
+            case NutritionInformationCalculator.FOOD_POTATO_RAW:
                 menu.findItem(R.id.food_potato_boiled).setChecked(true);
                 break;
             case NutritionInformationCalculator.FOOD_POTATO_SWEET:
@@ -304,20 +307,25 @@ public class ShowFramesFragment extends Fragment {
                 item.setChecked(true);
                 generateToastFoodSelected(NutritionInformationCalculator.FOOD_EGG_BOILED);
                 return true;
-            case R.id.food_noodles_boiled:
-                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_NOODLES_BOILED).apply();
-                item.setChecked(true);
-                generateToastFoodSelected(NutritionInformationCalculator.FOOD_NOODLES_BOILED);
-                return true;
-            case R.id.food_pasta_boiled:
-                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_PASTA_BOILED).apply();
-                item.setChecked(true);
-                generateToastFoodSelected(NutritionInformationCalculator.FOOD_PASTA_BOILED);
-                return true;
+//            case R.id.food_noodles_boiled:
+//                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_NOODLES_BOILED).apply();
+//                item.setChecked(true);
+//                generateToastFoodSelected(NutritionInformationCalculator.FOOD_NOODLES_BOILED);
+//                return true;
+//            case R.id.food_pasta_boiled:
+//                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_PASTA_BOILED).apply();
+//                item.setChecked(true);
+//                generateToastFoodSelected(NutritionInformationCalculator.FOOD_PASTA_BOILED);
+//                return true;
             case R.id.food_potato_boiled:
                 preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_POTATO_BOILED).apply();
                 item.setChecked(true);
                 generateToastFoodSelected(NutritionInformationCalculator.FOOD_POTATO_BOILED);
+                return true;
+            case R.id.food_potato_raw:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_POTATO_RAW).apply();
+                item.setChecked(true);
+                generateToastFoodSelected(NutritionInformationCalculator.FOOD_POTATO_RAW);
                 return true;
             case R.id.food_potato_sweet:
                 preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_POTATO_SWEET).apply();

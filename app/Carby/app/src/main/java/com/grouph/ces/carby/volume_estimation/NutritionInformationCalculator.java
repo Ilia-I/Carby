@@ -30,6 +30,7 @@ public class NutritionInformationCalculator {
             FOOD_NOODLES_BOILED,
             FOOD_RICE_BOILED,
             FOOD_POTATO_BOILED,
+            FOOD_POTATO_RAW,
             FOOD_POTATO_SWEET,
             FOOD_EGG_BOILED
     })
@@ -40,6 +41,7 @@ public class NutritionInformationCalculator {
     public static final int FOOD_NOODLES_BOILED = R.string.density_noodles_boiled;
     public static final int FOOD_RICE_BOILED = R.string.density_rice_boiled;
     public static final int FOOD_POTATO_BOILED = R.string.density_potato_boiled;
+    public static final int FOOD_POTATO_RAW = R.string.density_potato_raw;
     public static final int FOOD_POTATO_SWEET = R.string.density_potato_sweet;
     public static final int FOOD_EGG_BOILED = R.string.density_egg_boiled;
 
@@ -66,6 +68,8 @@ public class NutritionInformationCalculator {
         this.mass = this.volume * Double.valueOf(context.getResources().getString(foodType));
         Log.d(this.getClass().getName(),"Calculated mass:"+mass+"g");
         nutritionTable = new NutritionTable();
+
+        if(foodType==FOOD_POTATO_RAW) foodType = FOOD_POTATO_BOILED;
 
         //create a holder temporary nutrition table to display the results
         nutritionTable.setComponent("Energy",getEnergyVal()*mass/100.0);
@@ -213,6 +217,7 @@ public class NutritionInformationCalculator {
             case FOOD_NOODLES_BOILED: return "FOOD_NOODLES_BOILED";
             case FOOD_RICE_BOILED: return "FOOD_RICE_BOILED";
             case FOOD_POTATO_BOILED: return "FOOD_POTATO_BOILED";
+            case FOOD_POTATO_RAW: return "FOOD_POTATO_RAW";
             case FOOD_POTATO_SWEET: return "FOOD_POTATO_SWEET";
             case FOOD_EGG_BOILED: return "FOOD_EGG_BOILED";
             default:return "";
