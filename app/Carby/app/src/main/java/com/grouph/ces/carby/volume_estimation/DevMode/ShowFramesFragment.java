@@ -268,7 +268,7 @@ public class ShowFramesFragment extends Fragment {
 //                break;
 //            case NutritionInformationCalculator.FOOD_NOODLES_BOILED:
 //                menu.findItem(R.id.food_noodles_boiled).setChecked(true);
-//                break;    
+//                break;
             case NutritionInformationCalculator.FOOD_RICE_BOILED:
                 menu.findItem(R.id.food_rice_boiled).setChecked(true);
                 break;
