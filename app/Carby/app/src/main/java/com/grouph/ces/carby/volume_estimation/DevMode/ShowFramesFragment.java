@@ -262,6 +262,7 @@ public class ShowFramesFragment extends Fragment {
         switch (preferences.getInt("foodType", 0)) {
             case NutritionInformationCalculator.FOOD_OATS:
                 menu.findItem(R.id.food_oats).setChecked(true);
+                break;
             case NutritionInformationCalculator.FOOD_PASTA_BOILED:
                 menu.findItem(R.id.food_pasta_boiled).setChecked(true);
                 break;
