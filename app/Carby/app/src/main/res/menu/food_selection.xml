@@ -29,5 +29,16 @@
         </item>
         <item android:id="@+id/reset_images"
             android:title="Reset Current Images"></item>
+        <item android:id="@+id/ref_obj_select"
+            android:title="Reference Object">
+            <menu>
+                <group android:checkableBehavior="single">
+                    <item android:id="@+id/ref_coin"
+                        android:title="Reference Coin" />
+                    <item android:id="@+id/ref_card"
+                        android:title="Reference Card" />
+                </group>
+            </menu>
+        </item>
     </group>
 </menu>

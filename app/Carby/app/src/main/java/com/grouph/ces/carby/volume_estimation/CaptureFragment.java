@@ -91,6 +91,15 @@ public final class CaptureFragment extends Fragment {
                 preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_BREAD).apply();
                 break;
         }
+
+        switch(preferences.getString("ref_object_preference", "pound")){
+            case "cc": menu.findItem(R.id.ref_card).setChecked(true);
+                break;
+            default:
+                preferences.edit().putString("ref_object_preference", "pound").apply();
+                menu.findItem(R.id.ref_coin).setChecked(true);
+                break;
+        }
     }
 
     @Override
@@ -146,6 +155,18 @@ public final class CaptureFragment extends Fragment {
                 imageProcessor = new ImageProcessor(activityRef);
                 mOpenCvCameraView.toggleRefObjectDetection();
                 Toast.makeText(activityRef, "Reset taken images.", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.ref_card:
+                item.setChecked(true);
+                preferences.edit().putString("ref_object_preference","cc").apply();
+                onPause();
+                onResume();
+                return true;
+            case R.id.ref_coin:
+                item.setChecked(true);
+                preferences.edit().putString("ref_object_preference","pound").apply();
+                onPause();
+                onResume();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
