@@ -21,15 +21,18 @@ import android.content.res.Configuration;
 import android.support.annotation.RequiresPermission;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.gms.common.images.Size;
 
 import java.io.IOException;
 
-public class CameraSourcePreview extends ViewGroup {
+public class CameraSourcePreview extends ViewGroup implements View.OnTouchListener {
     private static final String TAG = "CameraSourcePreview";
 
     private Context mContext;
@@ -37,6 +40,13 @@ public class CameraSourcePreview extends ViewGroup {
     private boolean mStartRequested;
     private boolean mSurfaceAvailable;
     private CameraSource mCameraSource;
+
+    //variable for counting two successive up-down events
+    int clickCount = 0;
+    long startTime;
+    long duration;
+    static final int MAX_DURATION = 500;
+    private int zoomMode = 0;
 
     private GraphicOverlay mOverlay;
 
@@ -60,6 +70,8 @@ public class CameraSourcePreview extends ViewGroup {
         mCameraSource = cameraSource;
 
         if (mCameraSource != null) {
+            setOnTouchListener(this);
+
             mStartRequested = true;
             startIfReady();
         }
@@ -69,6 +81,7 @@ public class CameraSourcePreview extends ViewGroup {
     public void start(CameraSource cameraSource, GraphicOverlay overlay) throws IOException, SecurityException {
         mOverlay = overlay;
         start(cameraSource);
+        Toast.makeText(this.mContext, "Touch to zoom/unzoom", Toast.LENGTH_LONG).show();
     }
 
     public void stop() {
@@ -102,6 +115,36 @@ public class CameraSourcePreview extends ViewGroup {
                 mOverlay.clear();
             }
             mStartRequested = false;
+        }
+    }
+
+    private static final long DOUBLE_CLICK_TIME_DELTA = 300;//milliseconds
+    long lastClickTime = 0;
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        long clickTime = System.currentTimeMillis();
+        if (clickTime - lastClickTime < DOUBLE_CLICK_TIME_DELTA){
+            lastClickTime = 0;
+            return onDoubleTap(view,motionEvent);
+        }
+        lastClickTime = clickTime;
+        return false;
+    }
+
+    public boolean onDoubleTap(View view, MotionEvent motionEvent){
+        switch (motionEvent.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                if(zoomMode == 0) {
+                    mCameraSource.doZoom(5);
+                    zoomMode = 1;
+                    return true;
+                } else {
+                    mCameraSource.doZoom(0);
+                    zoomMode = 0;
+                    return true;
+                }
+            default: return false;
         }
     }
 

@@ -746,19 +746,35 @@ public class   CameraSource {
         }
         Camera camera = Camera.open(requestedCameraId);
 
+        Camera.Parameters parameters = camera.getParameters();
+        Camera.Size result=null;
+        for (Camera.Size size : parameters.getSupportedPreviewSizes()) {
+            if (size.width<=mRequestedPreviewWidth && size.height<=mRequestedPreviewHeight) {
+                if (result==null) {
+                    result=size;
+                } else {
+                    int resultArea=result.width*result.height;
+                    int newArea=size.width*size.height;
+
+                    if (newArea>resultArea) {
+                        result=size;
+                    }
+                }
+            }
+        }
+//        Camera.Size result = getOptimalPreviewSize(parameters.getSupportedPreviewSizes(), mRequestedPreviewWidth, mRequestedPreviewHeight);
+
         SizePair sizePair = selectSizePair(camera, mRequestedPreviewWidth, mRequestedPreviewHeight);
         if (sizePair == null) {
             throw new RuntimeException("Could not find suitable preview size.");
         }
         Size pictureSize = sizePair.pictureSize();
-        mPreviewSize = sizePair.previewSize();
+        mPreviewSize = new Size(result.width, result.height);
 
         int[] previewFpsRange = selectPreviewFpsRange(camera, mRequestedFps);
         if (previewFpsRange == null) {
             throw new RuntimeException("Could not find suitable preview frames per second range.");
         }
-
-        Camera.Parameters parameters = camera.getParameters();
 
         if (pictureSize != null) {
             parameters.setPictureSize(pictureSize.getWidth(), pictureSize.getHeight());
@@ -771,7 +787,6 @@ public class   CameraSource {
         parameters.setPreviewFormat(ImageFormat.NV21);
 
         setRotation(camera, parameters, requestedCameraId);
-
         if (mFocusMode != null) {
             if (parameters.getSupportedFocusModes().contains(
                     mFocusMode)) {
@@ -781,6 +796,9 @@ public class   CameraSource {
             }
         }
 
+        if (parameters.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE))
+            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        
         // setting mFocusMode to the one set in the params
         mFocusMode = parameters.getFocusMode();
 
@@ -799,7 +817,6 @@ public class   CameraSource {
         mFlashMode = parameters.getFlashMode();
 
         camera.setParameters(parameters);
-
         // Four frame buffers are needed for working with the camera:
         //
         //   one for the frame that is currently being executed upon in doing detection
@@ -812,6 +829,39 @@ public class   CameraSource {
         camera.addCallbackBuffer(createPreviewBuffer(mPreviewSize));
 
         return camera;
+    }
+
+    private Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int w, int h) {
+        final double ASPECT_TOLERANCE = 0.1;
+        double targetRatio = (double) w / h;
+        if (sizes == null) return null;
+
+        Camera.Size optimalSize = null;
+        double minDiff = Double.MAX_VALUE;
+
+        int targetHeight = h;
+
+        // Try to find an size match aspect ratio and size
+        for (Camera.Size size : sizes) {
+            double ratio = (double) size.width / size.height;
+            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
+            if (Math.abs(size.height - targetHeight) < minDiff) {
+                optimalSize = size;
+                minDiff = Math.abs(size.height - targetHeight);
+            }
+        }
+
+        // Cannot find the one match the aspect ratio, ignore the requirement
+        if (optimalSize == null) {
+            minDiff = Double.MAX_VALUE;
+            for (Camera.Size size : sizes) {
+                if (Math.abs(size.height - targetHeight) < minDiff) {
+                    optimalSize = size;
+                    minDiff = Math.abs(size.height - targetHeight);
+                }
+            }
+        }
+        return optimalSize;
     }
 
     /**

@@ -7,6 +7,8 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.grouph.ces.carby.volume_estimation.Frame;
+import com.grouph.ces.carby.volume_estimation.ResultsFragment;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
@@ -20,12 +22,13 @@ import java.util.Map;
 
 /**
  * Created by Martin Peev on 24.03.2018 г..
- * Version: 0.7
+ * Version: 0.8
  */
 
 public class RecordFrame {
     private static final String prefix = "takePicture_";
     private String fileName;
+    private double pixelsPerCm = -1.0;
     private Rect boundingBox;
     private String encodedImg;
 
@@ -34,24 +37,15 @@ public class RecordFrame {
         loadObj(preferences);
     }
 
-    public RecordFrame(Mat frame, Rect boundingBox){
-        this(""+Calendar.getInstance().getTime().getTime(),frame,boundingBox);
+    public RecordFrame(Frame frame){
+        this(""+Calendar.getInstance().getTime().getTime(), frame);
     }
 
-    public RecordFrame(String fileName, Mat frame, Rect boundingBox) {
+    public RecordFrame(String fileName, Frame frame) {
         this.fileName = namePrefix(fileName);
-        this.encodedImg = getStringFromBitmap(matToBitmap(frame));
-        this.boundingBox = boundingBox;
-    }
-
-    public RecordFrame(Bitmap frame, Rect boundingBox){
-        this(""+Calendar.getInstance().getTime().getTime(),frame,boundingBox);
-    }
-
-    public RecordFrame(String fileName, Bitmap frame, Rect boundingBox) {
-        this.fileName = namePrefix(fileName);
-        this.encodedImg = getStringFromBitmap(frame);
-        this.boundingBox = boundingBox;
+        this.encodedImg = getStringFromBitmap(matToBitmap(frame.getImage()));
+        this.boundingBox = frame.getBoundingBox();
+        this.pixelsPerCm = frame.getReferenceObjectSize();
     }
 
     public void saveObj(SharedPreferences preferences){
@@ -70,6 +64,7 @@ public class RecordFrame {
         RecordFrame obj = gson.fromJson(json, RecordFrame.class);
         this.encodedImg = obj.getEncodedImg();
         this.boundingBox = obj.getBoundingBox();
+        this.pixelsPerCm = obj.getPixelsPerCm();
         return true;
     }
 
@@ -77,8 +72,12 @@ public class RecordFrame {
         return fileName;
     }
 
-    public Bitmap getFrame() {
+    public Bitmap getImage() {
         return getBitmapFromString(encodedImg);
+    }
+
+    public double getPixelsPerCm() {
+        return pixelsPerCm;
     }
 
     private String getEncodedImg(){return encodedImg;}
@@ -88,7 +87,11 @@ public class RecordFrame {
     }
 
     private String namePrefix(String name){
-        if(name.startsWith(prefix)){
+        if(name.startsWith(prefix)
+                ||name.startsWith(ResultsFragment.IMAGE_SET_ORIGINAL)
+                ||name.startsWith(ResultsFragment.IMAGE_SET_MASK)
+                ||name.startsWith(ResultsFragment.IMAGE_SET_STRETCH)
+                ){
             return name;
         } else {
             return prefix+name;
@@ -167,5 +170,11 @@ public class RecordFrame {
     private Bitmap getBitmapFromString(String stringPicture) {
         byte[] decodedString = Base64.decode(stringPicture, Base64.DEFAULT);
         return BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+    }
+
+    public void delete(SharedPreferences preferences) {
+        SharedPreferences.Editor prefsEditor = preferences.edit();
+        prefsEditor.remove(getFileName());
+        prefsEditor.apply();
     }
 }

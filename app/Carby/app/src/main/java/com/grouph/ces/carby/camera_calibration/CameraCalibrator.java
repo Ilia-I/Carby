@@ -17,10 +17,27 @@ import org.opencv.imgproc.Imgproc;
 
 import android.util.Log;
 
-public class CameraCalibrator {
-    private static final String TAG = "OpenCVCameraCalibrator";
+import java.util.ArrayList;
+import java.util.List;
 
-    private final Size mPatternSize = new Size(7, 9);
+import org.opencv.calib3d.Calib3d;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfDouble;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.MatOfPoint3f;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+
+import android.util.Log;
+
+public class CameraCalibrator {
+    private static final String TAG = "CameraCalibrator";
+
+    private final Size mPatternSize = new Size(4, 11);
     private final int mCornersSize = (int)(mPatternSize.width * mPatternSize.height);
     private boolean mPatternWasFound = false;
     private MatOfPoint2f mCorners = new MatOfPoint2f();
@@ -123,7 +140,7 @@ public class CameraCalibrator {
     }
 
     private void findPattern(Mat grayFrame) {
-        mPatternWasFound = Calib3d.findChessboardCorners(grayFrame, mPatternSize,
+        mPatternWasFound = Calib3d.findCirclesGrid(grayFrame, mPatternSize,
                 mCorners, Calib3d.CALIB_CB_ASYMMETRIC_GRID);
     }
 

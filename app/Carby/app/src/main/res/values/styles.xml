@@ -6,7 +6,30 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    </style>
 
+    <style name="BarcodeTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/menu1</item>
+        <item name="colorPrimaryDark">@color/menu1dark</item>
+        <item name="colorAccent">@color/menu1</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    </style>
+
+    <style name="OCRTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/menu2</item>
+        <item name="colorPrimaryDark">@color/menu2dark</item>
+        <item name="colorAccent">@color/menu2</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    </style>
+
+    <style name="VolumeTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/menu3</item>
+        <item name="colorPrimaryDark">@color/menu3dark</item>
+        <item name="colorAccent">@color/menu3</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     </style>
 

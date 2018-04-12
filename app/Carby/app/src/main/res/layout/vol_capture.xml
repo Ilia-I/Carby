@@ -4,7 +4,8 @@
     android:orientation="horizontal"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:id="@+id/vol_cap_constraint_layout">
+    android:id="@+id/vol_cap_constraint_layout"
+    android:theme="@style/VolumeTheme">
 
     <FrameLayout
         android:id="@+id/camera_preview_frame"
@@ -25,37 +26,38 @@
 
     </FrameLayout>
 
-        <android.support.design.widget.FloatingActionButton
-                android:id="@+id/btn_capture"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:layout_marginBottom="16dp"
-            android:layout_marginRight="60dp"
-            android:src="@drawable/ic_photo_camera"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/search_gallery"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:layout_marginBottom="16dp"
-            android:layout_marginRight="60dp"
-            android:layout_toLeftOf="@+id/btn_capture"
-            android:src="@drawable/ic_search_gallery"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toLeftOf="@id/btn_capture"/>
-
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/btn_reset"
+        android:id="@+id/btn_capture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="15dp"
-        android:src="@drawable/ic_reset"
+        android:layout_marginBottom="16dp"
+        android:layout_marginRight="60dp"
+        android:src="@drawable/ic_photo_camera"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/search_gallery"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="15dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginRight="60dp"
+        android:layout_toLeftOf="@+id/btn_capture"
+        android:src="@drawable/ic_search_gallery"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/btn_capture"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/btn_more"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="15dp"
+        android:src="@drawable/ic_more"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
+        android:visibility="visible"
         />
 
 

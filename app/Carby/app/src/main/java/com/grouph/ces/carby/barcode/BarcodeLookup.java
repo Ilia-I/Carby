@@ -1,4 +1,4 @@
-package com.grouph.ces.carby.barcodescanner;
+package com.grouph.ces.carby.barcode;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -6,6 +6,7 @@ import android.util.Log;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.grouph.ces.carby.nutrition_data.ANutritionTable;
 import com.grouph.ces.carby.nutrition_data.INutritionTable;
 import com.grouph.ces.carby.nutrition_data.NutritionTable;
 
@@ -49,8 +50,8 @@ public class BarcodeLookup extends AsyncTask<Barcode, Void, INutritionTable> {
                         JsonElement product = root.getAsJsonObject().get("product");
                         JsonElement nutrients = product.getAsJsonObject().get("nutriments");
 
-                        String productName = product.getAsJsonObject().get("product_name").toString().replace("\"", "");
-                        String servingSize = product.getAsJsonObject().get("serving_size").toString().replace("\"", "");
+//                        String productName = product.getAsJsonObject().get("product_name").toString().replace("\"", "");
+//                        String servingSize = product.getAsJsonObject().get("serving_size").toString().replace("\"", "");
 
                         double energy100g = getNutrientValue(nutrients, "energy_100g");
 
@@ -70,7 +71,8 @@ public class BarcodeLookup extends AsyncTask<Barcode, Void, INutritionTable> {
 
                         INutritionTable nutritionTable = new NutritionTable();
                         if(energy100g != -1.0) {
-                            nutritionTable.setComponent("Energy", energy100g);
+                            nutritionTable.setEnergy(energy100g, ANutritionTable.KILOJOULES_UNIT);
+//                            nutritionTable.setComponent("Energy", energy100g);
                         }
                         if(fat100g!=-1.0){
                             nutritionTable.setComponent("Fat", fat100g);

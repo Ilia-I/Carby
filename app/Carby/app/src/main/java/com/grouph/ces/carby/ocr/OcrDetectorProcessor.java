@@ -16,7 +16,6 @@
 package com.grouph.ces.carby.ocr;
 
 import android.arch.persistence.room.Room;
-import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.util.SparseArray;
@@ -32,14 +31,12 @@ import com.grouph.ces.carby.nutrition_data.NutritionResultActivity;
 import com.grouph.ces.carby.nutrition_data.NutritionTable;
 import com.grouph.ces.carby.ui.camera.GraphicOverlay;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Processor which gets detects and processes the nutrition table
@@ -47,7 +44,7 @@ import java.util.Set;
 public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
     private static final int NUM_SCANS = 5;
-    private Context context;
+    private OcrCaptureActivity context;
     private GraphicOverlay<OcrGraphic> mGraphicOverlay;
     private int scan;
     private String barcode;
@@ -55,7 +52,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
     private List<List<String>> lineCollector;
     private long startTime;
 
-    public OcrDetectorProcessor(Context applicationContext, GraphicOverlay<OcrGraphic> ocrGraphicOverlay) {
+    public OcrDetectorProcessor(OcrCaptureActivity applicationContext, GraphicOverlay<OcrGraphic> ocrGraphicOverlay) {
         this.context = applicationContext;
         this.mGraphicOverlay = ocrGraphicOverlay;
         this.scan = 0;
@@ -63,7 +60,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         lineCollector = new ArrayList<>();
     }
 
-    public OcrDetectorProcessor(Context applicationContext, GraphicOverlay<OcrGraphic> ocrGraphicOverlay, String barcode) {
+    public OcrDetectorProcessor(OcrCaptureActivity applicationContext, GraphicOverlay<OcrGraphic> ocrGraphicOverlay, String barcode) {
         this(applicationContext,ocrGraphicOverlay);
         this.barcode = barcode;
     }
@@ -90,21 +87,24 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
             scan--;
             if(scan<=0){
                 scanComplete = true;
+                context.stopAnimation();
             }
         } else if(scanComplete){
             Log.d(this.getClass().getName(),"LineCorrector:"+lineCollector.size());
             INutritionTable nt = tableMatcher(errorCorrectNums());
             Log.v("OcrDetectorProcessor","NutritionTable:\n"+nt);
-            if(barcode!=null)   record(barcode,nt);
+            int key = record(barcode,nt);
             scanComplete = false;
             Log.d(this.getClass().getName(),"exec time:"+(System.currentTimeMillis() - startTime)+"ms");
-            showResult(nt);
+            showResult(nt,key);
         }
     }
 
-    private void showResult(INutritionTable nt) {
+    private void showResult(INutritionTable nt,int key) {
         Intent result = new Intent(context, NutritionResultActivity.class);
         result.putExtra("jsonNutritionTable",nt.toJasonObject().toString());
+        result.putExtra("id",key);
+        result.putExtra("source",NutritionResultActivity.SOURCE_NUTRITION_TABLE_SCANNER);
         context.startActivity(result);
     }
 
@@ -227,10 +227,17 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
      * @param barcode - barcode identifier for the nutrition table
      * @param nt - nutrition table to store
      */
-    private void record(String barcode, INutritionTable nt) {
+    private int record(String barcode, INutritionTable nt) {
         AppDatabase db = Room.databaseBuilder(context ,AppDatabase.class,"myDB").allowMainThreadQueries().build();
-        db.nutritionDataDao().insertAll(new NutritionDataDB(barcode,nt));
-        Log.d(this.getClass().getName(),"Barcode: "+barcode+"\nLoaded Table:\n"+db.nutritionDataDao().findByBarcode(barcode).getNt());
+        if(barcode==null){
+            barcode = "";
+        }
+        NutritionDataDB nd = new NutritionDataDB(barcode,nt,NutritionDataDB.SOURCE_NUTRITION_TABLE_SCANNER);
+        db.nutritionDataDao().insertAll(nd);
+        nd = db.nutritionDataDao().findByData(nd.getName(),nd.getBarcode(),nd.getNt());
+//        Log.d(this.getClass().getName(),"ID:"+nd.getKey()+"\nBarcode: "+barcode);
+//        Log.d(this.getClass().getName(),"Loaded Table:\n"+nd.getNt());
+        return nd.getKey();
     }
 
     @Override
@@ -289,11 +296,6 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         return dataLines;
     }
 
-    private INutritionTable tableMatcher(List<String> dataLines) {
-        //split in columns
-        return toTable(dataLines);
-    }
-
     /**
      * Perform error correction on provided collection
      * @param dataLines - Note, this will be changed using the algorithm
@@ -305,14 +307,15 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
         //find all correct lines and move them to the result list
         for(String str: dataLines){
-            if(str.contains("per")){
+            if(str.contains("per")||str.contains("Per")){
+                str = str.toLowerCase();
                 Log.d(this.getClass().getName(),"errorCorrection() -> per line:"+str);
                 result.add(str);
             } else {
                 for (int i = 0; i < contents.size(); i++) {
                     if (str.contains(contents.get(i))) {
                         Log.d(this.getClass().getName(),"errorCorrection() -> correct:"+contents.get(i)+" in "+str);
-                        result.add(str);
+                        result.add(str.replaceAll("_",""));
                         contents.remove(i);
                         break;
                     }
@@ -325,7 +328,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         for(String in:dataLines){
             List<String> splitLines = lineSplitter(in);
             String comp = splitLines.get(0);
-            String rest = splitLines.get(1);
+            String rest = splitLines.get(1).replaceAll("_","");
 
             List<Double> dist = new ArrayList<>();
             for(String s: contents) {
@@ -414,7 +417,8 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         return s.matches(pattern);
     }
 
-    private INutritionTable toTable(List<String> dataLines) {
+    private INutritionTable tableMatcher(List<String> dataLines) {
+        Log.d(this.getClass().getName(),"tableMatcher()");
         int numCols = 0;
         INutritionTable nt = new NutritionTable();
         List<String> contents = nt.listOfContents();
@@ -439,7 +443,6 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                         break;
                     }
                     typicalValues = typicalValues.substring(0,tempIdx);
-
                 }while(typicalValues.contains("per"));
                 break;
             }
@@ -456,15 +459,21 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                     for(int k=1;k<numCols;k++){
                         int idx =row.lastIndexOf(" ");
                         if(idx>0) {
-                            Log.d("OcrDetectorProcessor", "remove col:" + row.substring(idx));
-                            row = row.substring(0, idx);
+                            if(!row.substring(idx).matches(".*\\d+.*")) idx = row.substring(0,idx).lastIndexOf(" ");
+                            if(idx>0) {
+                                Log.d("OcrDetectorProcessor", "remove col:" + row.substring(idx));
+                                row = row.substring(0, idx);
+                            }
                         }
                     }
                     int tempIdx = row.lastIndexOf(" ");
                     if(tempIdx>0) {
                         try {
-                            setComponent(contents.get(i), row.substring(tempIdx), nt);
-                            Log.d("OcrDetectorProcessor", "Map<" + contents.get(i) + "," + row.substring(tempIdx) + ">");
+                            if(!row.substring(tempIdx).matches(".*\\d+.*")) tempIdx = row.substring(0,tempIdx).lastIndexOf(" ");
+                            if(tempIdx>0) {
+                                setComponent(contents.get(i), row.substring(tempIdx).replace(" ",""), nt);
+                                Log.d("OcrDetectorProcessor", "Map<" + contents.get(i) + "," + row.substring(tempIdx) + ">");
+                            }
                         } catch (NumberFormatException e){
                             Log.d(this.getClass().getName(),"Column miss-match!");
                         }
@@ -486,15 +495,23 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
             //make adjustments for energy 5.5kJ/5.5kcal format
             String[] strAr = value.split("/");
             for(String val: strAr){
-                if(val.contains("kcal")){
-                    return nt.setComponent(name, Double.valueOf(val.replaceAll("[^\\.0123456789]","")));
+                if(val.contains("kcal")){//prefer kcal as no conversion is required
+                    return nt.setComponent(name, extractValue(val));
+                } else if(val.contains("kJ")||val.contains("k)")){//check for common kJ error read case k)
+                    return nt.setEnergy(extractValue(val),INutritionTable.KILOJOULES_UNIT);
                 }
             }
         } else {
             //everything else uses the same 5.5g or 5.5ml format
-            return nt.setComponent(name, Double.valueOf(value.replaceAll("[^\\.0123456789]","")));
+            return nt.setComponent(name, extractValue(value));
         }
         return false;
+    }
+
+    private double extractValue(String value){
+        if((!value.endsWith("g")) && value.endsWith("9")) value = value.substring(0,value.length()-1);
+        String temp = value.replaceAll("[^\\.0123456789]","");
+        return Double.valueOf(temp);
     }
 
     /**
@@ -507,12 +524,6 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
         //sort rows form top to bottom (needed for multi frame work)
         List<Integer> keys = new ArrayList<>(scannedData.keySet());
-//        Collections.sort(keys, new Comparator<Integer>() {
-//            @Override
-//            public int compare(Integer x1, Integer x2) {
-//                return x1 < x2 ? -1 : (x2 < x1) ? 1 : 0;
-//            }
-//        });
 
         for(Integer i: keys){
             String line = "";

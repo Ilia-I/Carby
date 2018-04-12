@@ -44,35 +44,30 @@
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name=".barcodescanner.BarcodeCaptureActivity"
+            android:name=".barcode.BarcodeCaptureActivity"
             android:label="Read Barcode"
             android:parentActivityName=".MainActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/BarcodeTheme"/>
         <activity
             android:name=".ocr.OcrCaptureActivity"
             android:parentActivityName=".MainActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/OCRTheme"/>
         <activity
-            android:name=".volume_estimation.CaptureActivity"
+            android:name=".volume_estimation.VolEstActivity"
             android:label="@string/app_name"
             android:parentActivityName=".MainActivity"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/VolumeTheme">
             <intent-filter>
-                <action android:name=".VolumeCaptureActivity" />
+                <action android:name=".VolEstActivity" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".volume_estimation.ResultsActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name=".VolumeCaptureActivity" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".camera_calibration.CameraCalibrationActivity"
             android:label="@string/app_name"
@@ -94,6 +89,7 @@
         <activity
             android:name=".nutrition_data.NutritionResultActivity"
             android:label="@string/app_name"
+            android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity">
             <intent-filter>
                 <action android:name=".NutritionResultActivity" />
@@ -101,13 +97,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name=".volume_estimation.DevMode.ShowFramesActivity"
+            android:name=".history.HistoryActivity"
             android:label="@string/app_name"
-            android:parentActivityName=".volume_estimation.CaptureActivity">
+            android:parentActivityName=".MainActivity">
             <intent-filter>
-                <action android:name=".ShowFramesActivity" />
+                <action android:name=".HistoryActivity" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

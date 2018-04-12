@@ -34,14 +34,14 @@ public class ConsumptionDB {
     private int ref;
 
     @ColumnInfo(name = "quantity")
-    private int quantity;
+    private double quantity;
 
     @Ignore
-    public ConsumptionDB(int ref, int quantity){
+    public ConsumptionDB(int ref, double quantity){
         this(Calendar.getInstance().getTime(),ref,quantity);
     }
 
-    public ConsumptionDB(Date time, int ref, int quantity){
+    public ConsumptionDB(Date time, int ref, double quantity){
         this.time=time;
         this.ref=ref;
         this.quantity=quantity;
@@ -71,11 +71,11 @@ public class ConsumptionDB {
         this.ref = ref;
     }
 
-    public int getQuantity() {
+    public double getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(double quantity) {
         this.quantity = quantity;
     }
 }

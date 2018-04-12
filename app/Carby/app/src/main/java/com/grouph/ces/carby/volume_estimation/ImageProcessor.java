@@ -1,13 +1,15 @@
 package com.grouph.ces.carby.volume_estimation;
 
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.support.v7.preference.PreferenceManager;
+import android.widget.Toast;
 
-import com.grouph.ces.carby.volume_estimation.ImageTasks.FindPoundTask;
+import com.grouph.ces.carby.R;
+import com.grouph.ces.carby.volume_estimation.DevMode.RecordFrame;
 import com.grouph.ces.carby.volume_estimation.ImageTasks.GrabCutTask;
 
 import org.opencv.core.Mat;
@@ -26,86 +28,43 @@ import java.util.concurrent.ExecutionException;
 
 public class ImageProcessor {
 
-    private Context context;
+    private static String TAG = "ImageProcessor";
 
-    private Mat topDownIn = null;
-    private Mat sideIn = null;
-    private org.opencv.core.Rect boundingBox1;
-    private org.opencv.core.Rect boundingBox2;
-    private Bitmap topDownOut;
-    private Bitmap sideOut;
-    private Bitmap refObj1;
-    private Bitmap refObj2;
+    private VolEstActivity activity;
 
-    private ProcessingAlgorithms algorithms;
+    private Frame topDown;
+    private Frame side;
 
-    public ImageProcessor(Context context) {
-        this.context = context;
-        this.algorithms = new ProcessingAlgorithms(context);
+    public ImageProcessor(VolEstActivity activity) {
+        this.activity = activity;
     }
 
-    public ProcessingAlgorithms getAlgorithms() {
-        return algorithms;
-    }
-
-    public void addImage(Mat image, org.opencv.core.Rect boundingBox) {
-        if(topDownIn == null) {
-            topDownIn = image.clone();
-            boundingBox1 = boundingBox;
+    public void addImage(Frame frame) {
+        if(topDown == null)
+            topDown = frame;
+        else if (side == null) {
+            side = frame;
         }
-        else if (sideIn == null) {
-            sideIn = image.clone();
-            boundingBox2 = boundingBox;
-        }
-    }
-
-    public void reset() {
-        topDownIn = null;
-        sideIn = null;
     }
 
     public void processImages() {
         new ProcessImageTask().execute();
     }
 
-    private void saveImages() {
-
-
+    private void saveImage(Mat image1, String name) {
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
         File dir = new File(Environment.getExternalStorageDirectory() + "/Carby/" + timeStamp);
         if(!dir.exists())
             dir.mkdirs();
 
-        File top = new File(dir, "top.png");
-        File side = new File(dir, "side.png");
-        File topReference = new File(dir, "topRef.png");
-        File sideReference =  new File(dir, "sideRef.png");
-
+        File top = new File(dir, name);
         FileOutputStream fOut;
+
+        Bitmap bitmap = ProcessingAlgorithms.matToBitmap(image1, image1.width(), image1.height());
         try {
-            if(topDownOut != null) {
-                fOut = new FileOutputStream(top);
-                topDownOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);//PNG does not compress as it is a lossless format
-                fOut.flush();
-            }
-
-            if(sideOut != null) {
-                fOut = new FileOutputStream(side);
-                sideOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-                fOut.flush();
-            }
-
-            if(refObj1 != null) {
-                fOut = new FileOutputStream(topReference);
-                refObj1.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-                fOut.flush();
-            }
-
-            if(refObj2 != null) {
-                fOut = new FileOutputStream(sideReference);
-                refObj2.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-                fOut.close();
-            }
+            fOut = new FileOutputStream(top);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+            fOut.flush();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -114,24 +73,91 @@ public class ImageProcessor {
     }
 
 
-    private class ProcessImageTask extends AsyncTask<Void, Void, Void> {
+    private class ProcessImageTask extends AsyncTask<Void, Integer, Void> {
 
-        private ProgressDialog dialog = new ProgressDialog(context);
+        private ProgressDialog dialog = new ProgressDialog(activity);
+        private SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
+        private IntegralApproximation approximator;
+        private Mat grabCutTopMat, grabCutSideMat;
+
+        private double volume = -1.0;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            this.dialog.setMessage("Please wait");
+            this.dialog.setIndeterminate(false);
+            this.dialog.setMessage("Rectifying image distortion");
             this.dialog.show();
+            this.dialog.setCancelable(false);
+            this.dialog.setCanceledOnTouchOutside(false);
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            runVolumeCapture();
+            AsyncTask<Object, Void, Mat> grabCutTop = new GrabCutTask();
+            AsyncTask<Object, Void, Mat> grabCutSide = new GrabCutTask();
+
+            publishProgress(0);
+            ProcessingAlgorithms pa = new ProcessingAlgorithms(activity);
+            pa.undistort(topDown.getImage());
+            publishProgress(5);
+            pa.undistort(side.getImage());
+            publishProgress(10);
+
+            grabCutTop.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topDown.getImage(), topDown.getBoundingBox());
+            grabCutSide.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, side.getImage(), side.getBoundingBox());
+
+            try {
+                grabCutTopMat = grabCutTop.get();
+                grabCutSideMat = grabCutSide.get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+            publishProgress(50);
+
+            Frame topFrame = new Frame(grabCutTopMat, topDown.getReferenceObjectSize(), topDown.getBoundingBox());
+            Frame sideFrame = new Frame(grabCutSideMat, side.getReferenceObjectSize(), side.getBoundingBox());
+
+            if (preferences.getBoolean(activity.getResources().getString(R.string.key_dev_mode), false)) {
+                RecordFrame oTop = new RecordFrame(ResultsFragment.IMAGE_SET_ORIGINAL + 1, topDown);
+                oTop.saveObj(preferences);
+                RecordFrame oSide = new RecordFrame(ResultsFragment.IMAGE_SET_ORIGINAL + 2, side);
+                oSide.saveObj(preferences);
+
+                RecordFrame testTop = new RecordFrame(ResultsFragment.IMAGE_SET_MASK + 1, topFrame);
+                testTop.saveObj(preferences);
+                RecordFrame testSide = new RecordFrame(ResultsFragment.IMAGE_SET_MASK + 2, sideFrame);
+                testSide.saveObj(preferences);
+            }
+            publishProgress(55);
+
+            approximator = new IntegralApproximation(activity, topFrame, sideFrame);
+            this.volume = approximator.getApproximation();
+            publishProgress(95);
+
+            if (preferences.getBoolean(activity.getResources().getString(R.string.key_dev_mode), false)) {
+                RecordFrame testTop = new RecordFrame(ResultsFragment.IMAGE_SET_STRETCH + 1, topFrame);
+                testTop.saveObj(preferences);
+                RecordFrame testSide = new RecordFrame(ResultsFragment.IMAGE_SET_STRETCH + 2, sideFrame);
+                testSide.saveObj(preferences);
+            }
+            publishProgress(100);
 
             return null;
         }
 
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            if(values[0] == 10)
+                this.dialog.setMessage("Performing GrabCut");
+            else if(values[0] == 55)
+                this.dialog.setMessage("Performing volume calculation");
+
+            this.dialog.setProgress(values[0]);
+            super.onProgressUpdate(values);
+        }
 
         @Override
         protected void onPostExecute(Void aVoid) {
@@ -139,68 +165,13 @@ public class ImageProcessor {
             if (dialog.isShowing()) {
                 dialog.dismiss();
             }
-            showResults();
-        }
 
-        public void runVolumeCapture() {
-            // Do grab cut
-            // Feature matching
-            // ...
-
-            AsyncTask grabCutTop = new GrabCutTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topDownIn, boundingBox1);
-            AsyncTask grabCutSide = new GrabCutTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, sideIn, boundingBox2);
-            AsyncTask refDetectTop = new FindPoundTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, topDownIn);
-            AsyncTask refDetectSide = new FindPoundTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, sideIn);
-
-            try {
-                FindPoundTask.Result r1 = (FindPoundTask.Result) refDetectTop.get();
-                FindPoundTask.Result r2 = (FindPoundTask.Result) refDetectSide.get();
-
-                topDownOut = algorithms.matToBitmap((Mat) grabCutTop.get());
-                sideOut = algorithms.matToBitmap((Mat) grabCutSide.get());
-                refObj1 = algorithms.matToBitmap(r1.refObject);
-                refObj2 = algorithms.matToBitmap(r2.refObject);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
+            if(volume != -1.0)
+                approximator.showResults(volume);
+            else {
+                Toast.makeText(activity, "Failed to detect food object", Toast.LENGTH_LONG).show();
+                activity.recreate();
             }
-        }
-
-
-        public void showResults() {
-            Intent results = new Intent(context, ResultsActivity.class);
-
-            File out1 = new File(context.getCacheDir(), "1.png");
-            File out2 = new File(context.getCacheDir(), "2.png");
-
-            saveImages();
-
-            try {
-                FileOutputStream fOut;
-
-                if(topDownOut != null) {
-                    fOut = new FileOutputStream(out1);
-                    topDownOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-                    fOut.flush();
-                }
-
-                if(sideOut != null) {
-                    fOut = new FileOutputStream(out2);
-                    sideOut.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-                    fOut.flush();
-                    fOut.close();
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            results.putExtra("image1", out1.getAbsolutePath());
-            results.putExtra("image2", out2.getAbsolutePath());
-
-            context.startActivity(results);
         }
 
     }

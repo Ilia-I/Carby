@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.grouph.ces.carby.barcodescanner;
+package com.grouph.ces.carby.barcode;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -29,24 +30,18 @@ import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
@@ -88,16 +83,9 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
     private CameraSourcePreview mPreview;
     private GraphicOverlay<BarcodeGraphic> mGraphicOverlay;
 
-    // helper objects for detecting taps and pinches.
-    private ScaleGestureDetector scaleGestureDetector;
-    private GestureDetector gestureDetector;
-
     private AppDatabase db;
-
-    private CardView progressCard;
-    private ProgressBar progressBar;
-
     private Context context = this;
+    private ProgressDialog progressDialog;
 
     /**
      * Initializes the UI and creates the detector pipeline.
@@ -113,10 +101,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay<BarcodeGraphic>) findViewById(R.id.graphicOverlay);
 
-        progressBar = findViewById(R.id.progress_bar);
-        progressCard = findViewById(R.id.progress_card);
-
-        progressCard.setVisibility(View.GONE);
+        progressDialog = new ProgressDialog(this);
 
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -133,9 +118,6 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         } else {
             requestCameraPermission();
         }
-
-        gestureDetector = new GestureDetector(this, new CaptureGestureListener());
-        scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
     }
 
     /**
@@ -169,15 +151,6 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
                 Snackbar.LENGTH_INDEFINITE)
                 .setAction(R.string.ok, listener)
                 .show();
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent e) {
-        boolean b = scaleGestureDetector.onTouchEvent(e);
-
-        boolean c = gestureDetector.onTouchEvent(e);
-
-        return b || c || super.onTouchEvent(e);
     }
 
     /**
@@ -356,143 +329,43 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         }
     }
 
-    /**
-     * onTap returns the tapped barcode result to the calling Activity.
-     *
-     * @param rawX - the raw position of the tap
-     * @param rawY - the raw position of the tap.
-     * @return true if the activity is ending.
-     */
-    private boolean onTap(float rawX, float rawY) {
-        // Find tap point in preview frame coordinates.
-        int[] location = new int[2];
-        mGraphicOverlay.getLocationOnScreen(location);
-        float x = (rawX - location[0]) / mGraphicOverlay.getWidthScaleFactor();
-        float y = (rawY - location[1]) / mGraphicOverlay.getHeightScaleFactor();
-
-        // Find the barcode whose center is closest to the tapped point.
-        Barcode best = null;
-        float bestDistance = Float.MAX_VALUE;
-        for (BarcodeGraphic graphic : mGraphicOverlay.getGraphics()) {
-            Barcode barcode = graphic.getBarcode();
-            if (barcode.getBoundingBox().contains((int) x, (int) y)) {
-                // Exact hit, no need to keep looking.
-                best = barcode;
-                break;
-            }
-            float dx = x - barcode.getBoundingBox().centerX();
-            float dy = y - barcode.getBoundingBox().centerY();
-            float distance = (dx * dx) + (dy * dy);  // actually squared distance
-            if (distance < bestDistance) {
-                best = barcode;
-                bestDistance = distance;
-            }
-        }
-
-        if (best != null) {
-            Intent data = new Intent();
-            data.putExtra(BarcodeObject, best);
-            setResult(CommonStatusCodes.SUCCESS, data);
-            finish();
-            return true;
-        }
-        return false;
-    }
-
-    private class CaptureGestureListener extends GestureDetector.SimpleOnGestureListener {
-        @Override
-        public boolean onSingleTapConfirmed(MotionEvent e) {
-            return onTap(e.getRawX(), e.getRawY()) || super.onSingleTapConfirmed(e);
-        }
-    }
-
-    private class ScaleListener implements ScaleGestureDetector.OnScaleGestureListener {
-
-        /**
-         * Responds to scaling events for a gesture in progress.
-         * Reported by pointer motion.
-         *
-         * @param detector The detector reporting the event - use this to
-         *                 retrieve extended info about event state.
-         * @return Whether or not the detector should consider this event
-         * as handled. If an event was not handled, the detector
-         * will continue to accumulate movement until an event is
-         * handled. This can be useful if an application, for example,
-         * only wants to update scaling factors if the change is
-         * greater than 0.01.
-         */
-        @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            return false;
-        }
-
-        /**
-         * Responds to the beginning of a scaling gesture. Reported by
-         * new pointers going down.
-         *
-         * @param detector The detector reporting the event - use this to
-         *                 retrieve extended info about event state.
-         * @return Whether or not the detector should continue recognizing
-         * this gesture. For example, if a gesture is beginning
-         * with a focal point outside of a region where it makes
-         * sense, onScaleBegin() may return false to ignore the
-         * rest of the gesture.
-         */
-        @Override
-        public boolean onScaleBegin(ScaleGestureDetector detector) {
-            return true;
-        }
-
-        /**
-         * Responds to the end of a scale gesture. Reported by existing
-         * pointers going up.
-         * <p/>
-         * Once a scale has ended, {@link ScaleGestureDetector#getFocusX()}
-         * and {@link ScaleGestureDetector#getFocusY()} will return focal point
-         * of the pointers remaining on the screen.
-         *
-         * @param detector The detector reporting the event - use this to
-         *                 retrieve extended info about event state.
-         */
-        @Override
-        public void onScaleEnd(ScaleGestureDetector detector) {
-            mCameraSource.doZoom(detector.getScaleFactor());
-        }
-    }
-
     @Override
     public void onBarcodeDetected(Barcode barcode) {
         Log.i("Barcode", "Barcode detected: " + barcode.displayValue);
         //do something with barcode data returned
 
-        progressCard.setVisibility(View.VISIBLE);
-        INutritionTable nutritionTable = getNutritionTable(barcode);
+        this.runOnUiThread(() -> {
+                    progressDialog.setMessage("Searching databases for barcode");
+                    progressDialog.show();
+                });
 
-        if (nutritionTable!=null){
-            //progressCard.setVisibility(View.GONE);
-            sendToNutritionResult(nutritionTable);
+        NutritionDataDB dataDB = getNutritionTable(barcode);
+
+        if (dataDB!=null){
+            this.runOnUiThread(() -> progressDialog.dismiss());
+            sendToNutritionResult(dataDB.getNt(),dataDB.getKey());
         }else{
-            //progressCard.setVisibility(View.GONE);
+            this.runOnUiThread(() -> progressDialog.dismiss());
             startOCR(barcode.displayValue);
         }
     }
 
-    private INutritionTable getNutritionTable(Barcode barcode) {
+    private NutritionDataDB getNutritionTable(Barcode barcode) {
         if(barcode.valueFormat==Barcode.PRODUCT){
             Log.d(this.getClass().getName(),"Barcode: " + barcode.displayValue);
             INutritionTable result = null;
 
-            //1. check local database
+            //1. Check local database
             NutritionDataDB data = db.nutritionDataDao().findByBarcode(barcode.displayValue);
             if(data!=null) {
                 result = data.getNt();
                 if (result != null) {
                     Log.d("OcrDetectorProcessor", "Loaded Table:\n" + result);
-                    return result;
+                    return data;
                 }
             }
 
-            //TODO 2. check open food facts database (get info about result and set result variable)
+            //2. Check open food facts database (get info about result and set result variable)
             BarcodeLookup barcodeLookup = new BarcodeLookup();
             try {
                 result = barcodeLookup.execute(barcode).get();
@@ -502,17 +375,22 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
                 e.printStackTrace();
             }
             if(result!=null){
-                return result;
+                data = new NutritionDataDB(barcode.displayValue,result,NutritionDataDB.SOURCE_OPEN_FOOD_FACTS);
+                db.nutritionDataDao().insertAll(data);
+                data = db.nutritionDataDao().findByData(data.getName(),data.getBarcode(),data.getNt());//fetch the correct key
+                return data;
             }
         }
         return null;
     }
 
-    private void sendToNutritionResult(INutritionTable result) {
+    private void sendToNutritionResult(INutritionTable result,int key) {
         JSONObject jsonNutritionTable = result.toJasonObject();
 
         Intent intent = new Intent(this, NutritionResultActivity.class);
         intent.putExtra("jsonNutritionTable", jsonNutritionTable.toString());
+        intent.putExtra("id",key);
+        intent.putExtra("source",NutritionResultActivity.SOURCE_BARCODE_SCANNER);
         startActivity(intent);
     }
 
@@ -534,8 +412,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
             });
             builder.setNegativeButton(R.string.cancel, (DialogInterface dialog, int id) -> {
                 // Lazy restart of scan on Cancel
-                Intent intent = new Intent (context, BarcodeCaptureActivity.class);
-                startActivity(intent);
+                startActivity(getIntent());
                 dialog.dismiss();
             });
             builder.setCancelable(false);
@@ -544,5 +421,13 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
             dialog.setCanceledOnTouchOutside(false);
             dialog.show();
         });
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+        NavUtils.navigateUpFromSameTask(this);
+
     }
 }
