@@ -258,6 +258,7 @@ public class ShowFramesFragment extends Fragment {
         MenuInflater inflater = getActivity().getMenuInflater();
         inflater.inflate(R.menu.food_selection, menu);
         menu.findItem(R.id.reset_images).setVisible(false);
+        menu.findItem(R.id.ref_obj_select).setVisible(false);
 
         switch (preferences.getInt("foodType", 0)) {
             case NutritionInformationCalculator.FOOD_OATS:
