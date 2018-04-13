@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="density_bread">0.29</string>
-    <string name="density_oats">0.42</string>
+    <string name="density_oats">0.19</string>
     <string name="density_pasta_boiled">0.55</string>
     <string name="density_noodles_boiled">0.59</string>
-    <string name="density_rice_boiled">0.73</string>
+    <string name="density_rice_boiled">0.33</string>
     <string name="density_potato_boiled">0.59</string>
-    <string name="density_potato_raw">0.85</string>
+    <string name="density_potato_raw">0.96</string>
     <string name="density_potato_sweet">0.65</string>
-    <string name="density_egg_boiled">0.6</string>
+    <string name="density_egg_boiled">0.57</string>
     <!--data from http://www.fao.org/docrep/017/ap815e/ap815e.pdf-->
 </resources>
