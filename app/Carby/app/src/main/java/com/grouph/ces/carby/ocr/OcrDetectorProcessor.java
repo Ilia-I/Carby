@@ -78,7 +78,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
             for (int i = 0; i < items.size(); ++i) {
                 TextBlock item = items.valueAt(i);
                 if (item != null && item.getValue() != null) {
-                    Log.d("Processor", "Text detected! " + item.getValue());
+                    Log.d("Processor", "Text detected: " + item.getValue());
                 }
                 OcrGraphic graphic = new OcrGraphic(mGraphicOverlay, item);
                 mGraphicOverlay.add(graphic);
@@ -199,14 +199,14 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
     /**
      * find longest String and remove all shorter ones
-     * @param lines
-     * @return
+     * @param lines modified by removing all shorter as they are incomplete
+     * @return length of longest string
      */
     private int removeShorter(List<String> lines) {
         int maxLen = 0;
         //get length of largest
         for(String line: lines){
-            Log.d(this.getClass().getName(),"line:"+line);
+            Log.d(this.getClass().getName(),"removeShorter() line:"+line);
             if(line.length()>maxLen){
                 maxLen = line.length();
             }
@@ -451,17 +451,17 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
         for(String row: dataLines){
             for(int i=0; i<contents.size();i++) {
                 if (row.contains(contents.get(i))&&(row.indexOf(contents.get(i))==0||row.charAt(row.indexOf(contents.get(i))-1)==' ')){
-                    Log.d("OcrDetectorProcessor","Cols:"+numCols+" Content:"+contents.get(i)+" Row:"+row);
+                    Log.d(this.getClass().getName(),"Cols:"+numCols+" Content:"+contents.get(i)+" Row:"+row);
                     if(row.endsWith("%")){//&& ri
                         row = row.substring(0,row.lastIndexOf(" "));
-                        Log.d("OcrDetectorProcessor","remove %RI");
+                        Log.d(this.getClass().getName(),"remove %RI");
                     }
                     for(int k=1;k<numCols;k++){
                         int idx =row.lastIndexOf(" ");
                         if(idx>0) {
                             if(!row.substring(idx).matches(".*\\d+.*")) idx = row.substring(0,idx).lastIndexOf(" ");
                             if(idx>0) {
-                                Log.d("OcrDetectorProcessor", "remove col:" + row.substring(idx));
+                                Log.d(this.getClass().getName(), "remove col:" + row.substring(idx));
                                 row = row.substring(0, idx);
                             }
                         }
@@ -472,7 +472,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
                             if(!row.substring(tempIdx).matches(".*\\d+.*")) tempIdx = row.substring(0,tempIdx).lastIndexOf(" ");
                             if(tempIdx>0) {
                                 setComponent(contents.get(i), row.substring(tempIdx).replace(" ",""), nt);
-                                Log.d("OcrDetectorProcessor", "Map<" + contents.get(i) + "," + row.substring(tempIdx) + ">");
+                                Log.d(this.getClass().getName(), "Map<" + contents.get(i) + "," + row.substring(tempIdx) + ">");
                             }
                         } catch (NumberFormatException e){
                             Log.d(this.getClass().getName(),"Column miss-match!");
