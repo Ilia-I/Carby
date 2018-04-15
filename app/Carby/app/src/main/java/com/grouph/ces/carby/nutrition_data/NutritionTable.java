@@ -39,7 +39,7 @@ public class NutritionTable extends ANutritionTable{
                            IComposite content,
                            @MeasurementUnit String dataUnit,
                            @MeasurementUnit String targetUnit){
-        Log.d(this.getClass().getName(),"Setting component:"+nutrientName+" "+content);
+//        Log.d(this.getClass().getName(),"Setting component:"+nutrientName+" "+content);
         if(!super.convertUnits(content,dataUnit,targetUnit)) return false;
         nutritionalInformation.put(nutrientName,content);
         return true;
@@ -269,12 +269,12 @@ public class NutritionTable extends ANutritionTable{
         for(String key: nutritionalInformation.keySet()) {
             temp.put(key,nutritionalInformation.get(key).toJasonObject());
         }
-        JSONObject jo = new JSONObject(temp);
-        try {
-            Log.d(this.getClass().getName(), "toJSONObject():" + jo.toString(4));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+//        JSONObject jo = new JSONObject(temp);
+//        try {
+//            Log.d(this.getClass().getName(), "toJSONObject():" + jo.toString(4));
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
         return new JSONObject(temp);
     }
 }

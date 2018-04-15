@@ -52,7 +52,7 @@ public class FindPoundTask extends AsyncTask<Mat, Void, FindPoundTask.Result> {
         List<Mat> gray0Channel = new ArrayList<>();
         gray0Channel.add(gray0);
 
-        for (int c = 0; c < 3; c++) {
+        for (int c = 0; c < 1; c++) {
             int ch[] = { c, 0 };
 
             Core.mixChannels(blurredChannel, gray0Channel, new MatOfInt(ch));

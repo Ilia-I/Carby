@@ -10,14 +10,16 @@
                         android:checked="true"/>
                     <item android:id="@+id/food_oats"
                         android:title="@string/food_oats" />
-                    <item android:id="@+id/food_pasta_boiled"
+                    <!--<item android:id="@+id/food_pasta_boiled"
                         android:title="@string/food_boiled_pasta" />
                     <item android:id="@+id/food_noodles_boiled"
-                        android:title="@string/food_boiled_noodles" />
+                        android:title="@string/food_boiled_noodles" />-->
                     <item android:id="@+id/food_rice_boiled"
                         android:title="@string/food_boiled_rice" />
                     <item android:id="@+id/food_potato_boiled"
                         android:title="@string/food_boiled_potato" />
+                    <item android:id="@+id/food_potato_raw"
+                        android:title="@string/food_boiled_raw" />
                     <item android:id="@+id/food_potato_sweet"
                         android:title="@string/food_sweet_potato" />
                     <item android:id="@+id/food_egg_boiled"
@@ -27,5 +29,16 @@
         </item>
         <item android:id="@+id/reset_images"
             android:title="Reset Current Images"></item>
+        <item android:id="@+id/ref_obj_select"
+            android:title="Reference Object">
+            <menu>
+                <group android:checkableBehavior="single">
+                    <item android:id="@+id/ref_coin"
+                        android:title="Reference Coin" />
+                    <item android:id="@+id/ref_card"
+                        android:title="Reference Card" />
+                </group>
+            </menu>
+        </item>
     </group>
 </menu>

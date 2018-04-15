@@ -66,17 +66,20 @@ public final class CaptureFragment extends Fragment {
             case NutritionInformationCalculator.FOOD_OATS:
                 menu.findItem(R.id.food_oats).setChecked(true);
                 break;
-            case NutritionInformationCalculator.FOOD_PASTA_BOILED:
-                menu.findItem(R.id.food_pasta_boiled).setChecked(true);
-                break;
-            case NutritionInformationCalculator.FOOD_NOODLES_BOILED:
-                menu.findItem(R.id.food_noodles_boiled).setChecked(true);
-                break;
+//            case NutritionInformationCalculator.FOOD_PASTA_BOILED:
+//                menu.findItem(R.id.food_pasta_boiled).setChecked(true);
+//                break;
+//            case NutritionInformationCalculator.FOOD_NOODLES_BOILED:
+//                menu.findItem(R.id.food_noodles_boiled).setChecked(true);
+//                break;
             case NutritionInformationCalculator.FOOD_RICE_BOILED:
                 menu.findItem(R.id.food_rice_boiled).setChecked(true);
                 break;
             case NutritionInformationCalculator.FOOD_POTATO_BOILED:
                 menu.findItem(R.id.food_potato_boiled).setChecked(true);
+                break;
+            case NutritionInformationCalculator.FOOD_POTATO_RAW:
+                menu.findItem(R.id.food_potato_raw).setChecked(true);
                 break;
             case NutritionInformationCalculator.FOOD_POTATO_SWEET:
                 menu.findItem(R.id.food_potato_sweet).setChecked(true);
@@ -86,6 +89,15 @@ public final class CaptureFragment extends Fragment {
                 break;
             default:
                 preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_BREAD).apply();
+                break;
+        }
+
+        switch(preferences.getString("ref_object_preference", "pound")){
+            case "cc": menu.findItem(R.id.ref_card).setChecked(true);
+                break;
+            default:
+                preferences.edit().putString("ref_object_preference", "pound").apply();
+                menu.findItem(R.id.ref_coin).setChecked(true);
                 break;
         }
     }
@@ -108,20 +120,25 @@ public final class CaptureFragment extends Fragment {
                 item.setChecked(true);
                 generateToastFoodSelected(NutritionInformationCalculator.FOOD_EGG_BOILED);
                 return true;
-            case R.id.food_noodles_boiled:
-                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_NOODLES_BOILED).apply();
-                item.setChecked(true);
-                generateToastFoodSelected(NutritionInformationCalculator.FOOD_NOODLES_BOILED);
-                return true;
-            case R.id.food_pasta_boiled:
-                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_PASTA_BOILED).apply();
-                item.setChecked(true);
-                generateToastFoodSelected(NutritionInformationCalculator.FOOD_PASTA_BOILED);
-                return true;
+//            case R.id.food_noodles_boiled:
+//                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_NOODLES_BOILED).apply();
+//                item.setChecked(true);
+//                generateToastFoodSelected(NutritionInformationCalculator.FOOD_NOODLES_BOILED);
+//                return true;
+//            case R.id.food_pasta_boiled:
+//                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_PASTA_BOILED).apply();
+//                item.setChecked(true);
+//                generateToastFoodSelected(NutritionInformationCalculator.FOOD_PASTA_BOILED);
+//                return true;
             case R.id.food_potato_boiled:
                 preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_POTATO_BOILED).apply();
                 item.setChecked(true);
                 generateToastFoodSelected(NutritionInformationCalculator.FOOD_POTATO_BOILED);
+                return true;
+            case R.id.food_potato_raw:
+                preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_POTATO_RAW).apply();
+                item.setChecked(true);
+                generateToastFoodSelected(NutritionInformationCalculator.FOOD_POTATO_RAW);
                 return true;
             case R.id.food_potato_sweet:
                 preferences.edit().putInt("foodType", NutritionInformationCalculator.FOOD_POTATO_SWEET).apply();
@@ -138,6 +155,18 @@ public final class CaptureFragment extends Fragment {
                 imageProcessor = new ImageProcessor(activityRef);
                 mOpenCvCameraView.toggleRefObjectDetection();
                 Toast.makeText(activityRef, "Reset taken images.", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.ref_card:
+                item.setChecked(true);
+                preferences.edit().putString("ref_object_preference","cc").apply();
+                onPause();
+                onResume();
+                return true;
+            case R.id.ref_coin:
+                item.setChecked(true);
+                preferences.edit().putString("ref_object_preference","pound").apply();
+                onPause();
+                onResume();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

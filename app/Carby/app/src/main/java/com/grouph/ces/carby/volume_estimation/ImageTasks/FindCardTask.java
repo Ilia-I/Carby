@@ -42,8 +42,7 @@ public class FindCardTask extends AsyncTask<Mat, Void, FindCardTask.Result> {
         Mat src = mats[0];
         Mat blurred = new Mat();
         Imgproc.resize(src,blurred, new org.opencv.core.Size(src.width()/scalingFactor,src.height()/scalingFactor));
-        Mat output = blurred.clone();
-
+        Imgproc.cvtColor(blurred,blurred,Imgproc.COLOR_RGB2HSV);
         Imgproc.medianBlur(blurred, blurred, 7);
 
         Mat gray0 = new Mat(blurred.size(), CvType.CV_8U), gray = new Mat();

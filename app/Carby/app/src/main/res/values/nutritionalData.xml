@@ -40,15 +40,15 @@
     <string name="protein_noodles_boiled">7.22</string>
     <string name="salt_noodles_boiled">1</string>
 
-    <string name="kcal_rice_boiled">0.73</string>
-    <string name="fat_rice_boiled">0.73</string>
-    <string name="fat_saturates_rice_boiled">0.417</string>
-    <string name="fat_polyunsaturates_rice_boiled">0.549</string>
-    <string name="fat_monounsaturates_rice_boiled">0.578</string>
-    <string name="carbs_rice_boiled">0.73</string>
+    <string name="kcal_rice_boiled">129</string>
+    <string name="fat_rice_boiled">0.28</string>
+    <string name="fat_saturates_rice_boiled">0.076</string>
+    <string name="fat_polyunsaturates_rice_boiled">0.075</string>
+    <string name="fat_monounsaturates_rice_boiled">0.087</string>
+    <string name="carbs_rice_boiled">27.9</string>
     <string name="carbs_sugar_rice_boiled">0.4</string>
-    <string name="protein_rice_boiled">0.73</string>
-    <string name="salt_rice_boiled">0.6</string>
+    <string name="protein_rice_boiled">2.66</string>
+    <string name="salt_rice_boiled">1</string>
 
     <string name="kcal_potato_boiled">85</string>
     <string name="fat_potato_boiled">0.1</string>

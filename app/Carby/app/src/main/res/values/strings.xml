@@ -80,4 +80,5 @@
     <string name="food_boiled_potato">Boiled potato</string>
     <string name="food_sweet_potato">Sweet potato</string>
     <string name="food_boiled_egg">Boiled egg</string>
+    <string name="food_boiled_raw">Raw potato</string>
 </resources>
