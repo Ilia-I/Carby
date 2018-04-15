@@ -65,7 +65,7 @@ public class HistoryMasterFragment extends Fragment {
         if(entries.isEmpty())
             cv.state().edit()
                     .setMaximumDate(cv.getCurrentDate())
-                    .setMinimumDate(cv.getCurrentDate())
+                    .setMinimumDate(getTomorrow())
                     .commit();
         else
             cv.state().edit()
@@ -83,6 +83,12 @@ public class HistoryMasterFragment extends Fragment {
             activity.setFragmentHistoryDetail(b);
             cv.setSelectionMode(MaterialCalendarView.SELECTION_MODE_NONE);
         });
+    }
+
+    private Date getTomorrow() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE,1);
+        return cal.getTime();
     }
 
 }
