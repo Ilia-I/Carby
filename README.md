@@ -9,7 +9,3 @@
 ### How do I set up? ###
 
 * Browse the repository in Android studio and open the relevant project
-
-### Editing README ###
-
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo) 
